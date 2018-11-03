@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Amplitude;
 
 namespace DotE_Mod
 {
@@ -10,7 +11,7 @@ namespace DotE_Mod
     {
         public static bool Enabled { get; set; } = true;
         public static bool UseRandomRooms { get; set; } = false;
-        public static bool UseRandomDust { get; set; } = false;
+        public static bool UseRandomDust { get; set; } = true;
         public static bool UseRandomRoomDustProbability { get; set; } = true;
 
         // Manually injected into DungeonGenerator2: GenerateDungeonCoroutine(int, StaticString)
@@ -45,6 +46,7 @@ namespace DotE_Mod
         // Returns the weighted probability of a given room having dust
         public static float GetRoomDustLootProbWeight(GameConfig gameCfg, Room room)
         {
+            
             if (Enabled)
             {
                 // Do some calculation to determine the new probability of dust contained in the given room
