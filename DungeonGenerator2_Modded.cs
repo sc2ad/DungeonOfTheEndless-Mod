@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Amplitude;
 using Amplitude.Unity.Framework;
 using Amplitude.Unity.Gui;
+using Main;
 
 namespace DotE_Mod
 {
@@ -146,6 +147,8 @@ namespace DotE_Mod
                         // The EnqueueNotification is always null BECAUSE! the reference is to the dll that never has anything setup.
                         // I need to find a way to get around this by referencing the actual .dll, but then i need a way of building the new .dll
                         // From dnSpy
+                        SingletonManager.Get<LogPanel>(true).AddLog(GetExit(InitializedDungeon), NotificationType.Message, new StaticString("eventType"));
+                        Log("Attempting to write message to GUI using Dungeon.EnqueueNotification...");
                         InitializedDungeon.EnqueueNotification(s, null, "MajorModule_Major0001_LVL1", true, "MajorModule_Major0001_LVL1");
                         ExitMessageSent = true;
                         Log("Wrote the message to the GUI!");
@@ -175,14 +178,19 @@ namespace DotE_Mod
 
         private static void Log(string str)
         {
-            System.IO.File.AppendAllText(@"exit.txt", str+"\n");
+            System.IO.File.AppendAllText(@"mod_log.txt", str+"\n");
+        }
+
+        private static void ExitLog(string str)
+        {
+            System.IO.File.AppendAllText(@"exit.txt", str + "\n");
         }
 
         private static string GetPathToExit(string outp, Room current)
         {
             if (current.StaticRoomEvent == RoomEvent.Exit)
             {
-                Log("Found exit! " + outp);
+                ExitLog("Found exit! " + outp);
                 return outp + "ExitR: [" + current.Depth + ", " + current.CenterPosition + "]";
             }
             string o = outp + "R: [" + current.Depth + ", " + current.CenterPosition + "] ";
