@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotE Mod", "DotE Mod.csproj", "{767AACF3-9503-4EE1-83A7-3EE3208603FE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DungeonoftheEndless.MyMod2.mm", "DotE.MyMod2.mm\DungeonoftheEndless.MyMod2.mm.csproj", "{6FA399D4-8F7A-4FA3-9C4C-A98A2DD95A2F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,8 +17,15 @@ Global
 		{767AACF3-9503-4EE1-83A7-3EE3208603FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{767AACF3-9503-4EE1-83A7-3EE3208603FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{767AACF3-9503-4EE1-83A7-3EE3208603FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FA399D4-8F7A-4FA3-9C4C-A98A2DD95A2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FA399D4-8F7A-4FA3-9C4C-A98A2DD95A2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FA399D4-8F7A-4FA3-9C4C-A98A2DD95A2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FA399D4-8F7A-4FA3-9C4C-A98A2DD95A2F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {81B9DC63-B7AD-475C-91A0-0971AD21E87C}
 	EndGlobalSection
 EndGlobal
