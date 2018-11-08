@@ -12,7 +12,9 @@ namespace DotE_Patch_Mod
     public class ExitFinderMod : PartialityMod
     {
         private static string path = @"C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\Patched_log.txt";
-        private static bool MessageSent = false;
+        private static bool DisplayExit = true;
+
+        private static Room ExitRoom;
 
         private static void Log(string s)
         {
@@ -35,6 +37,13 @@ namespace DotE_Patch_Mod
         {
             Log("Loaded!");
             On.Session.Update += Session_Update;
+            On.Dungeon.SpawnExit += Dungeon_SpawnExit;
+        }
+
+        private void Dungeon_SpawnExit(On.Dungeon.orig_SpawnExit orig, Dungeon self, Room spawnRoom)
+        {
+            orig(self, spawnRoom);
+            Log("Called a SpawnExit function!");
         }
 
         private void Session_Update(On.Session.orig_Update orig, Session self)
@@ -47,7 +56,16 @@ namespace DotE_Patch_Mod
                     Dungeon d = SingletonManager.Get<Dungeon>(false);
                     Log("Attempting to find exit in Dungeon...");
                     d.EnqueueNotification(GetExit(d));
-                    MessageSent = true;
+                    if (DisplayExit)
+                    {
+                        Log("Attemping to display exit...");
+                        //OffscreenMarker.OffscreenMarkerData data = default(OffscreenMarker.OffscreenMarkerData);
+                        ExitRoom.AddCrystalSlot(true);
+                        d.DisplayCrystalAndExitOffscreenMarkers(ExitRoom.CrystalModuleSlots[0].transform).Show(true);
+                        //List<CrystalModuleSlot> slots = d.ExitRoom.CrystalModuleSlots;
+                        //Log("Crystal Slot: "+slots[0].ToString());
+                        //slots[0].Activate();
+                    }
                 } catch (NullReferenceException e)
                 {
                     // The Dungeon/GUI has yet to be setup!
@@ -141,6 +159,7 @@ namespace DotE_Patch_Mod
         {
             if (current.StaticRoomEvent == RoomEvent.Exit)
             {
+                ExitRoom = current;
                 return outp + "ExitR: [" + current.CenterPosition + "]";
             }
             string o = outp + "R: [" + current.CenterPosition + "] ";
