@@ -11,66 +11,63 @@ namespace DotE_Patch_Mod
 {
     public class ExitFinderMod : PartialityMod
     {
-        private static string path = @"C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\Patched_log.txt";
+        ScadMod mod = new ScadMod();
         private static bool DisplayExit = true;
 
         private static Room ExitRoom;
 
-        private static void Log(string s)
-        {
-            System.IO.File.AppendAllText(path, s + "\n");
-        }
-        private static void ClearLog()
-        {
-            System.IO.File.WriteAllText(path, "");
-        }
         public override void Init()
         {
-            author = "Sc2ad";
-            ClearLog();
-            Log("===============================================");
-            Log("DATETIME: " + DateTime.Today.ToLongDateString());
-            Log("===============================================");
-            Log("Initialized!");
+            mod.path = @"ExitFinder_log.txt";
+            mod.config = @"ExitFinder_config.txt";
+            mod.Initalize();
+
+            // Setup default values for config
+            mod.Values.Add("DisplayExit", "True");
+            mod.Values.Add("Key", @"Backslash");
+
+            mod.ReadConfig();
+
+            mod.Log("Initialized!");
         }
         public override void OnLoad()
         {
-            Log("Loaded!");
-            On.Session.Update += Session_Update;
-            On.Dungeon.SpawnExit += Dungeon_SpawnExit;
+            mod.Load();
+            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            {
+                On.Session.Update += Session_Update;
+                On.Dungeon.SpawnExit += Dungeon_SpawnExit;
+            }
         }
 
         private void Dungeon_SpawnExit(On.Dungeon.orig_SpawnExit orig, Dungeon self, Room spawnRoom)
         {
             orig(self, spawnRoom);
-            Log("Called a SpawnExit function!");
+            mod.Log("Called a SpawnExit function!");
         }
 
         private void Session_Update(On.Session.orig_Update orig, Session self)
         {
             orig(self);
-            if (Input.GetKeyDown(KeyCode.Backslash))
+            KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), mod.Values["Key"]);
+            if (Input.GetKeyDown(key))
             {
                 try
                 {
                     Dungeon d = SingletonManager.Get<Dungeon>(false);
-                    Log("Attempting to find exit in Dungeon...");
+                    mod.Log("Attempting to find exit in Dungeon...");
                     d.EnqueueNotification(GetExit(d));
                     if (DisplayExit)
                     {
-                        Log("Attemping to display exit...");
-                        //OffscreenMarker.OffscreenMarkerData data = default(OffscreenMarker.OffscreenMarkerData);
+                        mod.Log("Attemping to display exit...");
                         ExitRoom.AddCrystalSlot(true);
                         d.DisplayCrystalAndExitOffscreenMarkers(ExitRoom.CrystalModuleSlots[0].transform).Show(true);
-                        //List<CrystalModuleSlot> slots = d.ExitRoom.CrystalModuleSlots;
-                        //Log("Crystal Slot: "+slots[0].ToString());
-                        //slots[0].Activate();
                     }
                 } catch (NullReferenceException e)
                 {
                     // The Dungeon/GUI has yet to be setup!
                     // Let's just wait a bit and log it.
-                    Log("Dungeon/GUI Not yet initialized!");
+                    mod.Log("Dungeon/GUI Not yet initialized!");
                 }
             }
         }
@@ -81,7 +78,7 @@ namespace DotE_Patch_Mod
             //List<Room> path = FindPathToExit(new List<Room>(), d.StartRoom, d.ExitRoom);
             string pa = GetPathToExit("", d.StartRoom);
             List<Vector3> path = new List<Vector3>();
-            Log("Path to exit (before instructions): " + pa);
+            mod.Log("Path to exit (before instructions): " + pa);
             string[] splits = pa.Split(new string[] { "R: [(" }, StringSplitOptions.None);
             foreach (string s in splits)
             {
@@ -93,12 +90,12 @@ namespace DotE_Patch_Mod
                 string[] vec = q.Split(new string[] { ", " }, StringSplitOptions.None);
                 path.Add(new Vector3((float)Convert.ToDouble(vec[0]), (float)Convert.ToDouble(vec[1]), (float)Convert.ToDouble(vec[2])));
             }
-            Log("Exit Vectors:\n============================");
+            mod.Log("Exit Vectors:\n============================");
             foreach (Vector3 v in path)
             {
-                Log("Vector: " + v);
+                mod.Log("Vector: " + v);
             }
-            Log("============================");
+            mod.Log("============================");
             string instructions = "Path to exit: ";
             for (int i = 1; i < path.Count; i++)
             {
@@ -126,7 +123,7 @@ namespace DotE_Patch_Mod
                     }
                 }
             }
-            Log("Instructions: " + instructions);
+            mod.Log("Instructions: " + instructions);
             return instructions;
         }
 
@@ -179,15 +176,5 @@ namespace DotE_Patch_Mod
             }
             return o;
         }
-
-        public override void OnEnable()
-        {
-            Log("Enabled!");
-        }
-        public override void OnDisable()
-        {
-            Log("Disabled!");
-        }
-        
     }
 }

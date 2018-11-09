@@ -13,7 +13,7 @@ namespace DotE_Patch_Mod
         ScadMod mod = new ScadMod();
         public override void Init()
         {
-            mod.path = @"C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\DustGenerator_log.txt";
+            mod.path = @"DustGenerator_log.txt";
             mod.config = @"DustGenerator_config.txt";
             mod.Initalize();
 
