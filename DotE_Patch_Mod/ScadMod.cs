@@ -12,7 +12,7 @@ namespace DotE_Patch_Mod
         public string path = @"placeholder_log.txt";
 
         public string config = @"placeholder_config.txt";
-        public string default_config = "# Modify this file to change various settings of the DustGenerator Mod for DotE.\n# If these values are removed, the game will crash on initialization!\n";
+        public string default_config = "# If these values are removed, the game will crash on initialization!\n";
 
         public Dictionary<string, string> Values = new Dictionary<string, string>();
 

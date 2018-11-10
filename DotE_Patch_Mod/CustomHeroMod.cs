@@ -21,6 +21,7 @@ namespace DotE_Patch_Mod
         {
             mod.path = @"CustomHero_log.txt";
             mod.config = @"CustomHero_config.txt";
+            mod.default_config = "# Modify this file to change various settings of the CustomHero Mod for DotE.\n" + mod.default_config;
             mod.Initalize();
 
             // Setup default values for config
@@ -42,6 +43,23 @@ namespace DotE_Patch_Mod
             if (Convert.ToBoolean(mod.Values["Enabled"]))
             {
                 On.Hero.Init += Hero_Init;
+                On.Hero.ModifyLocalActiveHeroes += Hero_ModifyLocalActiveHeroes;
+            }
+        }
+
+        private void Hero_ModifyLocalActiveHeroes(On.Hero.orig_ModifyLocalActiveHeroes orig, bool add, Hero hero)
+        {
+            // This should be called every time a hero is given/taken
+            orig(add, hero);
+            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            {
+                if (mod.Values["HeroToReplace"] == hero.LocalizedName)
+                {
+                    // We are matching Heroes! Start to change data!
+                    SetHeroStats(hero);
+                    //self.HealthCpnt.SetHealth((float)Convert.ToDouble(mod.Values["Hero HP"]));
+                }
+                SetHeroRankName(hero);
             }
         }
 
@@ -79,17 +97,27 @@ namespace DotE_Patch_Mod
             if (mod.Values["HeroToReplace"] == self.LocalizedName)
             {
                 // We are matching Heroes! Start to change data!
-                mod.Log("Found hero with name: " + self.LocalizedName + " Attempting to change data!");
-                new DynData<Hero>(self).Set<string>("LocalizedName", mod.Values["HeroName"]);
-                //self.HealthCpnt.PermanantHealthMalus = (float)Convert.ToDouble(mod.Values["Hero HP"]);
-                self.GetSimObj().SetPropertyBaseValue("MaxHealth", (float)Convert.ToDouble(mod.Values["Hero HP"]) - self.GetSimObj().GetPropertyValue("MaxHealth"));
-                self.GetSimObj().SetPropertyBaseValue("MoveSpeed", (float)Convert.ToDouble(mod.Values["Speed"]) - self.GetSimObj().GetPropertyValue("MoveSpeed"));
-                //self.RemoveSimDescriptor(SimMonoBehaviour.GetDBDescriptorByName(self.Config.Name), true);
-                // Okay so now that I removed the actual SMB, I need to create a new one where the max health is mine
-                self.HealthCpnt.SetHealth((float)Convert.ToDouble(mod.Values["Hero HP"]));
-                mod.Log("New Name: " + self.LocalizedName + " and HP: " + self.HealthCpnt.GetHealth());
+                SetHeroStats(self);
                 //self.HealthCpnt.SetHealth((float)Convert.ToDouble(mod.Values["Hero HP"]));
             }
+            SetHeroRankName(self);
+        }
+
+        private void SetHeroStats(Hero self)
+        {
+            mod.Log("Found hero with name: " + self.LocalizedName + " Attempting to change data!");
+            new DynData<Hero>(self).Set<string>("LocalizedName", mod.Values["HeroName"]);
+            //self.HealthCpnt.PermanantHealthMalus = (float)Convert.ToDouble(mod.Values["Hero HP"]);
+            self.GetSimObj().SetPropertyBaseValue("MaxHealth", (float)Convert.ToDouble(mod.Values["Hero HP"]) - self.GetSimObj().GetPropertyValue("MaxHealth"));
+            self.GetSimObj().SetPropertyBaseValue("MoveSpeed", (float)Convert.ToDouble(mod.Values["Speed"]) - self.GetSimObj().GetPropertyValue("MoveSpeed"));
+            //self.RemoveSimDescriptor(SimMonoBehaviour.GetDBDescriptorByName(self.Config.Name), true);
+            // Okay so now that I removed the actual SMB, I need to create a new one where the max health is mine
+            self.HealthCpnt.SetHealth((float)Convert.ToDouble(mod.Values["Hero HP"]));
+            mod.Log("New Name: " + self.LocalizedName + " and HP: " + self.HealthCpnt.GetHealth());
+        }
+
+        private void SetHeroRankName(Hero self)
+        {
             if (Ranks.Keys.Count > 0)
             {
                 foreach (string hero in Ranks.Keys)
@@ -165,11 +193,18 @@ namespace DotE_Patch_Mod
             {
                 string label = GetSkillNameFromSkill(p);
                 mod.Log("GUI Label: " + label + " with desc name: " + p.name);
-                mod.Log("- All ModifierDescriptors:");
-                foreach (SimulationModifierDescriptor d in p.OwnerSimDesc.SimulationModifierDescriptors)
+                if (p.OwnerSimDesc == null)
                 {
-                    if (d != null)
-                        mod.Log("-- " + d.TargetPropertyName);
+                    continue;
+                }
+                if (p.OwnerSimDesc.SimulationModifierDescriptors != null)
+                {
+                    mod.Log("- All ModifierDescriptors:");
+                    foreach (SimulationModifierDescriptor d in p.OwnerSimDesc.SimulationModifierDescriptors)
+                    {
+                        if (d != null)
+                            mod.Log("-- " + d.TargetPropertyName);
+                    }
                 }
                 if (p.OwnerSimDesc.SimulationPropertyDescriptors != null)
                 {
