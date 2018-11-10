@@ -72,6 +72,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomHeroMod.cs" />
     <Compile Include="DustGeneratorMod.cs" />
     <Compile Include="ExitFinderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,0 +1,29 @@
+# This file contains the ranks of each hero as decided by: https://cdn.discordapp.com/attachments/495851413881094145/510595250436177920/lmaodab.jpg
+
+Pat Bates: S+
+Sasha Chokyo: S+
+Chef Nanor: S
+Skroig: S
+Golgy Phurtiver: S
+Wes Davoun: S
+Kreyang: S
+Ken Massoqui: A
+Rosetta Q: A
+Hikensha: B
+Max O'Kane: B
+Esseb Tarosh: B
+Troe Pekenyo: B
+Opbot DV8: C
+Kaspar Herab: C
+Lady Joleri Tulak: C
+Misha Cherny: C
+Dell Bradford: D
+Warden Mormish: D
+Sara Numas: D
+Nurse Deena Ratchet: D
+Mizi Kurtiz: D
+Rakya Pulmoni: D
+Elise Ness: D
+Gork "Butcher" Koroser: F
+Zugma Walker: F
+Professor Josh 'Ntello: F
