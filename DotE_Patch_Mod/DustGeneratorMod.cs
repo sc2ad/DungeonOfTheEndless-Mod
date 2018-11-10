@@ -15,6 +15,7 @@ namespace DotE_Patch_Mod
         {
             mod.path = @"DustGenerator_log.txt";
             mod.config = @"DustGenerator_config.txt";
+            mod.default_config = "# Modify this file to change various settings of the DustGenerator Mod for DotE.\n" + mod.default_config;
             mod.Initalize();
 
             // Setup default values for config

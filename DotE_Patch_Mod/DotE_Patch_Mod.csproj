@@ -76,6 +76,7 @@
     <Compile Include="DustGeneratorMod.cs" />
     <Compile Include="ExitFinderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResourceLimiterMod.cs" />
     <Compile Include="ScadMod.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
