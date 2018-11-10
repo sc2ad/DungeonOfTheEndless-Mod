@@ -57,6 +57,11 @@ namespace DotE_Patch_Mod
                     Dungeon d = SingletonManager.Get<Dungeon>(false);
                     mod.Log("Attempting to find exit in Dungeon...");
                     d.EnqueueNotification(GetExit(d));
+                    if (ExitRoom.CrystalModuleSlots.Count > 0)
+                    {
+                        // The exit already exists, don't make another one!
+                        return;
+                    }
                     if (DisplayExit)
                     {
                         mod.Log("Attemping to display exit...");
