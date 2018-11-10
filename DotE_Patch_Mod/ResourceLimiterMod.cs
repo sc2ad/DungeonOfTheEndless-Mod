@@ -14,7 +14,7 @@ namespace DotE_Patch_Mod
         {
             mod.path = @"ResourceLimiter_log.txt";
             mod.config = @"ResourceLimiter_config.txt";
-            mod.default_config = "# Modify this file to change various settings of the DustGenerator Mod for DotE.\nYou must match a value exactly when changing Use? (Percentage, FlatRate)\n" + mod.default_config;
+            mod.default_config = "# Modify this file to change various settings of the ResourceLimiter Mod for DotE.\nYou must match a value exactly when changing Use? (Percentage, FlatRate)\n" + mod.default_config;
             mod.Initalize();
 
             // Setup default values for config
