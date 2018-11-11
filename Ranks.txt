@@ -1,7 +1,7 @@
 # This file contains the ranks of each hero as decided by: https://cdn.discordapp.com/attachments/495851413881094145/510595250436177920/lmaodab.jpg
 
 Pat Bates: S+
-Sasha Chokyo: S+
+Sasha Chokyo : S+
 Chef Nanor: S
 Skroig: S
 Golgy Phurtiver: S
