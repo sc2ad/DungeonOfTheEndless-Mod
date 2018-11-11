@@ -25,7 +25,7 @@ namespace DotE_Patch_Mod
         public override void OnLoad()
         {
             mod.Load();
-            
+
             if (Convert.ToBoolean(mod.Values["Enabled"]))
             {
                 On.Dungeon.SpawnMobs += Dungeon_SpawnMobs;

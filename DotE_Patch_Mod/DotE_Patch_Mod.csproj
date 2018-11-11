@@ -75,6 +75,8 @@
     <Compile Include="AllowDustChangingWithCrystalMod.cs" />
     <Compile Include="CustomHeroMod.cs" />
     <Compile Include="DustGeneratorMod.cs" />
+    <Compile Include="DustlessPod.cs" />
+    <Compile Include="DustlessPodConfig.cs" />
     <Compile Include="ExitFinderMod.cs" />
     <Compile Include="HomogenyPod.cs" />
     <Compile Include="HomogenyPodConfig.cs" />
