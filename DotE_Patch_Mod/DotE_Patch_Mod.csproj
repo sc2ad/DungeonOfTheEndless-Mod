@@ -76,6 +76,8 @@
     <Compile Include="CustomHeroMod.cs" />
     <Compile Include="DustGeneratorMod.cs" />
     <Compile Include="ExitFinderMod.cs" />
+    <Compile Include="HomogenyPod.cs" />
+    <Compile Include="HomogenyPodUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceLimiterMod.cs" />
     <Compile Include="ScadMod.cs" />

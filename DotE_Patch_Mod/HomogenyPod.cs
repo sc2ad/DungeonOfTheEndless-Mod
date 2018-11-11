@@ -163,7 +163,8 @@ namespace DotE_Patch_Mod
                 if (syncOverNetwork && manager.IsServer())
                 {
                     global::Session session = manager.GetSession();
-                    session.SetLobbyData(global::Session.LOBBYDATA_GAME_SHIP, mod.Values["AssumedPod"]);
+                    session.SetLobbyData(global::Session.LOBBYDATA_GAME_SHIP, "HomogenyPod");
+                    // mod.Values["AssumedPod"]
                 }
                 return;
             }
