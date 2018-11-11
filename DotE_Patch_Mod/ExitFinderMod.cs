@@ -21,7 +21,7 @@ namespace DotE_Patch_Mod
             mod.path = @"ExitFinder_log.txt";
             mod.config = @"ExitFinder_config.txt";
             mod.default_config = "# Modify this file to change various settings of the ExitFinder Mod for DotE.\n" + mod.default_config;
-            mod.Initalize();
+            mod.Initialize();
 
             // Setup default values for config
             mod.Values.Add("DisplayExit", "True");

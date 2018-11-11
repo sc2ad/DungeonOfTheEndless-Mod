@@ -51,7 +51,7 @@ namespace DotE_Patch_Mod
             }
             Log("Values have been loaded successfully!");
         }
-        public void Initalize()
+        public void Initialize()
         {
             ClearLog();
             Log("===================================================================");
