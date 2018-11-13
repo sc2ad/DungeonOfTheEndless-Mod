@@ -1,10 +1,11 @@
-﻿using System;
+﻿using DustDevilFramework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotE_Patch_Mod
+namespace DotE_Combo_Mod
 {
     class HomogenyPodConfig : PodMod
     {

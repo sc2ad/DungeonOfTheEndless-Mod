@@ -1,6 +1,7 @@
 ﻿using Amplitude.Unity.Framework;
 using Amplitude.Unity.Gui;
 using Amplitude.Unity.Simulation;
+using DustDevilFramework;
 using MonoMod.Utils;
 using Partiality.Modloader;
 using System;
@@ -9,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotE_Patch_Mod
+namespace DotE_Combo_Mod
 {
     class CustomHeroMod : PartialityMod
     {

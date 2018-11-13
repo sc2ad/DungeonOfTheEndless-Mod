@@ -1,13 +1,12 @@
-﻿using Partiality.Modloader;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotE_Patch_Mod
+namespace DustDevilFramework
 {
-    class ScadMod
+    public class ScadMod
     {
         public string path = @"placeholder_log.txt";
 

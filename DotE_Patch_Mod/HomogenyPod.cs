@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotE_Patch_Mod
+namespace DotE_Combo_Mod
 {
     class HomogenyPod : PartialityMod
     {

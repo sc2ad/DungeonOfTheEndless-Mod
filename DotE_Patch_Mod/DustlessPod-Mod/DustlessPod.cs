@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotE_Combo_Mod
+namespace DustlessPod_Mod
 {
     class DustlessPod : PartialityMod
     {

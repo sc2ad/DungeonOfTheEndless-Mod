@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace DotE_Patch_Mod
+namespace DotE_Combo_Mod
 {
     class HomogenyPodUtil
     {

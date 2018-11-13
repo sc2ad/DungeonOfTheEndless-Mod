@@ -1,4 +1,5 @@
-﻿using Partiality.Modloader;
+﻿using DustDevilFramework;
+using Partiality.Modloader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using UnityEngine;
 
-namespace DotE_Patch_Mod
+namespace DotE_Combo_Mod
 {
     public class ExitFinderMod : PartialityMod
     {

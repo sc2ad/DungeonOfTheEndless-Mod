@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotE_Patch_Mod", "DotE_Patch_Mod.csproj", "{6C04C85B-D183-45D2-98D5-0168B613DA54}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotE_Combo_Mod", "DotE_Combo_Mod.csproj", "{6C04C85B-D183-45D2-98D5-0168B613DA54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DustDevilFramework", "DustDevilFramework\DustDevilFramework.csproj", "{C984CE07-D68C-443D-9558-A317A20CE3FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DustlessPod-Mod", "DustlessPod-Mod\DustlessPod-Mod.csproj", "{C53BE1C5-3C99-4BF4-ACE8-37EC4A745011}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +19,19 @@ Global
 		{6C04C85B-D183-45D2-98D5-0168B613DA54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C04C85B-D183-45D2-98D5-0168B613DA54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C04C85B-D183-45D2-98D5-0168B613DA54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C984CE07-D68C-443D-9558-A317A20CE3FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C984CE07-D68C-443D-9558-A317A20CE3FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C984CE07-D68C-443D-9558-A317A20CE3FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C984CE07-D68C-443D-9558-A317A20CE3FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C53BE1C5-3C99-4BF4-ACE8-37EC4A745011}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C53BE1C5-3C99-4BF4-ACE8-37EC4A745011}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C53BE1C5-3C99-4BF4-ACE8-37EC4A745011}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C53BE1C5-3C99-4BF4-ACE8-37EC4A745011}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7017B829-A763-492B-A5C0-CE0C7C15F6AB}
 	EndGlobalSection
 EndGlobal

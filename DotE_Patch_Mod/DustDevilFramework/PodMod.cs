@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotE_Patch_Mod
+namespace DustDevilFramework
 {
-    abstract class PodMod : ScadMod
+    public abstract class PodMod : ScadMod
     {
         public abstract string GetName();
         public abstract string GetDescription();
