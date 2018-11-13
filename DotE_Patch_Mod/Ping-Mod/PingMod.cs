@@ -55,14 +55,12 @@ namespace Ping_Mod
                     // Time is up! Remove the object
                     Dungeon d = SingletonManager.Get<Dungeon>(false);
 
-                    CrystalModuleSlot component = displayed.GetComponent<CrystalModuleSlot>();
-
-                    d.StartRoom.CrystalModuleSlots.Remove(component);
-
-                    OffscreenMarker mark = new DynData<CrystalModuleSlot>(component).Get<OffscreenMarker>("crystalMarker");
-
-                    mark.Hide();
-                    UnityEngine.Object.Destroy(mark);
+                    OffscreenMarker mark = displayed.GetComponent<OffscreenMarker>();
+                    if (mark != null)
+                    {
+                        mark.Hide();
+                        UnityEngine.Object.Destroy(mark);
+                    }
                     UnityEngine.Object.Destroy(displayed);
                     mod.Log("Time is up, destroyed displayed object!");
                     dict.Remove(displayed);
@@ -99,15 +97,14 @@ namespace Ping_Mod
                 GameObject pfb = r.Get<GameObject>("crystalModuleSlotPfb");
 
                 GameObject o = (GameObject)UnityEngine.Object.Instantiate(pfb, mousePos, Quaternion.identity);
-                CrystalModuleSlot component = o.GetComponent<CrystalModuleSlot>();
 
-                ulong ownerPlayerID = new DynData<Dungeon>(d).Get<GameNetworkManager>("gameNetManager").GetLocalPlayerID();
+                OffscreenMarker q = d.DisplayCrystalAndExitOffscreenMarkers(o.transform);
 
-                component.Init(ownerPlayerID, d.StartRoom, true);
-                d.StartRoom.CrystalModuleSlots.Add(component);
                 new DynData<Dungeon>(d).Get<IAudioEventService>("audioEventManager").Play2DEvent("Master/Jingles/Exit");
 
+                //dict.Add(o, DateTime.Now);
                 dict.Add(o, DateTime.Now);
+                dict.Add(q.gameObject, DateTime.Now);
 
                 mod.Log("Attempting to display!");
             }
