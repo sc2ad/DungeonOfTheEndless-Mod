@@ -19,6 +19,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DustWithCrystal-Mod", "Dust
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomHero-Mod", "CustomHero-Mod\CustomHero-Mod.csproj", "{9602B7D5-32B6-4571-9EA2-8C27058AF287}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoDustPod-Mod", "NoDustPod-Mod\NoDustPod-Mod.csproj", "{AD4B0A15-0A09-4DCA-BA4B-E888958C829F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ping-Mod", "Ping-Mod\Ping-Mod.csproj", "{34EB5280-4A60-4008-B78A-E1FBECA8D4C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,14 @@ Global
 		{9602B7D5-32B6-4571-9EA2-8C27058AF287}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9602B7D5-32B6-4571-9EA2-8C27058AF287}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9602B7D5-32B6-4571-9EA2-8C27058AF287}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD4B0A15-0A09-4DCA-BA4B-E888958C829F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD4B0A15-0A09-4DCA-BA4B-E888958C829F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD4B0A15-0A09-4DCA-BA4B-E888958C829F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD4B0A15-0A09-4DCA-BA4B-E888958C829F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34EB5280-4A60-4008-B78A-E1FBECA8D4C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34EB5280-4A60-4008-B78A-E1FBECA8D4C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34EB5280-4A60-4008-B78A-E1FBECA8D4C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34EB5280-4A60-4008-B78A-E1FBECA8D4C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

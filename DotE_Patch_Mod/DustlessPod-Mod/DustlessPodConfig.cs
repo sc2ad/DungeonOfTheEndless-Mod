@@ -40,7 +40,7 @@ namespace DustlessPod_Mod
 
         public override int GetLevelCount()
         {
-            return 10;
+            return 12;
         }
 
         public override string GetName()
