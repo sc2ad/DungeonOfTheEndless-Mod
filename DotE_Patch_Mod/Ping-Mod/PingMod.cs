@@ -56,25 +56,24 @@ namespace Ping_Mod
                 GameNetworkManager net = GameObject.FindObjectOfType<GameNetworkManager>();
                 IMessageBox msgBox = new DynData<GameNetworkManager>(net).Get<IMessageBox>("messageBox");
 
+                RaycastHit[] array = Physics.RaycastAll(gameCameraManager.ScreenPointToRay(Input.mousePosition), float.PositiveInfinity);
+                Array.Sort<RaycastHit>(array, (RaycastHit hitInfo1, RaycastHit hitInfo2) => hitInfo1.distance.CompareTo(hitInfo2.distance));
+
+                // In theory the first raycast hit should be the best?
+                // Not sure if this is the case...
+                Vector3 mousePos = array[0].point;
+
+                mod.Log("Raycast hits:");
+                foreach (RaycastHit ra in array)
+                {
+                    mod.Log("Dist: " + ra.distance + " with pos: " + ra.point);
+                }
+
+                mod.Log("Mouse pos: " + mousePos.ToString());
+
                 bool assert = (bool)typeof(GameNetworkManager).GetMethod("AssertMessageBoxIsSet", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(net, new object[0]);
                 if (assert && msgBox != null && net != null)
                 {
-
-                    RaycastHit[] array = Physics.RaycastAll(gameCameraManager.ScreenPointToRay(Input.mousePosition), float.PositiveInfinity);
-                    Array.Sort<RaycastHit>(array, (RaycastHit hitInfo1, RaycastHit hitInfo2) => hitInfo1.distance.CompareTo(hitInfo2.distance));
-
-                    // In theory the first raycast hit should be the best?
-                    // Not sure if this is the case...
-                    Vector3 mousePos = array[0].point;
-
-                    mod.Log("Raycast hits:");
-                    foreach (RaycastHit ra in array)
-                    {
-                        mod.Log("Dist: " + ra.distance + " with pos: " + ra.point);
-                    }
-
-                    mod.Log("Mouse pos: " + mousePos.ToString());
-
                     PingMessage pm = new PingMessage();
                     pm.SetPos(mousePos);
                     Message m = pm as Message;
@@ -91,7 +90,10 @@ namespace Ping_Mod
                     mod.Log("Attempting to display!");
                 } else
                 {
-                    mod.Log("It seems the game is not in multiplayer, you cannot ping if you are in single player!");
+                    GameObject obj = new GameObject("PING OBJECT");
+                    PingScript p = obj.AddComponent<PingScript>();
+                    p.pos = mousePos;
+                    mod.Log("It seems the game is not in multiplayer, attempting to create a local ping!");
                 }
             }
             orig(self);
@@ -120,12 +122,17 @@ namespace Ping_Mod
                     }
                     if (lifetime <= 0)
                     {
+                        mark.Hide();
                         Destroy(mark);
                         Destroy(gameObject);
                     }
                 } catch (Exception e)
                 {
-                    Destroy(mark);
+                    if (mark != null)
+                    {
+                        mark.Hide();
+                        Destroy(mark);
+                    }
                     Destroy(gameObject);
                 }
             }
