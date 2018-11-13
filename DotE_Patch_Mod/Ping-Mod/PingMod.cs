@@ -1,5 +1,6 @@
 ﻿using Amplitude.Unity.Audio;
 using Amplitude.Unity.Framework;
+using Amplitude.Unity.Messaging;
 using DustDevilFramework;
 using MonoMod.Utils;
 using Partiality.Modloader;
@@ -9,14 +10,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Amplitude.Interop.Steamworks.SteamNetworking;
 
 namespace Ping_Mod
 {
     class PingMod : PartialityMod
     {
-        ScadMod mod = new ScadMod();
+        public static ScadMod mod = new ScadMod();
 
-        private Dictionary<GameObject, DateTime> dict = new Dictionary<GameObject, DateTime>();
+        private static short PING_ID = 17346;
 
         public override void Init()
         {
@@ -38,36 +40,12 @@ namespace Ping_Mod
             mod.Load();
             if (Convert.ToBoolean(mod.Values["Enabled"]))
             {
-                On.Session.Update += Session_Update;
+                On.InputManager.Update += InputManager_Update;
             }
         }
 
-        private void Session_Update(On.Session.orig_Update orig, Session self)
-        {
-            for (int i = 0; i < dict.Keys.Count; i++)
-            {
-                // Don't let the user ping a second time.
-                orig(self);
-                GameObject displayed = dict.Keys.ElementAt(i);
-                // Count down the seconds
-                if (DateTime.Now.Subtract(dict[displayed]).Seconds >= Convert.ToInt16(mod.Values["Seconds Active"]))
-                {
-                    // Time is up! Remove the object
-                    Dungeon d = SingletonManager.Get<Dungeon>(false);
-
-                    OffscreenMarker mark = displayed.GetComponent<OffscreenMarker>();
-                    if (mark != null)
-                    {
-                        mark.Hide();
-                        UnityEngine.Object.Destroy(mark);
-                    }
-                    UnityEngine.Object.Destroy(displayed);
-                    mod.Log("Time is up, destroyed displayed object!");
-                    dict.Remove(displayed);
-                    i--;
-                }
-                mod.Log("Waiting till the object is destroyed!");
-            }
+        private void InputManager_Update(On.InputManager.orig_Update orig, InputManager self)
+        {   
             KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), mod.Values["Key"]);
             if (Input.GetKeyDown(key))
             {
@@ -75,40 +53,120 @@ namespace Ping_Mod
                 // Next, spawn something there that lasts for x seconds
                 // Finally, remove it after those seconds pass
                 IGameCameraService gameCameraManager = Services.GetService<IGameCameraService>();
+                GameNetworkManager net = GameObject.FindObjectOfType<GameNetworkManager>();
+                IMessageBox msgBox = new DynData<GameNetworkManager>(net).Get<IMessageBox>("messageBox");
 
-                RaycastHit[] array = Physics.RaycastAll(gameCameraManager.ScreenPointToRay(Input.mousePosition), float.PositiveInfinity);
-                Array.Sort<RaycastHit>(array, (RaycastHit hitInfo1, RaycastHit hitInfo2) => hitInfo1.distance.CompareTo(hitInfo2.distance));
-
-                // In theory the first raycast hit should be the best?
-                // Not sure if this is the case...
-                Vector3 mousePos = array[0].point;
-
-                mod.Log("Raycast hits:");
-                foreach (RaycastHit ra in array)
+                bool assert = (bool)typeof(GameNetworkManager).GetMethod("AssertMessageBoxIsSet", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(net, new object[0]);
+                if (assert && msgBox != null && net != null)
                 {
-                    mod.Log("Dist: " + ra.distance + " with pos: " + ra.point);
+
+                    RaycastHit[] array = Physics.RaycastAll(gameCameraManager.ScreenPointToRay(Input.mousePosition), float.PositiveInfinity);
+                    Array.Sort<RaycastHit>(array, (RaycastHit hitInfo1, RaycastHit hitInfo2) => hitInfo1.distance.CompareTo(hitInfo2.distance));
+
+                    // In theory the first raycast hit should be the best?
+                    // Not sure if this is the case...
+                    Vector3 mousePos = array[0].point;
+
+                    mod.Log("Raycast hits:");
+                    foreach (RaycastHit ra in array)
+                    {
+                        mod.Log("Dist: " + ra.distance + " with pos: " + ra.point);
+                    }
+
+                    mod.Log("Mouse pos: " + mousePos.ToString());
+
+                    PingMessage pm = new PingMessage();
+                    pm.SetPos(mousePos);
+                    Message m = pm as Message;
+
+                    mod.Log("Assertion: " + assert);
+                    mod.Log("Net: " + net.name);
+                    mod.Log("MSG BOX: " + msgBox.ToString());
+
+                    EP2PSend temp = msgBox.SteamNetworkingSendMode;
+                    msgBox.SteamNetworkingSendMode = EP2PSend.k_EP2PSendReliable;
+                    msgBox.SendMessage(ref m, net.GetLobbyPlayerIDs());
+                    msgBox.SteamNetworkingSendMode = temp;
+
+                    mod.Log("Attempting to display!");
+                } else
+                {
+                    mod.Log("It seems the game is not in multiplayer, you cannot ping if you are in single player!");
                 }
-
-                mod.Log("Mouse pos: "+mousePos.ToString());
-                Dungeon d = SingletonManager.Get<Dungeon>(false);
-
-                DynData<Room> r = new DynData<Room>(d.StartRoom);
-
-                GameObject pfb = r.Get<GameObject>("crystalModuleSlotPfb");
-
-                GameObject o = (GameObject)UnityEngine.Object.Instantiate(pfb, mousePos, Quaternion.identity);
-
-                OffscreenMarker q = d.DisplayCrystalAndExitOffscreenMarkers(o.transform);
-
-                new DynData<Dungeon>(d).Get<IAudioEventService>("audioEventManager").Play2DEvent("Master/Jingles/Exit");
-
-                //dict.Add(o, DateTime.Now);
-                dict.Add(o, DateTime.Now);
-                dict.Add(q.gameObject, DateTime.Now);
-
-                mod.Log("Attempting to display!");
             }
             orig(self);
+        }
+
+        class PingScript : MonoBehaviour
+        {
+            float lifetime;
+            public Vector3 pos;
+            OffscreenMarker mark;
+
+            public void Start()
+            {
+                lifetime = (float)Convert.ToDouble(mod.Values["Seconds Active"]);
+            }
+            public void Update()
+            {
+                try
+                {
+                    lifetime -= Time.deltaTime;
+                    transform.position = pos;
+
+                    if (mark == null)
+                    {
+                        mark = SingletonManager.Get<Dungeon>(false).DisplayCrystalAndExitOffscreenMarkers(gameObject.transform);
+                    }
+                    if (lifetime <= 0)
+                    {
+                        Destroy(mark);
+                        Destroy(gameObject);
+                    }
+                } catch (Exception e)
+                {
+                    Destroy(mark);
+                    Destroy(gameObject);
+                }
+            }
+        }
+
+        class PingMessage : Message
+        {
+            Vector3 pos;
+            public PingMessage() : base(PING_ID) {}
+            public void SetPos(Vector3 pos)
+            {
+                this.pos = pos;
+            }
+            protected override void Pack(BinaryWriter writer)
+            {
+                base.Pack(writer);
+
+                CreatePingObject();
+
+                writer.Write(pos.x);
+                writer.Write(pos.y);
+                writer.Write(pos.z);
+
+            }
+            protected override void Unpack(BinaryReader reader)
+            {
+                base.Unpack(reader);
+
+                pos = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+
+                CreatePingObject();
+            }
+            public void CreatePingObject()
+            {
+                mod.Log("Creating a ping object!");
+                Dungeon d = SingletonManager.Get<Dungeon>(false);
+                GameObject obj = new GameObject("PING OBJECT");
+                PingScript ping = obj.AddComponent<PingScript>();
+                ping.pos = pos;
+                new DynData<Dungeon>(d).Get<IAudioEventService>("audioEventManager").Play2DEvent("Master/Jingles/Exit");
+            }
         }
     }
 }
