@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoDustPod-Mod", "NoDustPod-
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ping-Mod", "Ping-Mod\Ping-Mod.csproj", "{34EB5280-4A60-4008-B78A-E1FBECA8D4C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueIGT-Mod", "TrueIGT-Mod\TrueIGT-Mod.csproj", "{B580B9DF-578B-48A3-947D-AE483621FB5C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{34EB5280-4A60-4008-B78A-E1FBECA8D4C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34EB5280-4A60-4008-B78A-E1FBECA8D4C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34EB5280-4A60-4008-B78A-E1FBECA8D4C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B580B9DF-578B-48A3-947D-AE483621FB5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B580B9DF-578B-48A3-947D-AE483621FB5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B580B9DF-578B-48A3-947D-AE483621FB5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B580B9DF-578B-48A3-947D-AE483621FB5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
