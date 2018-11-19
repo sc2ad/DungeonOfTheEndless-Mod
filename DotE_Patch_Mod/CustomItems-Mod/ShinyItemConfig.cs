@@ -126,12 +126,11 @@ namespace OPSashaItem_Mod
 
         public override string[] GetSkills()
         {
-            return new string[] { };
+            return new string[] { "Skill_A0033", "Skill_P0029" };
         }
 
         public override StaticString GetSpriteName()
         {
-            // This might actually need to have Item_ in front of it
             return "Weapon001";
         }
 
@@ -143,8 +142,6 @@ namespace OPSashaItem_Mod
         public override SimulationDescriptor GetBaseDescriptor()
         {
             SimDescriptorWrapper wrapper = new SimDescriptorWrapper();
-            //wrapper.Add(SimulationProperties.AttackCooldown, -0.3f);
-            //wrapper.Add(SimulationProperties.MoveSpeed, 3f);
             return wrapper.GetDescriptor(GetName());
         }
 
@@ -161,6 +158,9 @@ namespace OPSashaItem_Mod
             SimDescriptorWrapper wrapper = new SimDescriptorWrapper();
             wrapper.Add(SimulationProperties.AttackCooldown, -1.0f);
             wrapper.Add(SimulationProperties.MoveSpeed, 8f);
+            wrapper.Add(SimulationProperties.MaxHealth, 10000f);
+            wrapper.Add(SimulationProperties.AttackPower, 100);
+            wrapper.Add(SimulationProperties.HealthRegen, 800);
             return wrapper.GetDescriptor(GetName() + "_Rarity0");
         }
 
@@ -169,14 +169,20 @@ namespace OPSashaItem_Mod
             SimDescriptorWrapper wrapper = new SimDescriptorWrapper();
             wrapper.Add(SimulationProperties.AttackCooldown, -1.1f);
             wrapper.Add(SimulationProperties.MoveSpeed, 18f);
+            wrapper.Add(SimulationProperties.MaxHealth, 10000f);
+            wrapper.Add(SimulationProperties.AttackPower, 100);
+            wrapper.Add(SimulationProperties.HealthRegen, 800);
             return wrapper.GetDescriptor(GetName() + "_Rarity1");
         }
 
         public override SimulationDescriptor GetRarity2Descriptor()
         {
             SimDescriptorWrapper wrapper = new SimDescriptorWrapper();
-            wrapper.Add(SimulationProperties.AttackCooldown, -1.19999f);
+            wrapper.Add(SimulationProperties.AttackCooldown, -1.1999999f);
             wrapper.Add(SimulationProperties.MoveSpeed, 90f);
+            wrapper.Add(SimulationProperties.MaxHealth, 10000f);
+            wrapper.Add(SimulationProperties.AttackPower, 100);
+            wrapper.Add(SimulationProperties.HealthRegen, 800);
             return wrapper.GetDescriptor(GetName() + "_Rarity2");
         }
     }
