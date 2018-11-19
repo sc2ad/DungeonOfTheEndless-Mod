@@ -142,6 +142,8 @@ namespace OPSashaItem_Mod
         public override SimulationDescriptor GetBaseDescriptor()
         {
             SimDescriptorWrapper wrapper = new SimDescriptorWrapper();
+            wrapper.Add(SimulationProperties.AttackCooldown, -0.5f);
+            wrapper.Add(SimulationProperties.MoveSpeed, 3f);
             return wrapper.GetDescriptor(GetName());
         }
 
@@ -178,7 +180,7 @@ namespace OPSashaItem_Mod
         public override SimulationDescriptor GetRarity2Descriptor()
         {
             SimDescriptorWrapper wrapper = new SimDescriptorWrapper();
-            wrapper.Add(SimulationProperties.AttackCooldown, -1.1999999f);
+            wrapper.Add(SimulationProperties.AttackCooldown, -1.19999f);
             wrapper.Add(SimulationProperties.MoveSpeed, 90f);
             wrapper.Add(SimulationProperties.MaxHealth, 10000f);
             wrapper.Add(SimulationProperties.AttackPower, 100);
