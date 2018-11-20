@@ -12,14 +12,13 @@ namespace ExitFinder_Mod
 {
     public class ExitFinderMod : PartialityMod
     {
-        ScadMod mod = new ScadMod();
+        ScadMod mod = new ScadMod("ExitFinder");
         private static bool DisplayExit = true;
 
         private static Room ExitRoom;
 
         public override void Init()
         {
-            mod.name = "ExitFinder";
             mod.default_config = "# Modify this file to change various settings of the ExitFinder Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 

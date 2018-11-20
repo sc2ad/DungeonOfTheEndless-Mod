@@ -10,10 +10,9 @@ namespace DustWithCrystal_Mod
 {
     class AllowDustChangingWithCrystalMod : PartialityMod
     {
-        ScadMod mod = new ScadMod();
+        ScadMod mod = new ScadMod("DustAfterCrystal");
         public override void Init()
         {
-            mod.name = "DustAfterCrystal";
             mod.default_config = "# Modify this file to change various settings of the DustAfterCrystal Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 

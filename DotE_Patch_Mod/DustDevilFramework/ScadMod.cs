@@ -10,9 +10,11 @@ namespace DustDevilFramework
     {
         public string name = "placeholder";
         public string path;
-
         public string config;
         public string default_config = "# If these values are removed, the game will crash on initialization!\n";
+        public int MajorVersion = 1;
+        public int MinorVersion = 0;
+        public int Revision = 0;
 
         public Dictionary<string, string> Values = new Dictionary<string, string>();
         public ScadMod(string name)

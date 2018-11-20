@@ -12,11 +12,11 @@ namespace DustDevilFramework
     {
         private static DustDevil Instance;
 
-        public static int MajorVersion { get; } = 1;
-        public static int MinorVersion { get; } = 0;
-        public static int Revision { get; } = 0;
+        public static int MajorVersion { get; } = 2;
+        public static int MinorVersion { get; } = 7;
+        public static int Revision { get; } = 1;
 
-        private static List<string> ModList = new List<string>();
+        private static List<ScadMod> ModList = new List<ScadMod>();
 
         public static void CreateInstance(ScadMod mod)
         {
@@ -24,7 +24,7 @@ namespace DustDevilFramework
             {
                 Instance = new DustDevil();
             }
-            ModList.Add(mod.name);
+            ModList.Add(mod);
         }
         private DustDevil()
         {
@@ -70,9 +70,9 @@ namespace DustDevilFramework
             AgePrimitiveLabel l2 = o.GetComponent<AgePrimitiveLabel>();
             l2.Alignement = AgeTextAnchor.UpperLeft;
             string text = "ModList:\n";
-            foreach (string name in ModList)
+            foreach (ScadMod mod in ModList)
             {
-                text += "- " + name + "\n";
+                text += "- " + mod.name + " - " + mod.MajorVersion + "." + mod.MinorVersion + "." + mod.Revision+"\n";
             }
             
             Debug.Log("Label has alignment: " + label.Alignement + " new label has alignment: " + l2.Alignement);

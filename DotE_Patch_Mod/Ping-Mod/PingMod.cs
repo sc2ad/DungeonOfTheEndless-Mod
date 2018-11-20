@@ -16,13 +16,12 @@ namespace Ping_Mod
 {
     class PingMod : PartialityMod
     {
-        public static ScadMod mod = new ScadMod();
+        public static ScadMod mod = new ScadMod("Ping");
 
         private static short PING_ID = 17346;
 
         public override void Init()
         {
-            mod.name = "Ping";
             mod.default_config = "# Modify this file to change various settings of the Ping Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 

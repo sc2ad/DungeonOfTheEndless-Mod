@@ -11,10 +11,9 @@ namespace DustGenerator_Mod
 {
     class DustGeneratorMod : PartialityMod
     {
-        ScadMod mod = new ScadMod();
+        ScadMod mod = new ScadMod("DustGenerator");
         public override void Init()
         {
-            mod.name = "DustGenerator";
             mod.default_config = "# Modify this file to change various settings of the DustGenerator Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 
