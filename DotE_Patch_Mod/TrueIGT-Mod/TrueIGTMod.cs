@@ -16,10 +16,10 @@ namespace TrueIGT_Mod
         public static DateTime StartTime;
         public float LastGameStartTime = float.NegativeInfinity;
 
-        ScadMod mod = new ScadMod();
+        ScadMod mod = new ScadMod("TrueIGT");
         public override void Init()
         {
-            mod.name = "TrueIGT";
+            mod.MajorVersion = 2;
             mod.default_config = "# Modify this file to change various settings of the TrueIGT Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 
@@ -35,11 +35,42 @@ namespace TrueIGT_Mod
             if (Convert.ToBoolean(mod.Values["Enabled"]))
             {
                 On.Dungeon.RPC_DoLevelOver += Dungeon_RPC_DoLevelOver;
-                //On.Dungeon.FillDungeonAsync += Dungeon_FillDungeonAsync;
-                //On.Session.PostStateChange += Session_PostStateChange;
                 On.Session.Update += Session_Update;
-                //On.Dungeon.PrepareForNewGame += Dungeon_PrepareForNewGame;
-                //On.Dungeon.PrepareForSavedGame += Dungeon_PrepareForSavedGame;
+                On.Hero.MoveToDoor += Hero_MoveToDoor;
+                On.Hero.MoveToRoom += Hero_MoveToRoom;
+                On.VictoryPanel.Show += VictoryPanel_Show;
+            }
+        }
+
+        private void VictoryPanel_Show(On.VictoryPanel.orig_Show orig, VictoryPanel self, object[] parameters)
+        {
+            orig(self, parameters);
+            Dungeon d = SingletonManager.Get<Dungeon>(true);
+            AgePrimitiveLabel label = new DynData<VictoryPanel>(self).Get<AgePrimitiveLabel>("informationLabel");
+            label.Text += " - Time: " + d.Statistics.GetStat(DungeonStatistics.Stat_GameTime).DurationToString();
+        }
+
+        private void Hero_MoveToRoom(On.Hero.orig_MoveToRoom orig, Hero self, Room room, bool allowMoveInterruption, bool isMoveOrderedByPlayer, bool triggerTutorialEvent)
+        {
+            orig(self, room, allowMoveInterruption, isMoveOrderedByPlayer, triggerTutorialEvent);
+            mod.Log("Currently attempting to move to a room!");
+        }
+
+        private void Hero_MoveToDoor(On.Hero.orig_MoveToDoor orig, Hero self, Door door, bool allowMoveInterruption, Door nextMoveDoorTarget, bool isMoveOrderedByPlayer)
+        {
+            orig(self, door, allowMoveInterruption, nextMoveDoorTarget, isMoveOrderedByPlayer);
+            Dungeon d = SingletonManager.Get<Dungeon>(false);
+            mod.Log("Attempting to move to a door!");
+            if (d == null)
+            {
+                return;
+            }
+            if (d.Level == 1 && StartTime.Second == 0)
+            {
+                // Only do this for the first level...
+                StartTime = DateTime.Now;
+                mod.Log("Set Floor 1 StartTime!");
+                mod.Log("StartTime: " + StartTime.ToLongTimeString());
             }
         }
 
@@ -53,7 +84,12 @@ namespace TrueIGT_Mod
             }
             if (d.GameStartTime != LastGameStartTime)
             {
-                
+                // Don't actually do this for floor 1, instead calculate it based off of when the first door is selected to be opened
+                if (d.Level == 1)
+                {
+                    // Skip this
+                    return;
+                }
                 if (d.IsDisplayed && UnityEngine.Time.timeScale != 0) // Basically calculates load time from the very frame the dungeon is loaded and the game is unpaused
                 {
                     if (LastGameStartTime != 0)
@@ -67,29 +103,6 @@ namespace TrueIGT_Mod
                     mod.Log(StartTime.ToLongTimeString());
                 }
             }
-        }
-
-        private void Dungeon_PrepareForSavedGame(On.Dungeon.orig_PrepareForSavedGame orig, string saveKey, bool multiplayer)
-        {
-            mod.Log("Calling Prep Saved Game!");
-            orig(saveKey, multiplayer);
-            //dict.Add(DateTime.Now, true);
-        }
-
-        private void Dungeon_PrepareForNewGame(On.Dungeon.orig_PrepareForNewGame orig, bool multiplayer)
-        {
-            mod.Log("Calling Prep New Game!");
-            orig(multiplayer);
-            //dict.Add(DateTime.Now, true);
-        }
-
-        private System.Collections.IEnumerator Dungeon_FillDungeonAsync(On.Dungeon.orig_FillDungeonAsync orig, Dungeon self)
-        {
-            mod.Log("Calling FillDungeon!");
-            System.Collections.IEnumerator temp = orig(self);
-            //dict.Add(DateTime.Now, true);
-            // Could do something with setting GameStartTime here, and using it instead of having to rewrite OnLevelOver
-            return temp;
         }
 
         private void Dungeon_RPC_DoLevelOver(On.Dungeon.orig_RPC_DoLevelOver orig, Dungeon self, bool victory)
