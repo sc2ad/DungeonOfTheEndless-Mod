@@ -20,8 +20,7 @@ namespace CustomHero_Mod
 
         public override void Init()
         {
-            mod.path = @"CustomHero_log.txt";
-            mod.config = @"CustomHero_config.txt";
+            mod.name = "CustomHero";
             mod.default_config = "# Modify this file to change various settings of the CustomHero Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 

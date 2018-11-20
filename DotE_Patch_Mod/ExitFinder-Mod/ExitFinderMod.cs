@@ -19,8 +19,7 @@ namespace ExitFinder_Mod
 
         public override void Init()
         {
-            mod.path = @"ExitFinder_log.txt";
-            mod.config = @"ExitFinder_config.txt";
+            mod.name = "ExitFinder";
             mod.default_config = "# Modify this file to change various settings of the ExitFinder Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 

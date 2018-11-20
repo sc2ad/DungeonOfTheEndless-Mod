@@ -8,13 +8,24 @@ namespace DustDevilFramework
 {
     public class ScadMod
     {
-        public string path = @"placeholder_log.txt";
+        public string name = "placeholder";
+        public string path;
 
-        public string config = @"placeholder_config.txt";
+        public string config;
         public string default_config = "# If these values are removed, the game will crash on initialization!\n";
 
         public Dictionary<string, string> Values = new Dictionary<string, string>();
-
+        public ScadMod(string name)
+        {
+            this.name = name;
+            path = name + "_log.txt";
+            config = name + "_config.txt";
+        }
+        public ScadMod()
+        {
+            path = name + "_log.txt";
+            config = name + "_config.txt";
+        }
         public void Log(string s)
         {
             System.IO.File.AppendAllText(path, s + "\n");
@@ -58,6 +69,7 @@ namespace DustDevilFramework
             Log("===================================================================");
 
             Values.Add("Enabled", "True");
+            DustDevil.CreateInstance(this);
             // Add values here to the Values dictionary!
         }
         public void Load()

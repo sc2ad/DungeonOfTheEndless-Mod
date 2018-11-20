@@ -23,6 +23,11 @@ namespace DustDevilFramework
         public abstract string[] GetUnavailableBlueprints();
         public abstract string[] GetUnavailableItems();
 
+        public PodMod()
+        {
+            name = GetName();
+        }
+
         public void Initialize()
         {
             path = GetName() + "_log.txt";

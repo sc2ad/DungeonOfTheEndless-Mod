@@ -40,6 +40,11 @@ namespace DustDevilFramework
         public abstract string GetRealName();
         public abstract string GetRealDescription();
 
+        public CustomItem()
+        {
+            name = GetRealName();
+        }
+
         public void Initialize()
         {
             path = GetRealName() + "_log.txt";
@@ -69,20 +74,24 @@ namespace DustDevilFramework
             if (Convert.ToBoolean(Values["Enabled"]))
             {
                 On.Session.Update += Session_Update;
-                On.ItemHero.Init += ItemHero_Init;
-            }
-            else
-            {
-                Log("Attempting to remove Localization changes!");
-                RemoveLocalizationChanges();
             }
         }
 
-        private void ItemHero_Init(On.ItemHero.orig_Init orig, ItemHero self, ulong ownerPlayerID, Amplitude.StaticString itemConfigName, Amplitude.StaticString rarityConfigName, Room spawnRoom, ItemType type)
+        private void Session_Update(On.Session.orig_Update orig, Session self)
         {
-            Log("Entered an ItemHero Init with name: " + itemConfigName + " and rarityName: " + rarityConfigName);
+            // Continue attempting to add the ItemHero until it has been added!
             try
             {
+                SimulationDescriptor desc;
+                Databases.GetDatabase<SimulationDescriptor>(false).TryGetValue(GetBaseDescriptor().Name, out desc);
+                if (desc != null)
+                {
+                    orig(self);
+                    return;
+                }
+                ItemHeroConfig itemHeroConfig = GetItemHeroConfig();
+                Databases.GetDatabase<ItemConfig>(false).Add(itemHeroConfig);
+                Log("Added the item (ItemHeroConfig) to the database!");
                 Log("Attempting to make sim descriptors");
                 SimulationDescriptor descriptor = GetBaseDescriptor();
                 Log("Successfully retrieved the overall descriptor!");
@@ -108,23 +117,6 @@ namespace DustDevilFramework
                 Databases.GetDatabase<SimulationDescriptor>(false).Add(rarity2);
                 Log("Added Rarity2!");
                 Log("Added all SimDescriptors to the database!");
-            } catch (ArgumentException e)
-            {
-                // Already exists in the database
-            } catch (NullReferenceException e)
-            {
-                // Database does not exist yet
-            }
-            orig(self, ownerPlayerID, itemConfigName, rarityConfigName, spawnRoom, type);
-        }
-        private void Session_Update(On.Session.orig_Update orig, Session self)
-        {
-            // Continue attempting to add the ItemHero until it has been added!
-            try
-            {
-                ItemHeroConfig itemHeroConfig = GetItemHeroConfig();
-                Databases.GetDatabase<ItemConfig>(false).Add(itemHeroConfig);
-                Log("Added the item (ItemHeroConfig) to the database!");
             }
             catch (ArgumentException e)
             {
@@ -135,28 +127,7 @@ namespace DustDevilFramework
             }
             orig(self);
         }
-        public class SimDescriptorWrapper
-        {
-            List<SimulationModifierDescriptor> simulationModifierDescriptors = new List<SimulationModifierDescriptor>();
-            List<SimulationPropertyDescriptor> simulationPropertyDescriptors = new List<SimulationPropertyDescriptor>();
-            // Should only input SimulationProperties as a parameter
-            public void Add(Amplitude.StaticString name, float value)
-            {
-                SingleSimulationModifierDescriptor modif = new SingleSimulationModifierDescriptor(name, SimulationModifierDescriptor.ModifierOperation.Addition, value);
-                simulationPropertyDescriptors.Add(new SimulationPropertyDescriptor(name));
-                simulationModifierDescriptors.Add(modif);
-            }
-            public SimulationDescriptor GetDescriptor(string name)
-            {
-                SimulationDescriptor descriptor = new SimulationDescriptor();
-                descriptor.SetName("ItemHero_" + name);
-
-                descriptor.SetProperties(simulationPropertyDescriptors.ToArray());
-                descriptor.SetModifiers(simulationModifierDescriptors.ToArray());
-
-                return descriptor;
-            }
-        }
+        
         public abstract SimulationDescriptor GetBaseDescriptor();
         public abstract SimulationDescriptor GetCommonDescriptor();
         public abstract SimulationDescriptor GetRarity0Descriptor();
@@ -281,22 +252,6 @@ namespace DustDevilFramework
                 if (s.IndexOf("%Item_" + GetName()) != -1)
                 {
                     linesLst.RemoveAt(i);
-                }
-                if (s.IndexOf("%Item_" + GetName() + "_Description") != -1)
-                {
-                    int q = i;
-                    for (int j = i; j < linesLst.Count; j++)
-                    {
-                        if (linesLst[j].IndexOf("</LocalizationPair>") != -1)
-                        {
-                            // This is the stopping point for deleting.
-                            q = j;
-                        }
-                    }
-                    for (int l = i; l <= q; l++)
-                    {
-                        linesLst.RemoveAt(i);
-                    }
                 }
             }
             System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());

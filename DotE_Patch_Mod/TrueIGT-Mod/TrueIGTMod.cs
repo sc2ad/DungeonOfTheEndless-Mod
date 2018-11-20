@@ -19,8 +19,7 @@ namespace TrueIGT_Mod
         ScadMod mod = new ScadMod();
         public override void Init()
         {
-            mod.path = @"TrueIGT_log.txt";
-            mod.config = @"TrueIGT_config.txt";
+            mod.name = "TrueIGT";
             mod.default_config = "# Modify this file to change various settings of the TrueIGT Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 

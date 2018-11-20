@@ -13,13 +13,11 @@ namespace DustWithCrystal_Mod
         ScadMod mod = new ScadMod();
         public override void Init()
         {
-            mod.path = @"DustAfterCrystal_log.txt";
-            mod.config = @"DustAfterCrystal_config.txt";
+            mod.name = "DustAfterCrystal";
             mod.default_config = "# Modify this file to change various settings of the DustAfterCrystal Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 
             // Setup default values for config
-            
 
             mod.ReadConfig();
 

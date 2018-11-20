@@ -14,8 +14,7 @@ namespace DustGenerator_Mod
         ScadMod mod = new ScadMod();
         public override void Init()
         {
-            mod.path = @"DustGenerator_log.txt";
-            mod.config = @"DustGenerator_config.txt";
+            mod.name = "DustGenerator";
             mod.default_config = "# Modify this file to change various settings of the DustGenerator Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 

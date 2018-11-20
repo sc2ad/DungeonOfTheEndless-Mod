@@ -22,8 +22,7 @@ namespace Ping_Mod
 
         public override void Init()
         {
-            mod.path = @"Ping_log.txt";
-            mod.config = @"Ping_config.txt";
+            mod.name = "Ping";
             mod.default_config = "# Modify this file to change various settings of the Ping Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 
