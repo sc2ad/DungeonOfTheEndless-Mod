@@ -14,12 +14,14 @@ namespace TrueIGT_Mod
         //public static Dictionary<DateTime, bool> dict = new Dictionary<DateTime, bool>(); // For some reason, using normal values doesn't want to work.
 
         public static DateTime StartTime;
+        public bool HasStarted = false;
         public float LastGameStartTime = float.NegativeInfinity;
 
         ScadMod mod = new ScadMod("TrueIGT");
         public override void Init()
         {
             mod.MajorVersion = 2;
+            mod.MinorVersion = 5;
             mod.default_config = "# Modify this file to change various settings of the TrueIGT Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 
@@ -39,7 +41,14 @@ namespace TrueIGT_Mod
                 On.Hero.MoveToDoor += Hero_MoveToDoor;
                 On.Hero.MoveToRoom += Hero_MoveToRoom;
                 On.VictoryPanel.Show += VictoryPanel_Show;
+                On.Dungeon.PrepareForNewGame += Dungeon_PrepareForNewGame;
             }
+        }
+
+        private void Dungeon_PrepareForNewGame(On.Dungeon.orig_PrepareForNewGame orig, bool multiplayer)
+        {
+            HasStarted = false;
+            orig(multiplayer);
         }
 
         private void VictoryPanel_Show(On.VictoryPanel.orig_Show orig, VictoryPanel self, object[] parameters)
@@ -65,12 +74,13 @@ namespace TrueIGT_Mod
             {
                 return;
             }
-            if (d.Level == 1 && StartTime.Second == 0)
+            if (d.Level == 1 && !HasStarted)
             {
                 // Only do this for the first level...
                 StartTime = DateTime.Now;
                 mod.Log("Set Floor 1 StartTime!");
                 mod.Log("StartTime: " + StartTime.ToLongTimeString());
+                HasStarted = true;
             }
         }
 
