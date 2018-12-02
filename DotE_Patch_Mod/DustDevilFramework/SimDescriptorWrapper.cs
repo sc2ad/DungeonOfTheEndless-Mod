@@ -32,6 +32,10 @@ namespace DustDevilFramework
                 simulationModifierDescriptors.Add(modif);
             }
         }
+        public void Add(string targetName, float value, SimulationModifierDescriptor.ModifierOperation operation = SimulationModifierDescriptor.ModifierOperation.Addition)
+        {
+            Modifiers.Add(new SingleSimulationModifierDescriptor(targetName, operation, value));
+        }
         public SimulationDescriptor GetDescriptor(string name)
         {
             SimulationDescriptor descriptor = new SimulationDescriptor();
@@ -41,6 +45,15 @@ namespace DustDevilFramework
             descriptor.SetModifiers(simulationModifierDescriptors.ToArray());
 
             return descriptor;
+        }
+        public SimulationDescriptor GetDescriptor(string name, Amplitude.StaticString type)
+        {
+            var temp = GetDescriptor(name);
+            if (type != null)
+            {
+                temp.SetType(type);
+            }
+            return temp;
         }
     }
 }
