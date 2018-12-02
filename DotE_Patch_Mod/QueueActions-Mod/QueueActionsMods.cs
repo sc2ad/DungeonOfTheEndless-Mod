@@ -47,42 +47,6 @@ namespace QueueActions_Mod
             }
         }
 
-        private void CrystalPanel_OnUnplugButtonClicked(On.CrystalPanel.orig_OnUnplugButtonClicked orig, CrystalPanel self)
-        {
-            // If the shift key is down, instead of doing it right away, add it to a queue.
-            if (ConditionalAddToQueue(new QueueData(self, new DynData<CrystalPanel>(self).Get<MajorModule>("module"))))
-            {
-                self.Hide(false);
-                return;
-            }
-            orig(self);
-        }
-
-        private void MajorModule_OnRightClickDown(On.MajorModule.orig_OnRightClickDown orig, MajorModule self, ClickDownInfo clickInfo)
-        {
-            // If the shift key is down, instead of doing it right away, add it to a queue.
-            // Need to make sure that if it is a crystal, the orig is still called.
-            // Only call this if it isn't a crystal!
-            if (!self.IsCrystal)
-            {
-                if (ConditionalAddToQueue(new QueueData(self.RoomElement.ParentRoom, clickInfo)))
-                {
-                    return;
-                }
-            }
-            orig(self, clickInfo);
-        }
-
-        private void RoomTacticalMapElement_OnRightClickDown(On.RoomTacticalMapElement.orig_OnRightClickDown orig, RoomTacticalMapElement self, ClickDownInfo clickInfo)
-        {
-            // If the shift key is down, instead of doing it right away, add it to a queue.
-            if (ConditionalAddToQueue(new QueueData(new DynData<RoomTacticalMapElement>(self).Get<Room>("room"), clickInfo)))
-            {
-                return;
-            }
-            orig(self, clickInfo);
-        }
-
         public void PopQueue(Hero h, bool remove = true)
         {
             // Then need to apply the action at the top of the queue (which should be index 0)
@@ -211,7 +175,6 @@ namespace QueueActions_Mod
         private void Room_OnRightClickDown(On.Room.orig_OnRightClickDown orig, Room self, ClickDownInfo clickInfo)
         {
             // If the shift key is down, instead of doing it right away, add it to a queue.
-            mod.Log("On Mouse Down for a Room!");
             if (ConditionalAddToQueue(new QueueData(self, clickInfo)))
             {
                 return;
@@ -223,6 +186,42 @@ namespace QueueActions_Mod
         {
             // If the shift key is down, instead of doing it right away, add it to a queue.
             if (ConditionalAddToQueue(new QueueData(self, clickInfo)))
+            {
+                return;
+            }
+            orig(self, clickInfo);
+        }
+
+        private void CrystalPanel_OnUnplugButtonClicked(On.CrystalPanel.orig_OnUnplugButtonClicked orig, CrystalPanel self)
+        {
+            // If the shift key is down, instead of doing it right away, add it to a queue.
+            if (ConditionalAddToQueue(new QueueData(self, new DynData<CrystalPanel>(self).Get<MajorModule>("module"))))
+            {
+                self.Hide(false);
+                return;
+            }
+            orig(self);
+        }
+
+        private void MajorModule_OnRightClickDown(On.MajorModule.orig_OnRightClickDown orig, MajorModule self, ClickDownInfo clickInfo)
+        {
+            // If the shift key is down, instead of doing it right away, add it to a queue.
+            // Need to make sure that if it is a crystal, the orig is still called.
+            // Only call this if it isn't a crystal!
+            if (!self.IsCrystal)
+            {
+                if (ConditionalAddToQueue(new QueueData(self.RoomElement.ParentRoom, clickInfo)))
+                {
+                    return;
+                }
+            }
+            orig(self, clickInfo);
+        }
+
+        private void RoomTacticalMapElement_OnRightClickDown(On.RoomTacticalMapElement.orig_OnRightClickDown orig, RoomTacticalMapElement self, ClickDownInfo clickInfo)
+        {
+            // If the shift key is down, instead of doing it right away, add it to a queue.
+            if (ConditionalAddToQueue(new QueueData(new DynData<RoomTacticalMapElement>(self).Get<Room>("room"), clickInfo)))
             {
                 return;
             }

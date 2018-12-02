@@ -20,7 +20,7 @@ namespace DustGenerator_Mod
             // Setup default values for config
             mod.Values.Add("DustPerDoor", "10.0");
             mod.Values.Add("DustFromProducing", "False");
-            mod.Values.Add("DustFromRoom", "False");
+            mod.Values.Add("DustFromRoom", "True");
 
             mod.ReadConfig();
 

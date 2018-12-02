@@ -13,7 +13,6 @@ namespace SeededDungeon_Mod
     {
         ScadMod mod = new ScadMod("SeededDungeon");
         Dictionary<int, int> seeds = new Dictionary<int, int>();
-        List<Room> tempListToSave;
         public override void Init()
         {
             mod.default_config = "# Modify this file to change various settings of the SeededDungeon Mod for DotE.\n" + mod.default_config;
@@ -39,7 +38,7 @@ namespace SeededDungeon_Mod
                 // Other static/dynamic events are unknown based off of solely Seed
                 // However... What if I used recursive logging to find all of the data i need, then use recursive reading/setting in the same order.
                 On.DungeonGenerator2.GenerateDungeonCoroutine += DungeonGenerator2_GenerateDungeonCoroutine;
-                On.DungeonGenerator2.FreeMemory += DungeonGenerator2_FreeMemory;
+                On.Dungeon.FillDungeonAsync += Dungeon_FillDungeonAsync;
             }
             if (Convert.ToBoolean(mod.Values["Read From SeedLog if possible"]))
             {
@@ -47,21 +46,11 @@ namespace SeededDungeon_Mod
             }
         }
 
-        private System.Collections.IEnumerator DungeonGenerator2_FreeMemory(On.DungeonGenerator2.orig_FreeMemory orig, DungeonGenerator2 self)
+        private System.Collections.IEnumerator Dungeon_FillDungeonAsync(On.Dungeon.orig_FillDungeonAsync orig, Dungeon self)
         {
-            List<global::Room> roomsInDungeon = new DynData<DungeonGenerator2>(self).Get<List<global::Room>>("dungeonRooms");
-            if (roomsInDungeon != null)
-            {
-                tempListToSave = new List<Room>();
-                foreach (Room r in roomsInDungeon)
-                {
-                    // Need to copy the room to be used (for all intensive purposes...)
-                    // Because "FreeMemory" deletes the rooms too!
-                    // Or, in hindsight, we could just do recursive tracing
-                    tempListToSave.Add(r);
-                }
-            }
+
             yield return orig(self);
+            LogRoomData(GetRoomList(self));
             yield break;
         }
 
@@ -69,13 +58,14 @@ namespace SeededDungeon_Mod
         {
             if (seeds.ContainsKey(level))
             {
-                // And if i actually want to apply the seed change...
+                // And if I actually want to apply the seed change...
                 mod.Log("Creating the Dungeon with the provided seed from the dictionary: " + seeds[level]);
                 new DynData<DungeonGenerator2>(self).Set<int>("randomSeed", seeds[level]);
             }
             yield return orig(self, level, shipName);
             if (!seeds.ContainsKey(level))
             {
+                // And if I actually want to overwrite the existing seed...
                 int seed = new DynData<DungeonGenerator2>(self).Get<int>("randomSeed");
                 mod.Log("Adding a seed to the seeds dictionary: " + seed);
                 seeds.Add(level, seed);
@@ -84,7 +74,6 @@ namespace SeededDungeon_Mod
                     LogSeeds();
                 }
             }
-            LogRoomData(tempListToSave);
             yield break;
         }
         private void LogSeeds()
@@ -126,6 +115,25 @@ namespace SeededDungeon_Mod
             mod.Log("Reading room data...");
             string[] lines = System.IO.File.ReadAllLines(mod.Values["RoomData Path"]);
             // Need to somehow set various rooms' data to what is provided in this data
+        }
+        private List<Room> GetRoomList(Dungeon d)
+        {
+            List<Room> rooms = new List<Room>();
+            // Recursively add all adjacent rooms that don't already exist within the list until all rooms have been added
+            AddRoomRecursive(d.StartRoom, rooms);
+            return rooms;
+        }
+        private void AddRoomRecursive(Room r, List<Room> rooms)
+        {
+            if (rooms.Contains(r))
+            {
+                return;
+            }
+            rooms.Add(r);
+            foreach (Room r2 in r.AdjacentRooms)
+            {
+                AddRoomRecursive(r2, rooms);
+            }
         }
     }
 }
