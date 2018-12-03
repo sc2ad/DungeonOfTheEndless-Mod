@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeededDungeon-Mod", "Seeded
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueueActions-Mod", "QueueActions-Mod\QueueActions-Mod.csproj", "{6FEF00FB-3400-477C-9F79-0915ABD64C4E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCheats-Mod", "SimpleCheats-Mod\SimpleCheats-Mod.csproj", "{4DA91547-0CA1-48D2-B8E8-FD89476E8D08}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{6FEF00FB-3400-477C-9F79-0915ABD64C4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FEF00FB-3400-477C-9F79-0915ABD64C4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FEF00FB-3400-477C-9F79-0915ABD64C4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DA91547-0CA1-48D2-B8E8-FD89476E8D08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DA91547-0CA1-48D2-B8E8-FD89476E8D08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DA91547-0CA1-48D2-B8E8-FD89476E8D08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DA91547-0CA1-48D2-B8E8-FD89476E8D08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

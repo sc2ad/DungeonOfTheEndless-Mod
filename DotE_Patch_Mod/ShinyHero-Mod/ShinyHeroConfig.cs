@@ -104,6 +104,7 @@ namespace ShinyHero_Mod
             dict.Add(13, new string[] { "20", "Skill_P0011" });
             dict.Add(14, new string[] { "20", "Skill_P0012" });
             dict.Add(15, new string[] { "5", "Skill_P0013" });
+            dict.Add(16, new string[] { "0" });
             return dict;
         }
 
@@ -118,6 +119,7 @@ namespace ShinyHero_Mod
                 wrapper.Add(SimulationProperties.MoveSpeed, 5);
                 lst.Add(wrapper.GetDescriptor("Hero_" + GetName() + "_LVL" + i, SimulationProperties.SimDescTypeHero));
             }
+            lst.Add(new SimDescriptorWrapper().GetDescriptor("Hero_" + GetName() + "_LVL" + 16, SimulationProperties.SimDescTypeHero));
             return lst.ToArray();
         }
 
@@ -177,7 +179,7 @@ namespace ShinyHero_Mod
             wrapper.Add("MaxHealth", 510);
             wrapper.Add("MoveSpeed", 44);
             wrapper.Add("Wit", 15);
-            wrapper.Add("AttackCooldown", 0.2f);
+            wrapper.Add("AttackCooldown", 0.5f);
             wrapper.Add("AttackPower", 45);
             wrapper.Add("AttackRange", 5);
             wrapper.Add("Defense", 10);
