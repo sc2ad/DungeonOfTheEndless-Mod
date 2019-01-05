@@ -21,7 +21,7 @@ namespace DustDevilFramework
         public ScadMod(string name, Type settingsType)
         {
             this.name = name;
-            settings = (ModSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
+            settings = (ModSettings)settingsType.GetConstructor(new[] { typeof(string) }).Invoke(new object[] { name });
             this.settingsType = settingsType;
             path = name + "_log.txt";
         }

@@ -92,7 +92,7 @@ namespace DustDevilFramework
             Debug.Log("Attempting to create ModSettings Menu!");
 
             AgeControlButton oldButton = new DynData<MainMenuPanel>(mainMenuPanel).Get<AgeControlButton>("continueButton");
-            GameObject newO = (GameObject)GameObject.Instantiate(oldButton.gameObject, new Vector2(1, 0), Quaternion.identity);
+            GameObject newO = (GameObject)GameObject.Instantiate(oldButton.gameObject, new Vector3(0, 0, 0), Quaternion.identity);
 
             AgeControlButton settingsMenuButton = newO.GetComponent<AgeControlButton>();
             Debug.Log("Old Menu Button Position: " + oldButton.transform.position + " new: " + settingsMenuButton.transform.position);

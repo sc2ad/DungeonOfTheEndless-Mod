@@ -51,14 +51,36 @@ namespace DustDevilFramework
                 }
                 string[] spl = line.Split(new string[] { ": " }, StringSplitOptions.None);
                 string value = spl[1].Trim();
+                bool temp = false;
                 foreach (FieldInfo f in GetType().GetFields())
                 {
+                    //Debug.Log("Observed Field with name: " + f.Name);
                     if (f.Name == spl[0])
                     {
-                        // Will this work, cause spl[1] is a string?
-                        f.SetValue(this, spl[1]);
+                        // Will this work, cause spl[1] is a string? answer: no
+                        try
+                        {
+                            f.SetValue(this, spl[1]);
+                        }
+                        catch (ArgumentException _)
+                        {
+                            try
+                            {
+                                f.SetValue(this, (float)Convert.ToDouble(spl[1]));
+                            }
+                            catch (ArgumentException __)
+                            {
+                                f.SetValue(this, Convert.ToBoolean(spl[1]));
+                            }
+                        }
+                        Debug.Log("Set Field with name: " + spl[0] + " to: " + spl[1]);
+                        temp = true;
                         break;
                     }
+                }
+                if (temp)
+                {
+                    continue;
                 }
                 // This shouldn't happen, this means that something has gone wrong and that the field does not exist
                 Debug.Log("No fields with name matching: " + spl[0]);
