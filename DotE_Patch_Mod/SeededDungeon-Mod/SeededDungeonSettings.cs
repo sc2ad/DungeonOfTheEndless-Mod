@@ -13,7 +13,7 @@ namespace SeededDungeon_Mod
         public bool ReadFromSeedLog = false;
         public string SeedLogPath = "SeedLog.txt";
         public string RoomDataPath = "RoomData.txt";
-        public SeededDungeonSettings() : base("SeededDungeon")
+        public SeededDungeonSettings(string name) : base(name)
         {
         }
     }

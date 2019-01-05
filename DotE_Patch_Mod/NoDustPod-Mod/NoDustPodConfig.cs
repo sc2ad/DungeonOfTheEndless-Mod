@@ -9,6 +9,10 @@ namespace NoDustPod_Mod
 {
     class NoDustPodConfig : PodMod
     {
+        public NoDustPodConfig() : base(typeof(NoDustPodSettings))
+        {
+        }
+
         public override string GetAnimationPod()
         {
             return "Infirmary";

@@ -13,7 +13,7 @@ namespace DustGenerator_Mod
         public float DustPerDoor = 10.0f;
         public bool DustFromProducing = true;
         public bool DustFromRoom = false;
-        public DustGeneratorSettings() : base("DustGenerator")
+        public DustGeneratorSettings(string name) : base(name)
         {
         }
     }

@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HomogenyPod_Mod
+namespace NoDustPod_Mod
 {
-    public class HomogenyPodSettings : PodSettings
+    public class NoDustPodSettings : PodSettings
     {
-        public HomogenyPodSettings(string name) : base(name)
+        public NoDustPodSettings(string name) : base(name)
         {
         }
     }

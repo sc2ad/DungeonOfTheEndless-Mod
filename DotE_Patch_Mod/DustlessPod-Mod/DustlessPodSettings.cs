@@ -16,7 +16,7 @@ namespace DustlessPod_Mod
         [SettingsRange(0,100)]
         public int dustLootProbability = 30;
         public float DustLootProbability { get { return dustLootProbability / 100.0f; } set { dustLootProbability = (int)(100 * value); } }
-        public DustlessPodSettings() : base("DustlessPod")
+        public DustlessPodSettings(string name) : base(name)
         {
         }
     }

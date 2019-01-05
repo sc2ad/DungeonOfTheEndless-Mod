@@ -88,6 +88,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShinyItemConfig.cs" />
     <Compile Include="ShinyItemMod.cs" />
+    <Compile Include="ShinyItemSettings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

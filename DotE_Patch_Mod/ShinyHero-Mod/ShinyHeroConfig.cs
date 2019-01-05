@@ -11,6 +11,9 @@ namespace ShinyHero_Mod
 {
     class ShinyHeroConfig : CustomHero
     {
+        public ShinyHeroConfig () : base(typeof(ShinyHeroSettings))
+        {
+        }
         public override string GetArchetype()
         {
             return "A Guy";

@@ -14,25 +14,17 @@ namespace CustomHero_Mod
 {
     class CustomHeroMod : PartialityMod
     {
-        ScadMod mod = new ScadMod();
+        ScadMod mod = new ScadMod("CustomHero", typeof(CustomHeroTestSettings));
 
         Dictionary<string, string> Ranks = new Dictionary<string, string>();
 
         public override void Init()
         {
-            mod.name = "CustomHero";
-            mod.default_config = "# Modify this file to change various settings of the CustomHero Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 
             // Setup default values for config
-            mod.Values.Add("HeroToReplace", "Skroig");
-            mod.Values.Add("HeroName", "Skrog");
-            mod.Values.Add("Hero HP", "1000");
-            mod.Values.Add("Speed", "80");
-            mod.Values.Add("LogHeroData", "True");
-            mod.Values.Add("Path to Ranks.txt", "Ranks.txt");
 
-            mod.ReadConfig();
+            mod.settings.ReadSettings();
             ReadRanks();
 
             mod.Log("Initialized!");
@@ -40,20 +32,25 @@ namespace CustomHero_Mod
         public override void OnLoad()
         {
             mod.Load();
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
                 On.Hero.Init += Hero_Init;
                 On.Hero.ModifyLocalActiveHeroes += Hero_ModifyLocalActiveHeroes;
             }
+        }
+        public void UnLoad()
+        {
+            On.Hero.Init -= Hero_Init;
+            On.Hero.ModifyLocalActiveHeroes -= Hero_ModifyLocalActiveHeroes;
         }
 
         private void Hero_ModifyLocalActiveHeroes(On.Hero.orig_ModifyLocalActiveHeroes orig, bool add, Hero hero)
         {
             // This should be called every time a hero is given/taken
             orig(add, hero);
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
-                if (mod.Values["HeroToReplace"] == hero.LocalizedName)
+                if ((mod.settings as CustomHeroTestSettings).ReplaceHero && (mod.settings as CustomHeroTestSettings).HeroToReplace == hero.LocalizedName)
                 {
                     // We are matching Heroes! Start to change data!
                     SetHeroStats(hero);
@@ -65,10 +62,10 @@ namespace CustomHero_Mod
 
         private void ReadRanks()
         {
-            if (System.IO.File.Exists(mod.Values["Path to Ranks.txt"]))
+            if (System.IO.File.Exists((mod.settings as CustomHeroTestSettings).PathToRanks))
             {
                 mod.Log("Reading Ranks.txt...");
-                string[] lines = System.IO.File.ReadAllLines(mod.Values["Path to Ranks.txt"]);
+                string[] lines = System.IO.File.ReadAllLines((mod.settings as CustomHeroTestSettings).PathToRanks);
 
                 foreach (string line in lines)
                 {
@@ -79,7 +76,7 @@ namespace CustomHero_Mod
                     string[] spl = line.Split(new string[] { ": " }, StringSplitOptions.None);
                     string value = spl[1].Trim();
                     Ranks[spl[0]] = value;
-                    mod.Log("Read hero: " + spl[0] + " with rank: " + value + " from " + mod.Values["Path to Ranks.txt"]);
+                    mod.Log("Read hero: " + spl[0] + " with rank: " + value + " from " + (mod.settings as CustomHeroTestSettings).PathToRanks);
                 }
             } else
             {
@@ -90,11 +87,11 @@ namespace CustomHero_Mod
         private void Hero_Init(On.Hero.orig_Init orig, Hero self, ulong ownerPlayerID, Amplitude.StaticString heroDescName, Room spawnRoom, bool isRecruited, bool registerRecruitment, int initLevel, int unlockLevel, bool hasOperatingBonus, Dictionary<Amplitude.StaticString, List<ItemPersistentData>> initItemsByCategory, bool displayRecruitmentDialog, bool consumeLevelUpFood, bool updateDiscoverableHeroPool, int floorRecruited, Amplitude.StaticString[] permanentDescriptors, bool isStartingHero, int currentRespawnRoomCount, bool recruitable)
         {
             orig(self, ownerPlayerID, heroDescName, spawnRoom, isRecruited, registerRecruitment, initLevel, unlockLevel, hasOperatingBonus, initItemsByCategory, displayRecruitmentDialog, consumeLevelUpFood, updateDiscoverableHeroPool, floorRecruited, permanentDescriptors, isStartingHero, currentRespawnRoomCount, recruitable);
-            if (Convert.ToBoolean(mod.Values["LogHeroData"]))
+            if ((mod.settings as CustomHeroTestSettings).LogHeroData)
             {
                 LogHeroData(self, heroDescName);
             }
-            if (mod.Values["HeroToReplace"] == self.LocalizedName)
+            if ((mod.settings as CustomHeroTestSettings).ReplaceHero && (mod.settings as CustomHeroTestSettings).HeroToReplace == self.LocalizedName)
             {
                 // We are matching Heroes! Start to change data!
                 SetHeroStats(self);
@@ -106,13 +103,13 @@ namespace CustomHero_Mod
         private void SetHeroStats(Hero self)
         {
             mod.Log("Found hero with name: " + self.LocalizedName + " Attempting to change data!");
-            new DynData<Hero>(self).Set<string>("LocalizedName", mod.Values["HeroName"]);
+            new DynData<Hero>(self).Set<string>("LocalizedName", (mod.settings as CustomHeroTestSettings).HeroName);
             //self.HealthCpnt.PermanantHealthMalus = (float)Convert.ToDouble(mod.Values["Hero HP"]);
-            self.GetSimObj().SetPropertyBaseValue("MaxHealth", (float)Convert.ToDouble(mod.Values["Hero HP"]) - self.GetSimObj().GetPropertyValue("MaxHealth"));
-            self.GetSimObj().SetPropertyBaseValue("MoveSpeed", (float)Convert.ToDouble(mod.Values["Speed"]) - self.GetSimObj().GetPropertyValue("MoveSpeed"));
+            self.GetSimObj().SetPropertyBaseValue("MaxHealth", (mod.settings as CustomHeroTestSettings).HeroHP - self.GetSimObj().GetPropertyValue("MaxHealth"));
+            self.GetSimObj().SetPropertyBaseValue("MoveSpeed", (mod.settings as CustomHeroTestSettings).Speed - self.GetSimObj().GetPropertyValue("MoveSpeed"));
             //self.RemoveSimDescriptor(SimMonoBehaviour.GetDBDescriptorByName(self.Config.Name), true);
             // Okay so now that I removed the actual SMB, I need to create a new one where the max health is mine
-            self.HealthCpnt.SetHealth((float)Convert.ToDouble(mod.Values["Hero HP"]));
+            self.HealthCpnt.SetHealth((mod.settings as CustomHeroTestSettings).HeroHP);
             mod.Log("New Name: " + self.LocalizedName + " and HP: " + self.HealthCpnt.GetHealth());
         }
 

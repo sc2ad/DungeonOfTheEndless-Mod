@@ -14,7 +14,7 @@ namespace OPSashaItem_Mod
         public override void Init()
         {
             mod.Initialize();
-            mod.ReadConfig();
+            mod.settings.ReadSettings();
         }
         public override void OnLoad()
         {

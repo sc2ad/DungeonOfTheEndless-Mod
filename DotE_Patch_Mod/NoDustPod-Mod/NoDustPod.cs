@@ -23,10 +23,15 @@ namespace NoDustPod_Mod
         {
             mod.Load();
 
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
                 On.Dungeon.DoAddDust += Dungeon_DoAddDust;
             }
+        }
+        public void UnLoad()
+        {
+            mod.UnLoad();
+            On.Dungeon.DoAddDust -= Dungeon_DoAddDust;
         }
 
         private void Dungeon_DoAddDust(On.Dungeon.orig_DoAddDust orig, Dungeon self, float dustAmount, bool displayFeedback, bool triggerDungeonFIDSChangedEvent)

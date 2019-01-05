@@ -11,7 +11,7 @@ namespace ExitFinder_Mod
     {
         public bool DisplayExit = true;
         public string Key = "Backslash";
-        public ExitFinderSettings() : base("ExitFinder")
+        public ExitFinderSettings(string name) : base(name)
         {
         }
     }

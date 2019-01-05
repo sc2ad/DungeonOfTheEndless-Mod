@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HomogenyPod_Mod
+namespace ShinyHero_Mod
 {
-    public class HomogenyPodSettings : PodSettings
+    public class ShinyHeroSettings : CustomHeroSettings
     {
-        public HomogenyPodSettings(string name) : base(name)
+        public ShinyHeroSettings(string name) : base(name)
         {
         }
     }

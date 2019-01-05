@@ -62,9 +62,11 @@ namespace DustDevilFramework
 
         private bool displayedData = false;
 
-        public CustomHero()
+        public CustomHero(Type settingsType)
         {
             name = GetRealName();
+            settings = (CustomItemSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
+            this.settingsType = settingsType;
         }
 
         public void Initialize()

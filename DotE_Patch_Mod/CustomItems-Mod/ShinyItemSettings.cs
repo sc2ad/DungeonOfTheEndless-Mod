@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HomogenyPod_Mod
+namespace OPSashaItem_Mod
 {
-    public class HomogenyPodSettings : PodSettings
+    public class ShinyItemSettings : CustomItemSettings
     {
-        public HomogenyPodSettings(string name) : base(name)
+        public ShinyItemSettings(string name) : base(name)
         {
         }
     }

@@ -10,7 +10,7 @@ namespace QueueActions_Mod
     public class QueueActionsSettings : ModSettings
     {
         public string Key = "LeftShift";
-        public QueueActionsSettings() : base("QueueActions")
+        public QueueActionsSettings(string name) : base(name)
         {
         }
     }
