@@ -9,6 +9,10 @@ namespace DustlessPod_Mod
 {
     class DustlessPodConfig : PodMod
     {
+        public DustlessPodConfig() : base(typeof(DustlessPodSettings))
+        {
+        }
+
         public override string GetAnimationPod()
         {
             return "Refreezerator";

@@ -16,21 +16,23 @@ namespace DustlessPod_Mod
         {
             mod.Initialize();
 
-            mod.Values.Add("MinDustLoot", "1");
-            mod.Values.Add("MaxDustLoot", "8");
-            mod.Values.Add("DustLootProbability", "0.5");
-
-            mod.ReadConfig();
+            mod.settings.ReadSettings();
         }
         public override void OnLoad()
         {
             mod.Load();
 
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
                 On.Mob.OnDeath += Mob_OnDeath;
                 On.Room.Open += Room_Open;
             }
+        }
+        public void UnLoad()
+        {
+            mod.UnLoad();
+            On.Mob.OnDeath -= Mob_OnDeath;
+            On.Room.Open -= Room_Open;
         }
 
         private void Room_Open(On.Room.orig_Open orig, Room self, Door openingDoor, bool ignoreVisibility)
@@ -53,9 +55,9 @@ namespace DustlessPod_Mod
 
             if (d.ShipName == mod.GetName())
             {
-                self.SetSimPropertyBaseValue(SimulationProperties.DustLootProbability, (float)Convert.ToDouble(mod.Values["DustLootProbability"]));
-                self.SetSimPropertyBaseValue(SimulationProperties.DustLootAmountMin, (float)Convert.ToDouble(mod.Values["MinDustLoot"]));
-                self.SetSimPropertyBaseValue(SimulationProperties.DustLootAmountMax, (float)Convert.ToDouble(mod.Values["MaxDustLoot"]));
+                self.SetSimPropertyBaseValue(SimulationProperties.DustLootProbability, (mod.settings as DustlessPodSettings).DustLootProbability);
+                self.SetSimPropertyBaseValue(SimulationProperties.DustLootAmountMin, (mod.settings as DustlessPodSettings).MinDustLoot);
+                self.SetSimPropertyBaseValue(SimulationProperties.DustLootAmountMax, (mod.settings as DustlessPodSettings).MaxDustLoot);
             }
             orig(self, attackerOwnerPlayerID);
         }

@@ -13,7 +13,7 @@ namespace QueueActions_Mod
 {
     class QueueActionsMod : PartialityMod
     {
-        ScadMod mod = new ScadMod("QueueActions");
+        ScadMod mod = new ScadMod("QueueActions", typeof(QueueActionsSettings));
 
         //List<QueueData> queue = new List<QueueData>();
         // Each Hero needs to have their own queue.
@@ -21,19 +21,16 @@ namespace QueueActions_Mod
 
         public override void Init()
         {
-            mod.default_config = "# Modify this file to change various settings of the QueueActions Mod for DotE.\nThe 'Key' value must contain a valid KeyCode!\n" + mod.default_config;
             mod.Initialize();
 
-            mod.Values.Add("Key", "LeftShift");
-
-            mod.ReadConfig();
+            mod.settings.ReadSettings();
 
             mod.Log("Initialized!");
         }
         public override void OnLoad()
         {
             mod.Load();
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
                 On.Hero.OnRightClickDown += Hero_OnRightClickDown;
                 On.NPCMerchant.OnRightClickDown += NPCMerchant_OnRightClickDown;
@@ -45,6 +42,19 @@ namespace QueueActions_Mod
                 On.InputManager.Update += InputManager_Update;
                 On.Hero.OnBlockingDoorOpened += Hero_OnBlockingDoorOpened;
             }
+        }
+        public void UnLoad()
+        {
+            mod.UnLoad();
+            On.Hero.OnRightClickDown -= Hero_OnRightClickDown;
+            On.NPCMerchant.OnRightClickDown -= NPCMerchant_OnRightClickDown;
+            On.Room.OnRightClickDown -= Room_OnRightClickDown;
+            On.Door.OnRightClickDown -= Door_OnRightClickDown;
+            On.RoomTacticalMapElement.OnRightClickDown -= RoomTacticalMapElement_OnRightClickDown;
+            On.MajorModule.OnRightClickDown -= MajorModule_OnRightClickDown;
+            On.CrystalPanel.OnUnplugButtonClicked -= CrystalPanel_OnUnplugButtonClicked;
+            On.InputManager.Update -= InputManager_Update;
+            On.Hero.OnBlockingDoorOpened -= Hero_OnBlockingDoorOpened;
         }
 
         public void PopQueue(Hero h, bool remove = true)
@@ -121,7 +131,7 @@ namespace QueueActions_Mod
 
         private bool ConditionalAddToQueue(QueueData data)
         {
-            KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), mod.Values["Key"]);
+            KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), (mod.settings as QueueActionsSettings).Key);
             if (Input.GetKey(key))
             {
                 mod.Log("ShiftKey Down!");

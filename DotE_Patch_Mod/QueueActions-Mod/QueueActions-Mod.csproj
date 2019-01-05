@@ -52,23 +52,23 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod">
-      <HintPath>..\..\..\..\..\Partiality\bin\MonoMod.exe</HintPath>
+      <HintPath>..\..\..\..\Partiality\bin\MonoMod.exe</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour">
-      <HintPath>..\..\..\..\..\Partiality\bin\MonoMod.RuntimeDetour.dll</HintPath>
+      <HintPath>..\..\..\..\Partiality\bin\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour.HookGen">
-      <HintPath>..\..\..\..\..\Partiality\bin\MonoMod.RuntimeDetour.HookGen.exe</HintPath>
+      <HintPath>..\..\..\..\Partiality\bin\MonoMod.RuntimeDetour.HookGen.exe</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.Utils">
-      <HintPath>..\..\..\..\..\Partiality\bin\MonoMod.Utils.dll</HintPath>
+      <HintPath>..\..\..\..\Partiality\bin\MonoMod.Utils.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Partiality">
-      <HintPath>..\..\..\..\..\Partiality\bin\Partiality.dll</HintPath>
+      <HintPath>..\..\..\..\Partiality\bin\Partiality.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -85,9 +85,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="QueueActionsSettings.cs" />
     <Compile Include="QueueData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueueActionsMods.cs" />
+    <Compile Include="QueueActionsMod.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -22,19 +22,18 @@ namespace TrueIGT_Mod
         {
             mod.MajorVersion = 2;
             mod.MinorVersion = 5;
-            mod.default_config = "# Modify this file to change various settings of the TrueIGT Mod for DotE.\n" + mod.default_config;
             mod.Initialize();
 
             // Setup default values for config
 
-            mod.ReadConfig();
+            mod.settings.ReadSettings();
 
             mod.Log("Initialized!");
         }
         public override void OnLoad()
         {
             mod.Load();
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
                 On.Dungeon.RPC_DoLevelOver += Dungeon_RPC_DoLevelOver;
                 On.Session.Update += Session_Update;
@@ -43,6 +42,16 @@ namespace TrueIGT_Mod
                 On.VictoryPanel.Show += VictoryPanel_Show;
                 On.Dungeon.PrepareForNewGame += Dungeon_PrepareForNewGame;
             }
+        }
+        public void UnLoad()
+        {
+            mod.UnLoad();
+            On.Dungeon.RPC_DoLevelOver -= Dungeon_RPC_DoLevelOver;
+            On.Session.Update -= Session_Update;
+            On.Hero.MoveToDoor -= Hero_MoveToDoor;
+            On.Hero.MoveToRoom -= Hero_MoveToRoom;
+            On.VictoryPanel.Show -= VictoryPanel_Show;
+            On.Dungeon.PrepareForNewGame -= Dungeon_PrepareForNewGame;
         }
 
         private void Dungeon_PrepareForNewGame(On.Dungeon.orig_PrepareForNewGame orig, bool multiplayer)

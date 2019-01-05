@@ -9,6 +9,10 @@ namespace HomogenyPod_Mod
 {
     class HomogenyPodConfig : PodMod
     {
+        public HomogenyPodConfig() : base(typeof(HomogenyPodSettings))
+        {
+        }
+
         public override string GetAnimationPod()
         {
             return "Armory";
