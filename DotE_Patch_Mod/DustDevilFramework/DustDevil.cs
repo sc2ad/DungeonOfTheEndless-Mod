@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -57,6 +58,7 @@ namespace DustDevilFramework
             });
             Debug.Log("Final message is: " + label.Text);
             CreateModList(label);
+            CreateModSettingsMenu(self);
             yield break;
         }
 
@@ -84,6 +86,60 @@ namespace DustDevilFramework
             l2.Text = text;
             Debug.Log("ModList Text: " + l2.Text);
             o.SetActive(true);
+        }
+        private void CreateModSettingsMenu(MainMenuPanel mainMenuPanel)
+        {
+            Debug.Log("Attempting to create ModSettings Menu!");
+
+            AgeControlButton oldButton = new DynData<MainMenuPanel>(mainMenuPanel).Get<AgeControlButton>("continueButton");
+            GameObject newO = (GameObject)GameObject.Instantiate(oldButton.gameObject, new Vector2(1, 0), Quaternion.identity);
+
+            AgeControlButton settingsMenuButton = newO.GetComponent<AgeControlButton>();
+            Debug.Log("Old Menu Button Position: " + oldButton.transform.position + " new: " + settingsMenuButton.transform.position);
+            newO.GetComponent<AgeTooltip>().Content = "Mod Settings";
+            Debug.Log("Mod Settings Button Text: " + newO.GetComponent<AgeTooltip>().Content);
+            newO.SetActive(true);
+        }
+        private void OnShowModSettingsMenu()
+        {
+            // Called when the ModMenu is opened.
+            // First: Find all of the fields that are in all of the settings!
+            foreach (ScadMod m in ModList)
+            {
+                foreach (FieldInfo f in m.settingsType.GetFields())
+                {
+                    // Now check attributes and if it is something that isn't displayable
+                    object[] attributes = f.GetCustomAttributes(true);
+                    bool show = true;
+                    foreach (object attribute in attributes)
+                    {
+                        try
+                        {
+                            ModSettings.SettingsIgnore i = attribute as ModSettings.SettingsIgnore;
+                            // The attribute is an ignore attribute, don't display it on the screen
+                            show = false;
+                            break;
+                        } catch (InvalidCastException e)
+                        {
+                            // The Attribute isn't an ignore attribute
+                        }
+                    }
+                    if (!(f.FieldType == typeof(float) || f.FieldType == typeof(int) || f.FieldType == typeof(bool)))
+                    {
+                        show = false;
+                    }
+                    if (f.FieldType == typeof(float) || f.FieldType == typeof(int))
+                    {
+                        // Required to have a SettingsRange
+                    }
+                    if (show)
+                    {
+                        // Show it to the screen using the provided attribute data and other stuff!
+                        Debug.Log("ATTEMPTING TO SHOW FIELD: " + f.Name + " IN MOD: " + m.name);
+                    }
+                }
+                Debug.Log("==========================================");
+            }
         }
     }
 }

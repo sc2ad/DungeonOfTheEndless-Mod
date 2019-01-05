@@ -10,23 +10,31 @@ namespace DustDevilFramework
     {
         public string name = "placeholder";
         public string path;
-        public string config;
-        public string default_config = "# If these values are removed, the game will crash on initialization!\n";
+
+        public ModSettings settings = new ModSettings("placeholder");
+        public Type settingsType;
+
         public int MajorVersion = 1;
         public int MinorVersion = 0;
         public int Revision = 0;
 
-        public Dictionary<string, string> Values = new Dictionary<string, string>();
+        public ScadMod(string name, Type settingsType)
+        {
+            this.name = name;
+            settings = (ModSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
+            this.settingsType = settingsType;
+            path = name + "_log.txt";
+        }
         public ScadMod(string name)
         {
             this.name = name;
+            settings = new ModSettings(name);
+            settingsType = typeof(ModSettings);
             path = name + "_log.txt";
-            config = name + "_config.txt";
         }
         public ScadMod()
         {
             path = name + "_log.txt";
-            config = name + "_config.txt";
         }
         public void Log(string s)
         {
@@ -36,33 +44,6 @@ namespace DustDevilFramework
         {
             System.IO.File.WriteAllText(path, "");
         }
-        public void ReadConfig()
-        {
-            Log("Attempting to read from config file: " + config);
-            if (!System.IO.File.Exists(config))
-            {
-                Log("Need to create a new config file at: " + config);
-                string s = default_config;
-                foreach (string q in Values.Keys)
-                {
-                    s += q + ": " + Values[q] + "\n";
-                }
-                System.IO.File.WriteAllText(config, s);
-            }
-            string[] lines = System.IO.File.ReadAllLines(config);
-            foreach (string line in lines)
-            {
-                if (line.StartsWith("#") || line.IndexOf(": ") == -1)
-                {
-                    continue;
-                }
-                string[] spl = line.Split(new string[] { ": " }, StringSplitOptions.None);
-                string value = spl[1].Trim();
-                Values[spl[0]] = value;
-                Log("Loaded: " + spl[0] + " = " + Values[spl[0]] + " from config");
-            }
-            Log("Values have been loaded successfully!");
-        }
         public void Initialize()
         {
             ClearLog();
@@ -70,15 +51,20 @@ namespace DustDevilFramework
             Log("DATETIME: " + DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToShortTimeString());
             Log("===================================================================");
 
-            Values.Add("Enabled", "True");
+            settings.ReadSettings();
             DustDevil.CreateInstance(this);
-            // Add values here to the Values dictionary!
         }
         public void Load()
         {
             Log("Loaded!");
             
             // Load/Create hooks here!
+        }
+        public void UnLoad()
+        {
+            Log("Unloaded!");
+
+            // Unload all of the loaded hooks here!
         }
     }
 }
