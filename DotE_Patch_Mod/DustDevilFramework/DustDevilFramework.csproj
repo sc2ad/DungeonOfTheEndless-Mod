@@ -66,6 +66,8 @@
     <Compile Include="CustomHeroSettings.cs" />
     <Compile Include="CustomItem.cs" />
     <Compile Include="CustomItemSettings.cs" />
+    <Compile Include="CustomModule.cs" />
+    <Compile Include="CustomModuleSettings.cs" />
     <Compile Include="DustDevil.cs" />
     <Compile Include="ModSettings.cs" />
     <Compile Include="PodMod.cs" />

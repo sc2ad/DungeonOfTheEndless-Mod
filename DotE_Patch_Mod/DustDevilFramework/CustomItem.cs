@@ -61,7 +61,6 @@ namespace DustDevilFramework
 
         public void Initialize()
         {
-            path = GetRealName() + "_log.txt";
             base.Initialize();
 
             settings.ReadSettings();
