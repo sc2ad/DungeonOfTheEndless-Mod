@@ -1,4 +1,4 @@
-﻿using MonoMod.Utils;
+using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,21 +31,6 @@ namespace DustDevilFramework
         {
             On.MainMenuPanel.OnLoad += MainMenuPanel_OnLoad;
             //On.MainMenuPanel.RefreshContent += MainMenuPanel_RefreshContent;
-        }
-
-        private void MainMenuPanel_RefreshContent(On.MainMenuPanel.orig_RefreshContent orig, MainMenuPanel self)
-        {
-            AgeControlButton oldButton = new DynData<MainMenuPanel>(self).Get<AgeControlButton>("multiplayerButton");
-            Debug.Log("Height: " + oldButton.AgeTransform.Height);
-            Debug.Log("Is Table Arranged? " + oldButton.AgeTransform.TableArrangement);
-            Debug.Log("Data: " + oldButton.OnActivateData);
-            Debug.Log("Data Object: " + oldButton.OnActivateDataObject);
-            Debug.Log("Data Method: " + oldButton.OnActivateMethod);
-            Debug.Log("Data GameObject: " + oldButton.OnActivateObject);
-
-            Debug.Log("Old Menu Button Position: " + oldButton.transform.position);
-            Debug.Log("Old Menu Buttom AgeTransform: (" + oldButton.AgeTransform.X + ", " + oldButton.AgeTransform.Y + ", " + oldButton.AgeTransform.Z + ")");
-            Debug.Log("Old Name: " + oldButton.name);
         }
 
         private System.Collections.IEnumerator MainMenuPanel_OnLoad(On.MainMenuPanel.orig_OnLoad orig, MainMenuPanel self)
@@ -107,8 +92,8 @@ namespace DustDevilFramework
         {
             Debug.Log("Attempting to create ModSettings Menu!");
 
-            AgeControlButton oldButton = new DynData<MainMenuPanel>(mainMenuPanel).Get<AgeControlButton>("continueButton");
-            GameObject newO = (GameObject)GameObject.Instantiate(oldButton.gameObject);
+            AgeControlButton oldButton = new DynData<MainMenuPanel>(mainMenuPanel).Get<AgeControlButton>("multiplayerButton");
+            GameObject newO = (GameObject)GameObject.Instantiate(oldButton.gameObject, oldButton.transform.position, oldButton.transform.localRotation);
             //GameObject newO = GameObject.CreatePrimitive(PrimitiveType.Cube);
             //newO.GetComponent<MeshRenderer>().enabled = false;
             //newO.transform.position = oldButton.transform.position;
@@ -116,10 +101,13 @@ namespace DustDevilFramework
             //AgeControlButton settingsMenuButton = newO.AddComponent<AgeControlButton>();
             AgeControlButton settingsMenuButton = newO.GetComponent<AgeControlButton>();
             //AgeControlButton settingsMenuButton = oldButton;
-            settingsMenuButton.name = "Mod Settings";
+            settingsMenuButton.gameObject.name = "Mod Settings";
             settingsMenuButton.AgeTransform.Enable = true;
             settingsMenuButton.AgeTransform.X = oldButton.AgeTransform.X;
             settingsMenuButton.AgeTransform.Y = oldButton.AgeTransform.Y;
+
+            GameObject.Destroy(settingsMenuButton.GetComponent<DestroyerIfNoMultiplayer>());
+
             Component[] c = settingsMenuButton.GetComponents(typeof(Component));
             //Mod Settings(UnityEngine.Transform)
             //Mod Settings(AgeTransform)
@@ -127,16 +115,37 @@ namespace DustDevilFramework
             //Mod Settings(AgeTooltip)
             //Mod Settings(AgeAudio)
             //Mod Settings(AGESelectable)
+
+            //Child: 0-BG (UnityEngine.GameObject)
+            //Components:
+            //- 0-BG (UnityEngine.Transform)
+            //- 0-BG (AgeTransform)
+            //- 0-BG (AgePrimitiveImage)
+            //- 0-BG (AgeModifierColorSwitch)
+            //Child: 1-Label (UnityEngine.GameObject)
+            //Components:
+            //- 1-Label (UnityEngine.Transform)
+            //- 1-Label (AgeTransform)
+            //- 1-Label (AgePrimitiveLabel)
+            //- 1-Label (AgeModifierColorSwitch)
             foreach (Component q in c)
             {
                 Debug.Log(q.ToString());
             }
-            //settingsMenuButton.GetComponent<AgeControlTextArea>().AgePrimitiveLabel.Text = "Mod Settings";
 
-            Debug.Log("Data: " + oldButton.OnActivateData);
-            Debug.Log("Data Object: " + oldButton.OnActivateDataObject);
-            Debug.Log("Data Method: " + oldButton.OnActivateMethod);
-            Debug.Log("Data GameObject: " + oldButton.OnActivateObject);
+            newO.GetComponentInChildren<AgePrimitiveLabel>().Text = "Mod Settings";
+
+            //foreach (Transform child in oldButton.gameObject.transform)
+            //{
+            //    Debug.Log("Child: " + child.gameObject.ToString());
+            //    Debug.Log("Components:");
+            //    foreach (Component _ in child.gameObject.GetComponents(typeof(Component)))
+            //    {
+            //        Debug.Log("- " + _.ToString());
+            //    }
+            //}
+
+            //settingsMenuButton.GetComponent<AgeControlTextArea>().AgePrimitiveLabel.Text = "Mod Settings";
 
             Debug.Log("Old Menu Button Position: " + oldButton.transform.position + " new: " + settingsMenuButton.transform.position);
             Debug.Log("Old Menu Buttom AgeTransform: (" + oldButton.AgeTransform.X + ", " + oldButton.AgeTransform.Y + ", " + oldButton.AgeTransform.Z + ") new: (" + settingsMenuButton.AgeTransform.X + ", " + settingsMenuButton.AgeTransform.Y + ", " + settingsMenuButton.AgeTransform.Z + ")");
@@ -146,16 +155,11 @@ namespace DustDevilFramework
             Debug.Log("Old SubCategory: " + oldButton.GetComponent<AGESelectable>().SubCategoryID);
             Debug.Log("Old Next Category: " + oldButton.GetComponent<AGESelectable>().NextCategory);
 
-            //settingsMenuButton.gameObject.AddComponent<AgeTooltip>();
-            newO.GetComponent<AgeTooltip>().Content = "Mod Settings";
             AGESelectable selectable = newO.GetComponent<AGESelectable>();
             // Or Something!
             // SelectionCategory only goes until 28
             
-            selectable.Register((SelectionCategory)29);
-            Debug.Log("Attempting to set display!");
-            selectable.SetDisplay(true);
-            Debug.Log("Set Display!");
+
             Debug.Log("GameObject of oldButton: " + oldButton.gameObject);
 
             DynData<AGESelectable> d = new DynData<AGESelectable>(oldButton.GetComponent<AGESelectable>());
@@ -165,30 +169,62 @@ namespace DustDevilFramework
             Debug.Log("Old AGE AgeControl: " + d.Get<AgeControl>("ageControl").ToString());
 
             DynData<AGESelectable> d2 = new DynData<AGESelectable>(selectable);
-            //Debug.Log("New AGE AgeSelectionMarker: " + d2.Get<AGESelectionMarker>("marker").ToString());
-
-            // Tricks it into thinking position is the same
-
             AgeTransform positionAgeTfm = d2.Get<AgeTransform>("positionAgeTfm");
             DynData<AgeTransform> oldPosTfm = new DynData<AgeTransform>(positionAgeTfm);
             DynData<AgeTransform> newAgeTfm = new DynData<AgeTransform>(selectable.AgeTfm);
+            DynData<AgeTransform> oldBtnPosTfm = new DynData<AgeTransform>(d.Get<AgeTransform>("positionAgeTfm"));
+
+            //settingsMenuButton.gameObject.AddComponent<AgeTooltip>();
+            newO.GetComponent<AgeTooltip>().Content = "Mod Settings";
+
+            selectable.Register((SelectionCategory)29);
+            Debug.Log("Attempting to set display!");
+            selectable.SetDisplay(true);
+            Debug.Log("Set Display!");
+
+            Debug.Log("Old ActiveData: " + oldButton.GetComponent<AgeControlButton>().OnActivateData);
+            Debug.Log("Old ActiveObject: " + oldButton.GetComponent<AgeControlButton>().OnActivateDataObject);
+            Debug.Log("Old ActiveMethod: " + oldButton.GetComponent<AgeControlButton>().OnActivateMethod);
+            Debug.Log("Old ActiveGameObject: " + oldButton.GetComponent<AgeControlButton>().OnActivateObject.ToString());
+
+            newO.AddComponent<ClickHandler>();
+            newO.GetComponent<AgeControlButton>().OnActivateMethod = "ShowModSettingsMenu";
+            newO.GetComponent<AgeControlButton>().OnActivateObject = newO;
+
+            Debug.Log("New ActiveData: " + newO.GetComponent<AgeControlButton>().OnActivateData);
+            Debug.Log("New ActiveObject: " + newO.GetComponent<AgeControlButton>().OnActivateDataObject);
+            Debug.Log("New ActiveMethod: " + newO.GetComponent<AgeControlButton>().OnActivateMethod);
+            Debug.Log("New ActiveGameObject: " + newO.GetComponent<AgeControlButton>().OnActivateObject.ToString());
+
+
+            // Tricks it into thinking position is the same
+            newO.transform.SetParent(oldButton.transform.parent);
+            Rect newRect = oldBtnPosTfm.Get<Rect>("basePosition");
+            newRect.y += oldButton.AgeTransform.Height / 2.0f; 
+
+            oldPosTfm.Set("basePosition", newRect);
+            newAgeTfm.Set("basePosition", newRect);
+
+
+            Debug.Log("Old Transform Parent? " + oldButton.transform.parent);
+            Debug.Log("New Transform Parent? " + newO.transform.parent);
 
             Debug.Log("New positionAgeTfm: (" + positionAgeTfm.X + ", " + positionAgeTfm.Y + ")");
             Debug.Log("New AgeTfm: (" + selectable.AgeTfm.X + ", " + selectable.AgeTfm.Y + ")");
-            Debug.Log("Base Positions (Rect pos): " + oldPosTfm.Get<Rect>("basePosition").position);
-            Debug.Log("New Positions (Rect pos): " + newAgeTfm.Get<Rect>("basePosition").position);
+            Debug.Log("Base Positions (Rect ToString): " + oldBtnPosTfm.Get<Rect>("basePosition").ToString());
+            Debug.Log("New Positions (Rect ToString): " + newAgeTfm.Get<Rect>("basePosition").ToString());
             string text = "Parent is null!";
-            if (positionAgeTfm.GetParent() != null)
+            if (d.Get<AgeTransform>("positionAgeTfm").GetParent() != null)
             {
-                text = positionAgeTfm.GetParent().X + ", " + positionAgeTfm.GetParent().Y;
+                text = d.Get<AgeTransform>("positionAgeTfm").GetParent().X + ", " + d.Get<AgeTransform>("positionAgeTfm").GetParent().Y;
             }
-            Debug.Log("Old Parent? " + text);
+            Debug.Log("Old PositionAgeTfm Parent? " + text);
             text = "Parent is null!";
             if (selectable.AgeTfm.GetParent() != null)
             {
                 text = selectable.AgeTfm.GetParent().X + ", " + selectable.AgeTfm.GetParent().Y;
             }
-            Debug.Log("New Parent? " + text);
+            Debug.Log("New PositionAgeTfm Parent? " + text);
 
             Debug.Log("Old Monitor Changes? " + d.Get<bool>("monitorPositionChanges"));
             Debug.Log("New Monitor Changes? " + d2.Get<bool>("monitorPositionChanges"));
@@ -198,6 +234,10 @@ namespace DustDevilFramework
             Debug.Log("New Position: " + d2.Get<Vector2>("position"));
             Debug.Log("Old CenterXPosition: " + d.Get<bool>("centerXPosition"));
             Debug.Log("New CenterXPosition: " + d2.Get<bool>("centerXPosition"));
+            Debug.Log("Old Transform LocalPosition: " + oldButton.transform.localPosition);
+            Debug.Log("New Transform LocalPosition: " + settingsMenuButton.transform.localPosition);
+            Debug.Log("Old Transform LocalRotation: " + oldButton.transform.localRotation);
+            Debug.Log("New Transform LocalRotation: " + settingsMenuButton.transform.localRotation);
 
             //d2.Set("positionAgeTfm", d.Get<AgeTransform>("positionAgeTfm"));
             //d2.Set("position", d.Get<Vector2>("position"));
@@ -214,25 +254,21 @@ namespace DustDevilFramework
 
             float temp = oldButton.AgeTransform.Height;
             oldButton.AgeTransform.ForceHeight(temp / 2.0f);
-            settingsMenuButton.AgeTransform.ForceHeight(temp);
+            settingsMenuButton.AgeTransform.ForceHeight(temp / 2.0f);
 
             Debug.Log("Mod Settings Button Text: " + newO.GetComponent<AgeTooltip>().Content);
             newO.SetActive(true);
         }
-        
-        private class ModSettingsClickHandler : MonoBehaviour
+        private class ClickHandler : MonoBehaviour
         {
-            public ModSettingsClickHandler()
+            public void ShowModSettingsMenu(GameObject o)
             {
-            }
-            private void OnShowModSettingsMenu()
-            {
-                // Called when the ModMenu is opened.
-                // First: Find all of the fields that are in all of the settings!
-                // Also need to create the buttons and stuff and store them as instance variables
+                Debug.Log("Attempting to show mod settings menu!");
                 foreach (ScadMod m in ModList)
                 {
-                    foreach (FieldInfo f in m.settingsType.GetFields())
+                    
+                    Debug.Log("Mod: " + m.name + " has settingsType: " + m.settingsType.Name + " with: " + m.settingsType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Length + " properties.");
+                    foreach (FieldInfo f in m.settingsType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
                     {
                         // Now check attributes and if it is something that isn't displayable
                         object[] attributes = f.GetCustomAttributes(true);
@@ -244,37 +280,52 @@ namespace DustDevilFramework
                              */
                             try
                             {
-                                ModSettings.SettingsIgnore i = attribute as ModSettings.SettingsIgnore;
+                                Attribute a = attribute as Attribute;
+                                Debug.Log("Type of attribute: " + a.GetType().Name);
+                                if (a.GetType().Equals(typeof(ModSettings.SettingsIgnore)))
+                                {
+                                    // Hey, it is a SettingsIgnore attribute!
+                                    show = false;
+                                    Debug.Log("Ignoring setting with name: " + f.Name + " and type: " + f.FieldType);
+                                    break;
+                                }
                                 // The attribute is an ignore attribute, don't display it on the screen
-                                show = false;
-                                break;
                             }
                             catch (InvalidCastException e)
                             {
-                                // The Attribute isn't an ignore attribute
+                                // The Attribute isn't an attribute
                             }
                         }
-                        if (!(f.FieldType == typeof(float) || f.FieldType == typeof(int) || f.FieldType == typeof(bool)))
+                        if (!(f.FieldType.Equals(typeof(float)) || f.FieldType.Equals(typeof(int)) || f.FieldType.Equals(typeof(bool))))
                         {
                             show = false;
                         }
-                        if (f.FieldType == typeof(float) || f.FieldType == typeof(int))
+                        if (f.FieldType.Equals(typeof(float)) || f.FieldType.Equals(typeof(int)))
                         {
                             // Required to have a SettingsRange
                         }
                         if (show)
                         {
                             // Show it to the screen using the provided attribute data and other stuff!
-                            Debug.Log("ATTEMPTING TO SHOW FIELD: " + f.Name + " IN MOD: " + m.name);
+                            string name = f.Name;
+                            if (f.Name.Contains("<"))
+                            {
+                                // This is an autoproperty
+                                // This is okay, just make sure the name is reasonable!
+                                name = f.Name.Substring(f.Name.IndexOf("<") + 1, f.Name.LastIndexOf(">") - 1);
+                            }
+                            Debug.Log("ATTEMPTING TO SHOW FIELD: " + name + " WITH TYPE: " + f.FieldType + " IN MOD: " + m.name);
                         }
                     }
                     Debug.Log("==========================================");
-                }
+                    }
             }
-            private void OnHideModSettingsMenu()
+            public void HideModSettingsMenu(GameObject o)
             {
                 // Called when the ModMenu is closed.
                 // Just need to delete all the buttons and make sure everything is adequately removed
+                Debug.Log("Mod Settings Menu has been closed!");
+                // Also might want to disable mods here?
             }
         }
     }
