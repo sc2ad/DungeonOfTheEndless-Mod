@@ -14,10 +14,11 @@ namespace DustDevilFramework
         private static DustDevil Instance;
 
         public static int MajorVersion { get; } = 3;
-        public static int MinorVersion { get; } = 5;
-        public static int Revision { get; } = 5;
+        public static int MinorVersion { get; } = 7;
+        public static int Revision { get; } = 0;
 
         private static List<ScadMod> ModList = new List<ScadMod>();
+        private static ModSettingsPopupMenuPanel SettingsPanel;
 
         public static void CreateInstance(ScadMod mod)
         {
@@ -35,6 +36,7 @@ namespace DustDevilFramework
 
         private System.Collections.IEnumerator MainMenuPanel_OnLoad(On.MainMenuPanel.orig_OnLoad orig, MainMenuPanel self)
         {
+            SettingsPanel = new ModSettingsPopupMenuPanel(ModList);
             System.Collections.IEnumerator temp = orig(self);
             yield return temp;
             AgePrimitiveLabel label = new DynData<MainMenuPanel>(self).Get<AgePrimitiveLabel>("versionLabel");
@@ -200,7 +202,7 @@ namespace DustDevilFramework
             // Tricks it into thinking position is the same
             newO.transform.SetParent(oldButton.transform.parent);
             Rect newRect = oldBtnPosTfm.Get<Rect>("basePosition");
-            newRect.y += oldButton.AgeTransform.Height / 2.0f; 
+            newRect.y += oldButton.AgeTransform.Height / 2.0f + 2; 
 
             oldPosTfm.Set("basePosition", newRect);
             newAgeTfm.Set("basePosition", newRect);
@@ -253,8 +255,8 @@ namespace DustDevilFramework
             Debug.Log("Next Category: " + selectable.NextCategory);
 
             float temp = oldButton.AgeTransform.Height;
-            oldButton.AgeTransform.ForceHeight(temp / 2.0f);
-            settingsMenuButton.AgeTransform.ForceHeight(temp / 2.0f);
+            oldButton.AgeTransform.ForceHeight(temp / 2.0f - 2);
+            settingsMenuButton.AgeTransform.ForceHeight(temp / 2.0f - 2);
 
             Debug.Log("Mod Settings Button Text: " + newO.GetComponent<AgeTooltip>().Content);
             newO.SetActive(true);
@@ -264,61 +266,7 @@ namespace DustDevilFramework
             public void ShowModSettingsMenu(GameObject o)
             {
                 Debug.Log("Attempting to show mod settings menu!");
-                foreach (ScadMod m in ModList)
-                {
-                    
-                    Debug.Log("Mod: " + m.name + " has settingsType: " + m.settingsType.Name + " with: " + m.settingsType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Length + " properties.");
-                    foreach (FieldInfo f in m.settingsType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
-                    {
-                        // Now check attributes and if it is something that isn't displayable
-                        object[] attributes = f.GetCustomAttributes(true);
-                        bool show = true;
-                        foreach (object attribute in attributes)
-                        {
-                            /*
-                             * if (attribute instanceof ModSettings.SettingsIgnore)
-                             */
-                            try
-                            {
-                                Attribute a = attribute as Attribute;
-                                Debug.Log("Type of attribute: " + a.GetType().Name);
-                                if (a.GetType().Equals(typeof(ModSettings.SettingsIgnore)))
-                                {
-                                    // Hey, it is a SettingsIgnore attribute!
-                                    show = false;
-                                    Debug.Log("Ignoring setting with name: " + f.Name + " and type: " + f.FieldType);
-                                    break;
-                                }
-                                // The attribute is an ignore attribute, don't display it on the screen
-                            }
-                            catch (InvalidCastException e)
-                            {
-                                // The Attribute isn't an attribute
-                            }
-                        }
-                        if (!(f.FieldType.Equals(typeof(float)) || f.FieldType.Equals(typeof(int)) || f.FieldType.Equals(typeof(bool))))
-                        {
-                            show = false;
-                        }
-                        if (f.FieldType.Equals(typeof(float)) || f.FieldType.Equals(typeof(int)))
-                        {
-                            // Required to have a SettingsRange
-                        }
-                        if (show)
-                        {
-                            // Show it to the screen using the provided attribute data and other stuff!
-                            string name = f.Name;
-                            if (f.Name.Contains("<"))
-                            {
-                                // This is an autoproperty
-                                // This is okay, just make sure the name is reasonable!
-                                name = f.Name.Substring(f.Name.IndexOf("<") + 1, f.Name.LastIndexOf(">") - 1);
-                            }
-                            Debug.Log("ATTEMPTING TO SHOW FIELD: " + name + " WITH TYPE: " + f.FieldType + " IN MOD: " + m.name);
-                        }
-                    }
-                    Debug.Log("==========================================");
-                    }
+                SettingsPanel.Show(new object[0]);
             }
             public void HideModSettingsMenu(GameObject o)
             {

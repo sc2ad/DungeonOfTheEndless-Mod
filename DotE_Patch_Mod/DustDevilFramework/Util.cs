@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace DustDevilFramework
 {
@@ -105,6 +106,18 @@ namespace DustDevilFramework
                 }
             }
             System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());
+        }
+        // Returns a legible name from the given fieldinfo.Name
+        public static string GetName(FieldInfo f)
+        {
+            string name = f.Name;
+            if (f.Name.Contains("<"))
+            {
+                // This is an autoproperty
+                // This is okay, just make sure the name is reasonable!
+                name = f.Name.Substring(f.Name.IndexOf("<") + 1, f.Name.LastIndexOf(">") - 1);
+            }
+            return name;
         }
     }
 }

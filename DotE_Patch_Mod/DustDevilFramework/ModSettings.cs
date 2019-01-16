@@ -68,6 +68,10 @@ namespace DustDevilFramework
                             {
                                 f.SetValue(this, (float)Convert.ToDouble(spl[1]));
                             }
+                            catch (FormatException __)
+                            {
+                                f.SetValue(this, Convert.ToBoolean(spl[1]));
+                            }
                             catch (ArgumentException __)
                             {
                                 f.SetValue(this, Convert.ToBoolean(spl[1]));
@@ -93,15 +97,23 @@ namespace DustDevilFramework
         [AttributeUsage(AttributeTargets.Field)]
         public class SettingsRange : Attribute
         {
-            private int low;
-            private int high;
+            public float Low { get; set; }
+            public float High { get; set; }
+            public float Increment { get; set; } = 1;
             // Constructs a range of low-high
-            public SettingsRange(int low, int high)
+            public SettingsRange(float low, float high)
             {
-                this.low = low;
-                this.high = high;
+                Low = low;
+                High = high;
+            }
+            public SettingsRange(float low, float high, float increment)
+            {
+                Low = low;
+                High = high;
+                Increment = increment;
             }
         }
+        [AttributeUsage(AttributeTargets.Field)]
         public class SettingsIgnore : Attribute
         {
             // Constructs a setting that is ignored, does not appear in the gui
