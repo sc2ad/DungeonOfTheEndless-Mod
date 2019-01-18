@@ -108,7 +108,7 @@ namespace DustDevilFramework
             System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());
         }
         // Returns a legible name from the given fieldinfo.Name
-        public static string GetName(FieldInfo f)
+        public static string GetName(ScadMod m, FieldInfo f)
         {
             string name = f.Name;
             if (f.Name.Contains("<"))
@@ -117,7 +117,7 @@ namespace DustDevilFramework
                 // This is okay, just make sure the name is reasonable!
                 name = f.Name.Substring(f.Name.IndexOf("<") + 1, f.Name.LastIndexOf(">") - 1);
             }
-            return name;
+            return m.name + " - " + name;
         }
     }
 }
