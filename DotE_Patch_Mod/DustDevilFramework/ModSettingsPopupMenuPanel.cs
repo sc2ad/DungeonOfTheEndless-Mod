@@ -15,8 +15,12 @@ namespace DustDevilFramework
     public class ModSettingsPopupMenuPanel : PopupMenuPanel
     {
         private OptionsPanel optionsPanel;
+        private GameObject frame;
         List<ScadMod> mods;
         List<FieldInfo> fields;
+
+        private readonly float toggleYDisplacement = 50;
+        private readonly float settingSpacing = 200;
 
         public ModSettingsPopupMenuPanel()
         {
@@ -28,6 +32,8 @@ namespace DustDevilFramework
         {
             Debug.Log("Setting up ModList!");
             mods = m;
+            Debug.Log("Creating Frame");
+            CreateFrame();
             Debug.Log("Creating Settings Components!");
             CreateSettings();
         }
@@ -193,6 +199,12 @@ namespace DustDevilFramework
         public override void Hide(bool instant = false)
         {
             Debug.Log("Hiding ModSettings Panel!");
+            Debug.Log("Attempting to write settings to files!");
+            foreach (ScadMod m in mods)
+            {
+                m.settings.WriteSettings();
+            }
+            Debug.Log("Wrote settings to files!");
             base.Hide(instant);
         }
         protected override IEnumerator OnHide(bool instant)
@@ -225,6 +237,87 @@ namespace DustDevilFramework
         private void OnConfirmButtonClick(GameObject obj)
         {
             Hide();
+        }
+        public void CreateFrame()
+        {
+            Debug.Log("Creating the Frame!");
+            DynData<OptionsPanel> d = new DynData<OptionsPanel>(optionsPanel);
+            GameObject oldObj = d.Get<AgeControlToggle>("vSyncToggle").transform.parent.parent.parent.parent.gameObject;
+            // oldObj in this case is the "Frame" object that we would like to duplicate.
+            GameObject frame = (GameObject)GameObject.Instantiate(oldObj);
+            // The frame is a child of the current display.
+            frame.transform.parent = transform;
+            // Delete the Frame from the GUI control, there can only be one frame (otherwise weird things happen)
+            GameObject.DestroyImmediate(transform.FindChild("1-Frame").gameObject);
+            GameObject bg = (GameObject)GameObject.Instantiate(optionsPanel.transform.FindChild("0-Bg").gameObject);
+            bg.transform.parent = transform;
+
+            transform.parent = optionsPanel.AgeTransform.GetParent().transform;
+            transform.GetComponent<AgeTransform>().Position = optionsPanel.AgeTransform.Position;
+
+            bg.name = "ModSettingsBackground";
+            frame.name = "ModSettingsFrame";
+            foreach (Component c in frame.GetComponents<Component>())
+            {
+                Debug.Log("- " + c);
+            }
+            Debug.Log("Children of the Frame:");
+            foreach (Transform t in frame.transform)
+            {
+                Debug.Log("- " + t);
+                Debug.Log("- Children:");
+                foreach (Transform q in t)
+                {
+                    Debug.Log("-- " + q);
+                }
+            }
+            // Destroys the useless LeftSide (which holds the controls)
+            // Instead, we could put stuff like labels there, or something
+            // We need to delete all of its children too, and its children's children, etc.
+
+            //GameObject.DestroyImmediate(frame.transform.FindChild("2-LeftPart"));
+            Util.DeleteChildrenInclusive(frame.transform.FindChild("2-LeftPart").gameObject);
+            Util.DeleteChildrenExclusive(frame.transform.FindChild("3-RightPart").gameObject);
+            Util.DeleteChildrenInclusive(frame.transform.FindChild("3-RightPart").FindChild("4-AudioConfig").gameObject);
+            Debug.Log("Children of Right part after deletion");
+            foreach (Transform t in frame.transform.FindChild("3-RightPart"))
+            {
+                Debug.Log("- " + t);
+            }
+            //GameObject.DestroyImmediate(frame.transform.FindChild("3-RightPart"));
+            AgeControlButton cancel = frame.transform.FindChild("7-CancelButton").GetComponent<AgeControlButton>();
+            AgeControlButton confirm = frame.transform.FindChild("9-ConfirmButton").GetComponent<AgeControlButton>();
+            confirm.AgeTransform.Position = frame.transform.FindChild("9-ConfirmButton").GetComponent<AgeControlButton>().AgeTransform.Position; // Fixes a strange bug
+            AgeControlButton reset = frame.transform.FindChild("8-ResetButton").GetComponent<AgeControlButton>();
+            cancel.OnActivateObject = gameObject;
+            confirm.OnActivateObject = gameObject;
+            reset.OnActivateObject = gameObject;
+
+            frame.GetComponent<AgeTransform>().GetParent().Position = optionsPanel.GetComponent<AgeTransform>().GetParent().Position;
+            //frame.GetComponent<AgeTransform>().AutoResizeHeight = false;
+            //frame.GetComponent<AgeTransform>().AutoResizeWidth = false;
+            frame.GetComponent<AgeTransform>().Position = optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().Position;
+
+            Debug.Log("Children of (AgeTransform) Frame:");
+            foreach (AgeTransform t in frame.GetComponent<AgeTransform>().GetChildren())
+            {
+                Debug.Log("- " + t.name + " " + t.Position);
+            }
+            Debug.Log("Frame AgeTransform: " + frame + " " + frame.GetComponent<AgeTransform>().Position);
+            Debug.Log("Parent (AgeTransform): " + frame.GetComponent<AgeTransform>().GetParent().name + " " + frame.GetComponent<AgeTransform>().GetParent().Position);
+            Debug.Log("Panel AgeTransform: " + name + " " + GetComponent<AgeTransform>().Position);
+            Debug.Log("Parent of Panel: " + GetComponent<AgeTransform>().GetParent().name + " " + GetComponent<AgeTransform>().GetParent().Position);
+            Debug.Log("OptionsPanel AgeTransform: " + optionsPanel.GetComponent<AgeTransform>().name + " " + optionsPanel.GetComponent<AgeTransform>().Position);
+            Debug.Log("OptionsPanel Parent (AgeTransform): " + optionsPanel.GetComponent<AgeTransform>().GetParent().name + " " + optionsPanel.GetComponent<AgeTransform>().GetParent().Position);
+            Debug.Log("OptionsPanel Parent Parent: " + optionsPanel.GetComponent<AgeTransform>().GetParent().GetParent().name + " " + optionsPanel.GetComponent<AgeTransform>().GetParent().GetParent().Position);
+            Debug.Log("Children of (AgeTransform) OptionsPanel:");
+            foreach (AgeTransform t in optionsPanel.GetComponent<AgeTransform>().GetChildren())
+            {
+                Debug.Log("- " +  t.name + " " + t.Position);
+            }
+            //frame.GetComponent<AgeTransform>().ForceHeight(optionsPanel.GetComponent<AgeTransform>().Height);
+
+            this.frame = frame;
         }
         public void CreateSlider(ScadMod m, FieldInfo f, float low, float high, float current, float increment)
         {
@@ -259,12 +352,21 @@ namespace DustDevilFramework
             DynData<OptionsPanel> d = new DynData<OptionsPanel>(optionsPanel);
             GameObject oldObj = d.Get<AgeControlToggle>("vSyncToggle").transform.parent.gameObject;
             // oldObj is now the group object!
+
             Debug.Log("Old Parent: " + oldObj.transform.parent);
+            Debug.Log("Old Parent's Parent: " + oldObj.transform.parent.parent);
+            Debug.Log("Old Parent's Parent's Parent: " + oldObj.transform.parent.parent.parent);
+
             GameObject toggleGroup = (GameObject)GameObject.Instantiate(oldObj);
             toggleGroup.name = Util.GetName(m, f);
+            toggleGroup.transform.parent = frame.transform.FindChild("3-RightPart");
             Debug.Log("Toggle Group Object Created!");
+
+            Debug.Log("New Parent: " + toggleGroup.transform.parent);
+            Debug.Log("New Parent's Parent: " + toggleGroup.transform.parent.parent);
+            Debug.Log("New Parent's Parent's Parent: " + toggleGroup.transform.parent.parent.parent);
             //toggleGroup.transform.parent = transform;
-            toggleGroup.transform.parent = oldObj.transform.parent;
+
             //Debug.Log("Parent: " + toggleGroup.transform.parent);
             //Debug.Log("Toggle group components:");
             //foreach (Component _ in toggleGroup.GetComponents(typeof(Component)))
@@ -276,50 +378,7 @@ namespace DustDevilFramework
             {
                 Debug.Log("- " + _);
             }
-            //Debug.Log("Children of Parent:");
-            //for (int i = 0; i < toggleGroup.transform.parent.childCount; i++)
-            //{
-            //    Transform t = toggleGroup.transform.parent.GetChild(i);
-            //    Debug.Log("- ID: " + i + ": " + t.gameObject);
-            //    Debug.Log("- Components:");
-            //    foreach (Component _ in t.GetComponents(typeof(Component)))
-            //    {
-            //        Debug.Log("-- " + _);
-            //    }
-            //}
 
-            //Children of 24 - VSyncGroup(Clone)(UnityEngine.GameObject):
-            //-ID: 0: 1 - Background(UnityEngine.GameObject)
-            //- Components:
-            //-- 1 - Background(UnityEngine.Transform)
-            //-- 1 - Background(AgeTransform)
-            //-- 1 - Background(AgePrimitiveImage)
-            //-- 1 - Background(AgeModifierColorSwitch)
-            //- ID: 1: 2 - Label(UnityEngine.GameObject)
-            //- Components:
-            //-- 2 - Label(UnityEngine.Transform)
-            //-- 2 - Label(AgeTransform)
-            //-- 2 - Label(AgePrimitiveLabel)
-            //-- 2 - Label(AgeModifierColorSwitch)
-            //- ID: 2: 2 - VSyncToggle(UnityEngine.GameObject)
-            //- Components:
-            //-- 2 - VSyncToggle(UnityEngine.Transform)
-            //-- 2 - VSyncToggle(AgeTransform)
-            //-- 2 - VSyncToggle(AgeControlToggle)
-            //-- 2 - VSyncToggle(AgeAudio)
-            //-- 2 - VSyncToggle(AgeTooltip)
-
-            //Debug.Log("Children of " + toggleGroup.gameObject + ":");
-            //for (int i = 0; i < toggleGroup.transform.childCount; i++)
-            //{
-            //    Transform t = toggleGroup.transform.GetChild(i);
-            //    Debug.Log("- ID: " + i + ": " + t.gameObject);
-            //    Debug.Log("- Components:");
-            //    foreach (Component _ in t.GetComponents(typeof(Component)))
-            //    {
-            //        Debug.Log("-- " + _);
-            //    }
-            //}
             Transform toggle = toggleGroup.transform.GetChild(2);
             toggle.gameObject.name = Util.GetName(m,f) + "_Toggle";
             Debug.Log("Toggle Object: " + toggle.gameObject);
@@ -332,13 +391,15 @@ namespace DustDevilFramework
             label.gameObject.name = Util.GetName(m, f) + "_Label";
             Debug.Log("Label Object: " + label.gameObject);
             label.GetComponent<AgePrimitiveLabel>().Text = Util.GetName(m, f);
-            toggleGroup.GetComponent<AgeTransform>().ForceHeight(oldObj.GetComponent<AgeTransform>().Height * 2);
+            toggleGroup.GetComponent<AgeTransform>().Position = oldObj.GetComponent<AgeTransform>().Position;
+            toggle.GetComponent<AgeTransform>().Position = oldObj.transform.GetChild(2).GetComponent<AgeTransform>().Position;
+            toggleGroup.GetComponent<AgeTransform>().Y = 0;
+            Debug.Log("Old Toggle Button AgeTfm: " + oldObj.transform.GetChild(2).GetComponent<AgeTransform>().Position);
+            Debug.Log("New Toggle Button AgeTfm: " + toggle.GetComponent<AgeTransform>().Position);
+            //toggleGroup.GetComponent<AgeTransform>().Y += toggleYDisplacement - (settingSpacing + toggleGroup.GetComponent<AgeTransform>().Height) * fields.Count;
+            //toggleGroup.GetComponent<AgeTransform>().ForceHeight(oldObj.GetComponent<AgeTransform>().Height * 2);
             Debug.Log("Old AgeTfm: " + oldObj.GetComponent<AgeTransform>().Position);
             Debug.Log("AgeTfm: " + toggleGroup.GetComponent<AgeTransform>().Position);
-            Debug.Log("Old Position: " + oldObj.transform.position);
-            Debug.Log("New Position: " + toggleGroup.transform.position);
-            Debug.Log("Old 2d: " + oldObj.Get2DPosition());
-            Debug.Log("New 2d: " + toggleGroup.Get2DPosition());
             toggleControl.OnSwitchMethod = "OnTogglePressed";
             toggleControl.OnSwitchObject = transform.gameObject;
             Debug.Log("Switch - Method: " + toggleControl.OnSwitchMethod + " GameObject: " + toggleControl.OnSwitchObject);
