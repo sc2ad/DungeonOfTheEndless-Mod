@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 
 namespace DustDevilFramework
 {
@@ -118,6 +119,24 @@ namespace DustDevilFramework
                 name = f.Name.Substring(f.Name.IndexOf("<") + 1, f.Name.LastIndexOf(">") - 1);
             }
             return m.name + " - " + name;
+        }
+        // Deletes all the children of a certain GameObject including the provided GameObject
+        public static void DeleteChildrenInclusive(GameObject toDelete)
+        {
+            // Delete children, then self
+            foreach (Transform t in toDelete.transform)
+            {
+                DeleteChildrenInclusive(t.gameObject);
+            }
+            GameObject.DestroyImmediate(toDelete);
+        }
+        // Deletes all the children of a certain GameObject excluding the provided GameObject
+        public static void DeleteChildrenExclusive(GameObject toDelete)
+        {
+            foreach (Transform t in toDelete.transform)
+            {
+                DeleteChildrenInclusive(t.gameObject);
+            }
         }
     }
 }
