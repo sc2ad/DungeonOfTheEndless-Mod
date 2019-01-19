@@ -12,7 +12,7 @@ namespace DustDevilFramework
     {
         [SettingsIgnore]
         private string name;
-        public bool Enabled { get; set; } = true;
+        public bool Enabled = true;
         public ModSettings(string name)
         {
             this.name = name;
@@ -25,12 +25,13 @@ namespace DustDevilFramework
             FieldInfo[] fields = GetType().GetFields();
             foreach (FieldInfo q in fields)
             {
-                if (q.IsPrivate)
+                if (q.Name == "name")
                 {
                     continue;
                 }
                 s += q.Name + ": " + q.GetValue(this) + "\n";
             }
+            Debug.Log("Wrote settings to file: " + config);
             System.IO.File.WriteAllText(config, s);
         }
         public void ReadSettings()
