@@ -19,8 +19,9 @@ namespace DustDevilFramework
         List<ScadMod> mods;
         List<FieldInfo> fields;
 
-        private readonly float toggleYDisplacement = 50;
-        private readonly float settingSpacing = 200;
+        private bool saveSettings = false;
+
+        private readonly float settingSpacing = 3;
 
         public ModSettingsPopupMenuPanel()
         {
@@ -49,7 +50,7 @@ namespace DustDevilFramework
             GameObject obj = SingletonManager.Get<OptionsPanel>(true).gameObject;
             OptionsPanel old = obj.GetComponent<OptionsPanel>();
 
-            GameObject o = (GameObject)GameObject.Instantiate(obj, obj.transform.position, obj.transform.rotation);
+            GameObject o = (GameObject)GameObject.Instantiate(obj);
             o.name = "ModSettingsPanel";
             foreach (Transform t in o.transform)
             {
@@ -61,6 +62,8 @@ namespace DustDevilFramework
             ModSettingsPopupMenuPanel instanceForGO = o.AddComponent<ModSettingsPopupMenuPanel>();
             Debug.Log("Created InstanceForGO");
             instanceForGO.transform.parent = obj.transform.parent;
+            instanceForGO.transform.GetComponent<AgeTransform>().Position = old.AgeTransform.Position;
+
             Debug.Log("Current Parent: " + instanceForGO.transform.parent);
             instanceForGO.SetupOptionsPanel(old);
             instanceForGO.SetupModlist(m);
@@ -96,6 +99,7 @@ namespace DustDevilFramework
         protected override void Awake()
         {
             base.Awake();
+            saveSettings = false;
             Hide();
         }
 
@@ -174,9 +178,57 @@ namespace DustDevilFramework
                 Debug.Log("==========================================");
             }
         }
+        private void RecalculatePositions()
+        {
+            frame.transform.GetComponent<AgeTransform>().Position = optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().Position;
+            frame.transform.FindChild("3-RightPart").GetComponent<AgeTransform>().Position = optionsPanel.transform.FindChild("1-Frame").FindChild("3-RightPart").GetComponent<AgeTransform>().Position;
+            frame.transform.FindChild("3-RightPart").FindChild("ModSettingsConfig").GetComponent<AgeTransform>().Position = optionsPanel.transform.FindChild("1-Frame").FindChild("3-RightPart").FindChild("2-ResolutionConfig").GetComponent<AgeTransform>().Position;
+
+            foreach (ScadMod m in mods)
+            {
+                Type basicType = m.settingsType;
+                List<FieldInfo> fields = new List<FieldInfo>();
+                while (!basicType.Equals(typeof(object)))
+                {
+
+                    Debug.Log("Attempting to find inheritance tree with settings type: " + basicType);
+
+                    fields.AddRange(basicType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
+                    Debug.Log("Found: " + fields.Count + " so far.");
+                    if (basicType.Equals(typeof(ModSettings)))
+                    {
+                        Debug.Log("Found a total of: " + fields.Count + " fields");
+                        break;
+                    }
+                    if (basicType.BaseType.Equals(typeof(object)))
+                    {
+                        // You must provide a Settings class that extends ModSettings as the Settings Type!
+                        Debug.LogError("You must provide a Settings class that extends ModSettings as the Settings Type for Mod: " + m.name);
+                        break;
+                    }
+                    basicType = basicType.BaseType;
+                }
+                foreach (FieldInfo f in this.fields)
+                {
+                    for (int i = 0; i < fields.Count; i++)
+                    {
+                        FieldInfo f2 = fields[i];
+                        if (f.Equals(f2))
+                        {
+                            // The field exists as a button, recalculate its position.
+                            Transform t = frame.transform.FindChild("3-RightPart").FindChild("ModSettingsConfig").FindChild(m.name + " - " + f.Name);
+                            Rect temp = optionsPanel.transform.FindChild("1-Frame").FindChild("3-RightPart").FindChild("2-ResolutionConfig").FindChild("24-VSyncGroup").GetComponent<AgeTransform>().Position;
+                            temp.y += i * (settingSpacing + t.GetComponent<AgeTransform>().Height);
+                            t.GetComponent<AgeTransform>().Position = temp;
+                        }
+                    }
+                }
+            }
+        }
         public override void RefreshContent()
         {
             base.RefreshContent();
+
         }
         protected override IEnumerator OnLoad()
         {
@@ -185,7 +237,17 @@ namespace DustDevilFramework
         public override void Show(params object[] parameters)
         {
             Debug.Log("Showing ModSettings Panel!");
+            //RecalculatePositions();
+
+            //GameObject temp = frame.transform.FindChild("3-RightPart").FindChild("ModSettingsConfig").FindChild("TrueIGT - Enabled").gameObject;
+            //if (temp)
+            //{
+            //    GameObject.DestroyImmediate(temp);
+            //}
+            //frame.transform.FindChild("3-RightPart").FindChild("ModSettingsConfig").FindChild("TrueIGT - Enabled").transform.Translate(new Vector3(0, 0.0001f, 0));
             base.Show(parameters);
+            // TEMP
+
             //optionsPanel.Show(parameters);
             //GameResolutionAgeScaler scaler = optionsPanel.transform.parent.GetComponent<GameResolutionAgeScaler>();
             //// Hopefully fixes the scaling problem!
@@ -193,18 +255,27 @@ namespace DustDevilFramework
         }
         protected override IEnumerator OnShow(params object[] parameters)
         {
+            RecalculatePositions();
             Debug.Log("OnShow!");
-            return base.OnShow(parameters);
+            saveSettings = false;
+            LogFrame();
+            yield return base.OnShow(parameters);
+            Debug.Log("AFTER SHOW!");
+            LogFrame();
+            yield break;
         }
         public override void Hide(bool instant = false)
         {
             Debug.Log("Hiding ModSettings Panel!");
-            Debug.Log("Attempting to write settings to files!");
-            foreach (ScadMod m in mods)
+            if (saveSettings)
             {
-                m.settings.WriteSettings();
+                Debug.Log("Attempting to write settings to files!");
+                foreach (ScadMod m in mods)
+                {
+                    m.settings.WriteSettings();
+                }
+                Debug.Log("Wrote settings to files!");
             }
-            Debug.Log("Wrote settings to files!");
             base.Hide(instant);
         }
         protected override IEnumerator OnHide(bool instant)
@@ -226,7 +297,7 @@ namespace DustDevilFramework
         }
         private void OnCancelButtonClick(GameObject obj)
         {
-            //this.saveSettings = false;
+            saveSettings = false;
             Hide();
         }
         private void OnResetButtonClick()
@@ -236,7 +307,55 @@ namespace DustDevilFramework
         }
         private void OnConfirmButtonClick(GameObject obj)
         {
+            saveSettings = true;
             Hide();
+        }
+        private void LogFrame()
+        {
+            Debug.Log("============================== FRAME LOG");
+            Debug.Log("Frame: " + frame + " AgeTfm: " + frame.GetComponent<AgeTransform>().Position);
+            Debug.Log("Children:");
+            foreach (AgeTransform a in frame.GetComponent<AgeTransform>().GetChildren())
+            {
+                Debug.Log("-" + a.name + " " + a.Position);
+                Debug.Log("-Children:");
+                foreach (AgeTransform q in a.GetChildren())
+                {
+                    Debug.Log("--" + q.name + " " + q.Position);
+                    if (q.name == "ModSettingsConfig")
+                    {
+                        Debug.Log("--Children:");
+                        foreach (AgeTransform z in q.GetChildren())
+                        {
+                            Debug.Log("---" + z.name + " " + z.Position);
+                        }
+                    }
+                }
+            }
+            Debug.Log("Frame Anchor: " + frame.GetComponent<AgeTransform>().Anchored);
+            Debug.Log("SettingsPanel Anchor: " + GetComponent<AgeTransform>().Anchored);
+            Debug.Log("Options Frame: " + optionsPanel.transform.FindChild("1-Frame") + " AgeTfm: " + optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().Position);
+            Debug.Log("Children:");
+            foreach (AgeTransform a in optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().GetChildren())
+            {
+                Debug.Log("-" + a.name + " " + a.Position);
+                Debug.Log("-Children:");
+                foreach (AgeTransform q in a.GetChildren())
+                {
+                    Debug.Log("--" + q.name + " " + q.Position);
+                    if (q.name == "2-ResolutionConfig")
+                    {
+                        Debug.Log("--Children:");
+                        foreach (AgeTransform z in q.GetChildren())
+                        {
+                            Debug.Log("---" + z.name + " " + z.Position);
+                        }
+                    }
+                }
+            }
+            Debug.Log("Options Frame Anchor: " + optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().Anchored);
+            Debug.Log("OptionsPanel Anchor: " + optionsPanel.GetComponent<AgeTransform>().Anchored);
+            Debug.Log("============================== FRAME LOG");
         }
         public void CreateFrame()
         {
@@ -247,16 +366,21 @@ namespace DustDevilFramework
             GameObject frame = (GameObject)GameObject.Instantiate(oldObj);
             // The frame is a child of the current display.
             frame.transform.parent = transform;
+            frame.name = "ModSettingsFrame";
+            frame.GetComponent<AgeTransform>().Position = optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().Position;
+
             // Delete the Frame from the GUI control, there can only be one frame (otherwise weird things happen)
             GameObject.DestroyImmediate(transform.FindChild("1-Frame").gameObject);
             GameObject bg = (GameObject)GameObject.Instantiate(optionsPanel.transform.FindChild("0-Bg").gameObject);
-            bg.transform.parent = transform;
 
-            transform.parent = optionsPanel.AgeTransform.GetParent().transform;
-            transform.GetComponent<AgeTransform>().Position = optionsPanel.AgeTransform.Position;
+            GameObject modSettingsConfig = (GameObject)GameObject.Instantiate(optionsPanel.transform.FindChild("1-Frame").FindChild("3-RightPart").FindChild("2-ResolutionConfig").gameObject);
+
+            bg.transform.parent = transform;
+            //transform.parent = optionsPanel.AgeTransform.GetParent().transform;
 
             bg.name = "ModSettingsBackground";
-            frame.name = "ModSettingsFrame";
+            modSettingsConfig.name = "ModSettingsConfig";
+
             foreach (Component c in frame.GetComponents<Component>())
             {
                 Debug.Log("- " + c);
@@ -275,10 +399,13 @@ namespace DustDevilFramework
             // Instead, we could put stuff like labels there, or something
             // We need to delete all of its children too, and its children's children, etc.
 
-            //GameObject.DestroyImmediate(frame.transform.FindChild("2-LeftPart"));
             Util.DeleteChildrenInclusive(frame.transform.FindChild("2-LeftPart").gameObject);
             Util.DeleteChildrenExclusive(frame.transform.FindChild("3-RightPart").gameObject);
-            Util.DeleteChildrenInclusive(frame.transform.FindChild("3-RightPart").FindChild("4-AudioConfig").gameObject);
+            Util.DeleteChildrenExclusive(modSettingsConfig);
+
+            modSettingsConfig.transform.parent = frame.transform.FindChild("3-RightPart");
+            modSettingsConfig.GetComponent<AgeTransform>().Position = optionsPanel.transform.FindChild("1-Frame").FindChild("3-RightPart").FindChild("2-ResolutionConfig").GetComponent<AgeTransform>().Position;
+
             Debug.Log("Children of Right part after deletion");
             foreach (Transform t in frame.transform.FindChild("3-RightPart"))
             {
@@ -293,29 +420,54 @@ namespace DustDevilFramework
             confirm.OnActivateObject = gameObject;
             reset.OnActivateObject = gameObject;
 
-            frame.GetComponent<AgeTransform>().GetParent().Position = optionsPanel.GetComponent<AgeTransform>().GetParent().Position;
-            //frame.GetComponent<AgeTransform>().AutoResizeHeight = false;
-            //frame.GetComponent<AgeTransform>().AutoResizeWidth = false;
-            frame.GetComponent<AgeTransform>().Position = optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().Position;
+            //frame.GetComponent<AgeTransform>().GetParent().Position = optionsPanel.GetComponent<AgeTransform>().Position;
 
             Debug.Log("Children of (AgeTransform) Frame:");
             foreach (AgeTransform t in frame.GetComponent<AgeTransform>().GetChildren())
             {
                 Debug.Log("- " + t.name + " " + t.Position);
             }
-            Debug.Log("Frame AgeTransform: " + frame + " " + frame.GetComponent<AgeTransform>().Position);
-            Debug.Log("Parent (AgeTransform): " + frame.GetComponent<AgeTransform>().GetParent().name + " " + frame.GetComponent<AgeTransform>().GetParent().Position);
-            Debug.Log("Panel AgeTransform: " + name + " " + GetComponent<AgeTransform>().Position);
-            Debug.Log("Parent of Panel: " + GetComponent<AgeTransform>().GetParent().name + " " + GetComponent<AgeTransform>().GetParent().Position);
-            Debug.Log("OptionsPanel AgeTransform: " + optionsPanel.GetComponent<AgeTransform>().name + " " + optionsPanel.GetComponent<AgeTransform>().Position);
-            Debug.Log("OptionsPanel Parent (AgeTransform): " + optionsPanel.GetComponent<AgeTransform>().GetParent().name + " " + optionsPanel.GetComponent<AgeTransform>().GetParent().Position);
-            Debug.Log("OptionsPanel Parent Parent: " + optionsPanel.GetComponent<AgeTransform>().GetParent().GetParent().name + " " + optionsPanel.GetComponent<AgeTransform>().GetParent().GetParent().Position);
-            Debug.Log("Children of (AgeTransform) OptionsPanel:");
-            foreach (AgeTransform t in optionsPanel.GetComponent<AgeTransform>().GetChildren())
+
+            AgeTransform start = frame.GetComponent<AgeTransform>();
+            Debug.Log("=========================");
+            Debug.Log("Frame: Start: " + frame.name + " " + start.Position);
+            int depth = 1;
+            while (start.GetParent())
             {
-                Debug.Log("- " +  t.name + " " + t.Position);
+                Debug.Log("- Depth: " + depth + " " + start.GetParent().name + " " + start.GetParent().Position);
+                Debug.Log("- Components:");
+                foreach (Component c in start.GetParent().GetComponents<Component>())
+                {
+                    Debug.Log("-- " + c);
+                }
+                start = start.GetParent();
+                depth++;
+            }
+            start = optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>();
+            Debug.Log("=========================");
+            Debug.Log("Old Frame: Start: " + start.name + " " + start.Position);
+            depth = 1;
+            while (start.GetParent())
+            {
+                Debug.Log("- Depth: " + depth + " " + start.GetParent().name + " " + start.GetParent().Position);
+                Debug.Log("- Components:");
+                foreach (Component c in start.GetParent().GetComponents<Component>())
+                {
+                    Debug.Log("-- " + c);
+                }
+                start = start.GetParent();
+                depth++;
             }
             //frame.GetComponent<AgeTransform>().ForceHeight(optionsPanel.GetComponent<AgeTransform>().Height);
+
+            // Should set up each of the children to have identical positioning as the options panel
+            foreach (AgeTransform a in optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().GetChildren())
+            {
+                if (frame.transform.FindChild(a.name))
+                {
+                    frame.transform.FindChild(a.name).GetComponent<AgeTransform>().Position = a.Position;
+                }
+            }
 
             this.frame = frame;
         }
@@ -359,7 +511,7 @@ namespace DustDevilFramework
 
             GameObject toggleGroup = (GameObject)GameObject.Instantiate(oldObj);
             toggleGroup.name = Util.GetName(m, f);
-            toggleGroup.transform.parent = frame.transform.FindChild("3-RightPart");
+            toggleGroup.transform.parent = frame.transform.FindChild("3-RightPart").FindChild("ModSettingsConfig");
             Debug.Log("Toggle Group Object Created!");
 
             Debug.Log("New Parent: " + toggleGroup.transform.parent);
@@ -393,10 +545,11 @@ namespace DustDevilFramework
             label.GetComponent<AgePrimitiveLabel>().Text = Util.GetName(m, f);
             toggleGroup.GetComponent<AgeTransform>().Position = oldObj.GetComponent<AgeTransform>().Position;
             toggle.GetComponent<AgeTransform>().Position = oldObj.transform.GetChild(2).GetComponent<AgeTransform>().Position;
-            toggleGroup.GetComponent<AgeTransform>().Y = 0;
+            //toggleGroup.GetComponent<AgeTransform>().Y = 0;
             Debug.Log("Old Toggle Button AgeTfm: " + oldObj.transform.GetChild(2).GetComponent<AgeTransform>().Position);
             Debug.Log("New Toggle Button AgeTfm: " + toggle.GetComponent<AgeTransform>().Position);
-            //toggleGroup.GetComponent<AgeTransform>().Y += toggleYDisplacement - (settingSpacing + toggleGroup.GetComponent<AgeTransform>().Height) * fields.Count;
+            toggleGroup.GetComponent<AgeTransform>().Y = 0;
+            toggleGroup.GetComponent<AgeTransform>().Y += (settingSpacing + toggleGroup.GetComponent<AgeTransform>().Height) * fields.Count;
             //toggleGroup.GetComponent<AgeTransform>().ForceHeight(oldObj.GetComponent<AgeTransform>().Height * 2);
             Debug.Log("Old AgeTfm: " + oldObj.GetComponent<AgeTransform>().Position);
             Debug.Log("AgeTfm: " + toggleGroup.GetComponent<AgeTransform>().Position);

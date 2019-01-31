@@ -36,7 +36,10 @@ namespace DustDevilFramework
 
         private System.Collections.IEnumerator MainMenuPanel_OnLoad(On.MainMenuPanel.orig_OnLoad orig, MainMenuPanel self)
         {
-            SettingsPanel = ModSettingsPopupMenuPanel.Create(ModList);
+            if (SettingsPanel == null)
+            {
+                SettingsPanel = ModSettingsPopupMenuPanel.Create(ModList);
+            }
             System.Collections.IEnumerator temp = orig(self);
             yield return temp;
             AgePrimitiveLabel label = new DynData<MainMenuPanel>(self).Get<AgePrimitiveLabel>("versionLabel");
