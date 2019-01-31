@@ -133,8 +133,9 @@ namespace DustDevilFramework
         // Deletes all the children of a certain GameObject excluding the provided GameObject
         public static void DeleteChildrenExclusive(GameObject toDelete)
         {
-            foreach (Transform t in toDelete.transform)
+            for (int i = toDelete.transform.childCount - 1; i >= 0; i--)
             {
+                Transform t = toDelete.transform.GetChild(i);
                 DeleteChildrenInclusive(t.gameObject);
             }
         }
