@@ -271,13 +271,6 @@ namespace DustDevilFramework
                 Debug.Log("Attempting to show mod settings menu!");
                 SettingsPanel.Show(new object[0]);
             }
-            public void HideModSettingsMenu(GameObject o)
-            {
-                // Called when the ModMenu is closed.
-                // Just need to delete all the buttons and make sure everything is adequately removed
-                Debug.Log("Mod Settings Menu has been closed!");
-                // Also might want to disable mods here?
-            }
         }
     }
 }
