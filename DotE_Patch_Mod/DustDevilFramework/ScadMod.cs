@@ -13,25 +13,30 @@ namespace DustDevilFramework
 
         public ModSettings settings = new ModSettings("placeholder");
         public Type settingsType;
+        public Type PartialityModType;
+        public object PartialityModReference;
 
         public int MajorVersion = 1;
         public int MinorVersion = 0;
         public int Revision = 0;
 
-        public ScadMod(string name, Type settingsType)
+        public ScadMod(string name, Type settingsType, Type partialityModType)
         {
             this.name = name;
             settings = (ModSettings)settingsType.GetConstructor(new[] { typeof(string) }).Invoke(new object[] { name });
             this.settingsType = settingsType;
             path = name + "_log.txt";
+            PartialityModType = partialityModType;
         }
-        public ScadMod(string name)
+        public ScadMod(string name, Type partialityModType)
         {
             this.name = name;
             settings = new ModSettings(name);
             settingsType = typeof(ModSettings);
             path = name + "_log.txt";
+            PartialityModType = partialityModType;
         }
+        // Don't use this constructor unless you plan on setting settingsType and PartialityModType later!
         public ScadMod()
         {
             path = name + "_log.txt";

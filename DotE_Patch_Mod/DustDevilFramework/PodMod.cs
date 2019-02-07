@@ -23,7 +23,7 @@ namespace DustDevilFramework
         public abstract string[] GetUnavailableBlueprints();
         public abstract string[] GetUnavailableItems();
 
-        public PodMod(Type settingsType)
+        public PodMod(Type settingsType, Type partialityType)
         {
             name = GetName();
             PodSettings temp = (PodSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
@@ -35,6 +35,7 @@ namespace DustDevilFramework
                 temp.AssumedPod = GetAnimationPod();
                 temp.DungeonPod = GetDungeonPod();
             }
+            PartialityModType = partialityType;
         }
 
         public void Initialize()

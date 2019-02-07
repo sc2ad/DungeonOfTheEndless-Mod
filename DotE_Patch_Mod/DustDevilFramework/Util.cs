@@ -139,5 +139,59 @@ namespace DustDevilFramework
                 DeleteChildrenInclusive(t.gameObject);
             }
         }
+        // Logs lots of information about a given AgeTransform (in order to resolve issues with alignment)
+        public static void LogVariousAgeTransformInfo(AgeTransform trans)
+        {
+            Debug.Log("========================================== LOG FOR: " + trans.name + " ==========================================");
+            Debug.Log("Anchored: " + trans.Anchored);
+            Debug.Log("Attach Bottom: " + trans.AttachBottom);
+            Debug.Log("Attach Left: " + trans.AttachLeft);
+            Debug.Log("Attach Right: " + trans.AttachRight);
+            Debug.Log("Attach Top: " + trans.AttachTop);
+            Debug.Log("AutoResizeHeight: " + trans.AutoResizeHeight);
+            Debug.Log("AutoResizeWidth: " + trans.AutoResizeWidth);
+            Debug.Log("ChildHeight: " + trans.ChildHeight);
+            Debug.Log("ChildWidth: " + trans.ChildWidth);
+            Debug.Log("ChildComparer: " + trans.ChildrenComparer);
+            Debug.Log("FixedSize: " + trans.FixedSize);
+            trans.ComputeGlobalPosition(out Rect temp);
+            Debug.Log("GlobalPosition: " + temp);
+            Debug.Log("DirtyPosition: " + trans.DirtyPosition);
+            Debug.Log("RenderedPosition: " + trans.GetRenderedPosition());
+            Debug.Log("HasModifiers: " + trans.HasModifiers);
+            Debug.Log("Height: " + trans.Height);
+            Debug.Log("HorizontalMargin: " + trans.HorizontalMargin);
+            Debug.Log("HorizontalSpacing: " + trans.HorizontalSpacing);
+            Debug.Log("ModifiersRunning: " + trans.ModifiersRunning);
+            Debug.Log("NoOverroll: " + trans.NoOverroll);
+            Debug.Log("Percent Bottom: " + trans.PercentBottom);
+            Debug.Log("Percent Left: " + trans.PercentLeft);
+            Debug.Log("Percent Right: " + trans.PercentRight);
+            Debug.Log("Percent Top: " + trans.PercentTop);
+            Debug.Log("PivotMode: " + trans.PivotMode);
+            Debug.Log("PivotOffset: " + trans.PivotOffset);
+            Debug.Log("PixelMarginBottom: " + trans.PixelMarginBottom);
+            Debug.Log("PixelMarginLeft: " + trans.PixelMarginLeft);
+            Debug.Log("PixelMarginRight: " + trans.PixelMarginRight);
+            Debug.Log("PixelMarginTop: " + trans.PixelMarginTop);
+            Debug.Log("PixelOffsetBottom: " + trans.PixelOffsetBottom);
+            Debug.Log("PixelOffsetLeft: " + trans.PixelOffsetLeft);
+            Debug.Log("PixelOffsetRight: " + trans.PixelOffsetRight);
+            Debug.Log("PixelOffsetTop: " + trans.PixelOffsetTop);
+            Debug.Log("Position: " + trans.Position);
+            Debug.Log("PropagateDirty: " + trans.PropagateDirty);
+            Debug.Log("TableArrangement: " + trans.TableArrangement);
+            Debug.Log("Tag: " + trans.tag);
+            Debug.Log("TiltAngle: " + trans.TiltAngle);
+            Debug.Log("UniformScale: " + trans.UniformScale);
+            Debug.Log("VerticalMargin: " + trans.VerticalMargin);
+            Debug.Log("VerticalSpacing: " + trans.VerticalSpacing);
+            Debug.Log("Visible: " + trans.Visible);
+            Debug.Log("Width: " + trans.Width);
+            Debug.Log("X: " + trans.X);
+            Debug.Log("Y: " + trans.Y);
+            Debug.Log("Z: " + trans.Z);
+            Debug.Log("====================================================================================");
+        }
     }
 }

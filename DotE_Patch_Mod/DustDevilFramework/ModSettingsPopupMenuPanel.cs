@@ -17,6 +17,7 @@ namespace DustDevilFramework
         private OptionsPanel optionsPanel;
         private GameObject frame;
         List<ScadMod> mods;
+        List<ScadMod> modsToModify;
         List<FieldInfo> Fields;
         List<FieldInfo> VisibleFields;
 
@@ -29,6 +30,7 @@ namespace DustDevilFramework
             Debug.Log("Constructing a ModSettings Popup Menu Panel for a GameObject!");
             Fields = new List<FieldInfo>();
             VisibleFields = new List<FieldInfo>();
+            modsToModify = new List<ScadMod>();
             Debug.Log("Construction of Component for GO Complete!");
         }
         private void SetupModlist(List<ScadMod> m)
@@ -66,37 +68,10 @@ namespace DustDevilFramework
             instanceForGO.transform.SetParent(obj.transform.parent);
             instanceForGO.transform.GetComponent<AgeTransform>().Position = old.AgeTransform.Position;
 
-            Debug.Log("Current Parent: " + instanceForGO.transform.parent);
             instanceForGO.SetupOptionsPanel(old);
             instanceForGO.SetupModlist(m);
 
-            Debug.Log("Components of Self:");
-            foreach (Component _ in o.GetComponents(typeof(Component)))
-            {
-                Debug.Log("- " + _);
-            }
-            Debug.Log("Parent: " + o.transform.parent);
-            Debug.Log("Parent of Parent: " + o.transform.parent.parent);
-            Debug.Log("Components of 1st Parent:");
-            foreach (Component _ in o.transform.parent.GetComponents(typeof(Component)))
-            {
-                Debug.Log("- " + _);
-            }
-            Debug.Log("Components of 2nd Parent:");
-            foreach (Component _ in o.transform.parent.parent.GetComponents(typeof(Component)))
-            {
-                Debug.Log("- " + _);
-            }
             return instanceForGO;
-
-            //settingsPanel.Show(new object[0]);
-            //Parent: GameResolutionScaler(UnityEngine.Transform)
-            //Components:
-            //- 50 - OptionsPanel_Mouse(Clone)(UnityEngine.Transform)
-            //- 50 - OptionsPanel_Mouse(Clone)(AgeTransform)
-            //- 50 - OptionsPanel_Mouse(Clone)(OptionsPanel)
-            //- 50 - OptionsPanel_Mouse(Clone)(Singleton)
-            //- 50 - OptionsPanel_Mouse(Clone)(AgeModifierAlpha)
         }
         protected override void Awake()
         {
@@ -180,110 +155,6 @@ namespace DustDevilFramework
                 Debug.Log("==========================================");
             }
         }
-        private void LogVariousAgeTransformInfo(AgeTransform trans)
-        {
-            Debug.Log("========================================== LOG FOR: " + trans.name + " ==========================================");
-            Debug.Log("Anchored: " + trans.Anchored);
-            Debug.Log("Attach Bottom: " + trans.AttachBottom);
-            Debug.Log("Attach Left: " + trans.AttachLeft);
-            Debug.Log("Attach Right: " + trans.AttachRight);
-            Debug.Log("Attach Top: " + trans.AttachTop);
-            Debug.Log("AutoResizeHeight: " + trans.AutoResizeHeight);
-            Debug.Log("AutoResizeWidth: " + trans.AutoResizeWidth);
-            Debug.Log("ChildHeight: " + trans.ChildHeight);
-            Debug.Log("ChildWidth: " + trans.ChildWidth);
-            Debug.Log("ChildComparer: " + trans.ChildrenComparer);
-            Debug.Log("FixedSize: " + trans.FixedSize);
-            trans.ComputeGlobalPosition(out Rect temp);
-            Debug.Log("GlobalPosition: " + temp);
-            Debug.Log("DirtyPosition: " + trans.DirtyPosition);
-            Debug.Log("RenderedPosition: " + trans.GetRenderedPosition());
-            Debug.Log("HasModifiers: " + trans.HasModifiers);
-            Debug.Log("Height: " + trans.Height);
-            Debug.Log("HorizontalMargin: " + trans.HorizontalMargin);
-            Debug.Log("HorizontalSpacing: " + trans.HorizontalSpacing);
-            Debug.Log("ModifiersRunning: " + trans.ModifiersRunning);
-            Debug.Log("NoOverroll: " + trans.NoOverroll);
-            Debug.Log("Percent Bottom: " + trans.PercentBottom);
-            Debug.Log("Percent Left: " + trans.PercentLeft);
-            Debug.Log("Percent Right: " + trans.PercentRight);
-            Debug.Log("Percent Top: " + trans.PercentTop);
-            Debug.Log("PivotMode: " + trans.PivotMode);
-            Debug.Log("PivotOffset: " + trans.PivotOffset);
-            Debug.Log("PixelMarginBottom: " + trans.PixelMarginBottom);
-            Debug.Log("PixelMarginLeft: " + trans.PixelMarginLeft);
-            Debug.Log("PixelMarginRight: " + trans.PixelMarginRight);
-            Debug.Log("PixelMarginTop: " + trans.PixelMarginTop);
-            Debug.Log("PixelOffsetBottom: " + trans.PixelOffsetBottom);
-            Debug.Log("PixelOffsetLeft: " + trans.PixelOffsetLeft);
-            Debug.Log("PixelOffsetRight: " + trans.PixelOffsetRight);
-            Debug.Log("PixelOffsetTop: " + trans.PixelOffsetTop);
-            Debug.Log("Position: " + trans.Position);
-            Debug.Log("PropagateDirty: " + trans.PropagateDirty);
-            Debug.Log("TableArrangement: " + trans.TableArrangement);
-            Debug.Log("Tag: " + trans.tag);
-            Debug.Log("TiltAngle: " + trans.TiltAngle);
-            Debug.Log("UniformScale: " + trans.UniformScale);
-            Debug.Log("VerticalMargin: " + trans.VerticalMargin);
-            Debug.Log("VerticalSpacing: " + trans.VerticalSpacing);
-            Debug.Log("Visible: " + trans.Visible);
-            Debug.Log("Width: " + trans.Width);
-            Debug.Log("X: " + trans.X);
-            Debug.Log("Y: " + trans.Y);
-            Debug.Log("Z: " + trans.Z);
-            Debug.Log("====================================================================================");
-        }
-        private void RecalculatePositions()
-        {
-            //frame.transform.GetComponent<AgeTransform>().Position = optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().Position;
-            LogVariousAgeTransformInfo(frame.GetComponent<AgeTransform>());
-            LogVariousAgeTransformInfo(optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>());
-            frame.transform.FindChild("3-RightPart").GetComponent<AgeTransform>().Position = optionsPanel.transform.FindChild("1-Frame").FindChild("3-RightPart").GetComponent<AgeTransform>().Position;
-            frame.transform.FindChild("3-RightPart").FindChild("ModSettingsConfig").GetComponent<AgeTransform>().Position = optionsPanel.transform.FindChild("1-Frame").FindChild("3-RightPart").FindChild("2-ResolutionConfig").GetComponent<AgeTransform>().Position;
-
-            foreach (ScadMod m in mods)
-            {
-                Type basicType = m.settingsType;
-                List<FieldInfo> fields = new List<FieldInfo>();
-                while (!basicType.Equals(typeof(object)))
-                {
-
-                    Debug.Log("Attempting to find inheritance tree with settings type: " + basicType);
-
-                    fields.AddRange(basicType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
-                    Debug.Log("Found: " + fields.Count + " so far.");
-                    if (basicType.Equals(typeof(ModSettings)))
-                    {
-                        Debug.Log("Found a total of: " + fields.Count + " fields");
-                        break;
-                    }
-                    if (basicType.BaseType.Equals(typeof(object)))
-                    {
-                        // You must provide a Settings class that extends ModSettings as the Settings Type!
-                        Debug.LogError("You must provide a Settings class that extends ModSettings as the Settings Type for Mod: " + m.name);
-                        break;
-                    }
-                    basicType = basicType.BaseType;
-                }
-                foreach (FieldInfo f in VisibleFields)
-                {
-                    for (int i = 0; i < fields.Count; i++)
-                    {
-                        FieldInfo f2 = fields[i];
-                        if (f.Equals(f2))
-                        {
-                            // The field exists as a button, recalculate its position.
-                            Transform t = frame.transform.FindChild("3-RightPart").FindChild("ModSettingsConfig").FindChild(m.name + " - " + f.Name);
-
-                            //t.GetComponent<AgeTransform>().PixelMarginTop = i * (settingSpacing + t.GetComponent<AgeTransform>().Height);
-                            LogVariousAgeTransformInfo(t.GetComponent<AgeTransform>());
-                            LogVariousAgeTransformInfo(optionsPanel.transform.FindChild("1-Frame").FindChild("3-RightPart").FindChild("2-ResolutionConfig").FindChild("24-VSyncGroup").GetComponent<AgeTransform>());
-                            //t.GetComponent<AgeTransform>().Position = temp;
-                        }
-                    }
-                }
-            }
-        }
         public override void RefreshContent()
         {
             base.RefreshContent();
@@ -296,31 +167,17 @@ namespace DustDevilFramework
         public override void Show(params object[] parameters)
         {
             Debug.Log("Showing ModSettings Panel!");
-            //RecalculatePositions();
 
-            //GameObject temp = frame.transform.FindChild("3-RightPart").FindChild("ModSettingsConfig").FindChild("TrueIGT - Enabled").gameObject;
-            //if (temp)
-            //{
-            //    GameObject.DestroyImmediate(temp);
-            //}
-            //frame.transform.FindChild("3-RightPart").FindChild("ModSettingsConfig").FindChild("TrueIGT - Enabled").transform.Translate(new Vector3(0, 0.0001f, 0));
-            RecalculatePositions();
             base.Show(parameters);
-            // TEMP
 
-            //optionsPanel.Show(parameters);
-            //GameResolutionAgeScaler scaler = optionsPanel.transform.parent.GetComponent<GameResolutionAgeScaler>();
-            //// Hopefully fixes the scaling problem!
-            //typeof(GameResolutionAgeScaler).GetMethod("ApplyCurrentGameResolution", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(scaler, new object[0]);
         }
         protected override IEnumerator OnShow(params object[] parameters)
         {
             Debug.Log("OnShow!");
             saveSettings = false;
-            LogFrame();
+            modsToModify = new List<ScadMod>();
             yield return base.OnShow(parameters);
             Debug.Log("AFTER SHOW!");
-            LogFrame();
             yield break;
         }
         public override void Hide(bool instant = false)
@@ -332,6 +189,18 @@ namespace DustDevilFramework
                 foreach (ScadMod m in mods)
                 {
                     m.settings.WriteSettings();
+                }
+                foreach (ScadMod m in modsToModify)
+                {
+                    if (m.settings.Enabled)
+                    {
+                        Debug.Log("Mod: " + m.PartialityModType.GetMethod("ToString").Invoke(m.PartialityModReference, new object[0]) + " is being Loaded!");
+                        m.PartialityModType.GetMethod("OnLoad").Invoke(m.PartialityModReference, new object[0]);
+                    } else
+                    {
+                        Debug.Log("Mod: " + m.PartialityModType.GetMethod("ToString").Invoke(m.PartialityModReference, new object[0]) + " is being UnLoaded!");
+                        m.PartialityModType.GetMethod("UnLoad").Invoke(m.PartialityModReference, new object[0]);
+                    }
                 }
                 Debug.Log("Wrote settings to files!");
             }
@@ -368,53 +237,6 @@ namespace DustDevilFramework
         {
             saveSettings = true;
             Hide();
-        }
-        private void LogFrame()
-        {
-            Debug.Log("============================== FRAME LOG");
-            Debug.Log("Frame: " + frame + " AgeTfm: " + frame.GetComponent<AgeTransform>().Position);
-            Debug.Log("Children:");
-            foreach (AgeTransform a in frame.GetComponent<AgeTransform>().GetChildren())
-            {
-                Debug.Log("-" + a.name + " " + a.Position);
-                Debug.Log("-Children:");
-                foreach (AgeTransform q in a.GetChildren())
-                {
-                    Debug.Log("--" + q.name + " " + q.Position);
-                    if (q.name == "ModSettingsConfig")
-                    {
-                        Debug.Log("--Children:");
-                        foreach (AgeTransform z in q.GetChildren())
-                        {
-                            Debug.Log("---" + z.name + " " + z.Position);
-                        }
-                    }
-                }
-            }
-            Debug.Log("Frame Anchor: " + frame.GetComponent<AgeTransform>().Anchored);
-            Debug.Log("SettingsPanel Anchor: " + GetComponent<AgeTransform>().Anchored);
-            Debug.Log("Options Frame: " + optionsPanel.transform.FindChild("1-Frame") + " AgeTfm: " + optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().Position);
-            Debug.Log("Children:");
-            foreach (AgeTransform a in optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().GetChildren())
-            {
-                Debug.Log("-" + a.name + " " + a.Position);
-                Debug.Log("-Children:");
-                foreach (AgeTransform q in a.GetChildren())
-                {
-                    Debug.Log("--" + q.name + " " + q.Position);
-                    if (q.name == "2-ResolutionConfig")
-                    {
-                        Debug.Log("--Children:");
-                        foreach (AgeTransform z in q.GetChildren())
-                        {
-                            Debug.Log("---" + z.name + " " + z.Position);
-                        }
-                    }
-                }
-            }
-            Debug.Log("Options Frame Anchor: " + optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().Anchored);
-            Debug.Log("OptionsPanel Anchor: " + optionsPanel.GetComponent<AgeTransform>().Anchored);
-            Debug.Log("============================== FRAME LOG");
         }
         public void CreateFrame()
         {
@@ -480,16 +302,6 @@ namespace DustDevilFramework
             cancel.OnActivateObject = gameObject;
             confirm.OnActivateObject = gameObject;
             reset.OnActivateObject = gameObject;
-            
-
-            // Should set up each of the children to have identical positioning as the options panel
-            foreach (AgeTransform a in optionsPanel.transform.FindChild("1-Frame").GetComponent<AgeTransform>().GetChildren())
-            {
-                if (frame.transform.FindChild(a.name))
-                {
-                    frame.transform.FindChild(a.name).GetComponent<AgeTransform>().Position = a.Position;
-                }
-            }
 
             this.frame = frame;
         }
@@ -580,7 +392,12 @@ namespace DustDevilFramework
                         // This is the field that needs to be modified.
                         // It should be a bool, if the button is working as intended!
                         Debug.Log("Setting value of: " + Util.GetName(mod, f) + " to: " + o.GetComponent<AgeControlToggle>().State + " in settings type: " + mod.settingsType + " in mod: " + mod.name);
+                        bool prevEnabled = mod.settings.Enabled;
                         f.SetValue(mod.settings, o.GetComponent<AgeControlToggle>().State);
+                        if (prevEnabled != mod.settings.Enabled)
+                        {
+                            modsToModify.Add(mod);
+                        }
                         return;
                     }
                 }

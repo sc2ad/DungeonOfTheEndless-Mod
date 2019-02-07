@@ -62,11 +62,12 @@ namespace DustDevilFramework
 
         private bool displayedData = false;
 
-        public CustomHero(Type settingsType)
+        public CustomHero(Type settingsType, Type partialityType)
         {
             name = GetRealName();
             settings = (CustomItemSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
             this.settingsType = settingsType;
+            PartialityModType = partialityType;
         }
 
         public void Initialize()
@@ -90,7 +91,7 @@ namespace DustDevilFramework
             }
             Log("Initialized!");
         }
-        public void Load()
+        public new void Load()
         {
             base.Load();
             if (settings.Enabled)
@@ -102,7 +103,7 @@ namespace DustDevilFramework
                 On.Hero.ModifyLocalActiveHeroes += Hero_ModifyLocalActiveHeroes;
             }
         }
-        public void UnLoad()
+        public new void UnLoad()
         {
             base.UnLoad();
 
