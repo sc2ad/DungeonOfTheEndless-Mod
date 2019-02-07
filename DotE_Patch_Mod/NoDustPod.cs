@@ -17,7 +17,6 @@ namespace NoDustPod_Mod
 
         public override void Init()
         {
-            mod.PartialityModReference = this;
             mod.Initialize();
         }
         public override void OnLoad()

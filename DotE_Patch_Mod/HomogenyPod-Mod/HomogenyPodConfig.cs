@@ -9,7 +9,7 @@ namespace HomogenyPod_Mod
 {
     class HomogenyPodConfig : PodMod
     {
-        public HomogenyPodConfig() : base(typeof(HomogenyPodSettings))
+        public HomogenyPodConfig(Type partialityType) : base(typeof(HomogenyPodSettings), partialityType)
         {
         }
 

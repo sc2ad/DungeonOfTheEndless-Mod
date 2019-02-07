@@ -10,10 +10,11 @@ namespace DustlessPod_Mod
 {
     class DustlessPod : PartialityMod
     {
-        DustlessPodConfig mod = new DustlessPodConfig();
+        DustlessPodConfig mod = new DustlessPodConfig(typeof(DustlessPod));
 
         public override void Init()
         {
+            mod.PartialityModReference = this;
             mod.Initialize();
 
             mod.settings.ReadSettings();

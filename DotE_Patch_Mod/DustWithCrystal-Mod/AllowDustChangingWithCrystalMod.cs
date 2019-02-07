@@ -10,12 +10,11 @@ namespace DustWithCrystal_Mod
 {
     class AllowDustChangingWithCrystalMod : PartialityMod
     {
-        ScadMod mod = new ScadMod("DustAfterCrystal");
+        ScadMod mod = new ScadMod("DustAfterCrystal", typeof(AllowDustChangingWithCrystalMod));
         public override void Init()
         {
+            mod.PartialityModReference = this;
             mod.Initialize();
-
-            // Setup default values for config
 
             mod.settings.ReadSettings();
 

@@ -21,6 +21,7 @@ namespace ResourceLimiter_Mod
             ScadMod mod = new ScadMod("ResourceLimiter", typeof(ResourceLimiterSettings), typeof(ResourceLimiterMod));
             public override void Init()
             {
+                mod.PartialityModReference = this;
                 mod.Initialize();
 
                 mod.settings.ReadSettings();

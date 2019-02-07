@@ -14,7 +14,6 @@ namespace SimpleCheats_Mod
         ScadMod mod = new ScadMod("SimpleCheats", typeof(SimpleCheatsSettings), typeof(SimpleCheatsMod));
         public override void Init()
         {
-            mod.PartialityModReference = this;
             mod.Initialize();
 
             mod.settings.ReadSettings();

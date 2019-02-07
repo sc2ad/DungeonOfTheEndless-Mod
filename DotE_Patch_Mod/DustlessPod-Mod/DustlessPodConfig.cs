@@ -9,7 +9,7 @@ namespace DustlessPod_Mod
 {
     class DustlessPodConfig : PodMod
     {
-        public DustlessPodConfig() : base(typeof(DustlessPodSettings))
+        public DustlessPodConfig(Type partialityType) : base(typeof(DustlessPodSettings), partialityType)
         {
         }
 

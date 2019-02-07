@@ -22,7 +22,6 @@ namespace Ping_Mod
 
         public override void Init()
         {
-            mod.PartialityModReference = this;
             mod.Initialize();
 
             mod.settings.ReadSettings();

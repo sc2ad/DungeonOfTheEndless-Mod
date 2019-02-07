@@ -11,7 +11,7 @@ namespace OPSashaItem_Mod
 {
     class ShinyItemConfig : CustomItem
     {
-        public ShinyItemConfig() : base(typeof(ShinyItemSettings))
+        public ShinyItemConfig(Type partialityType) : base(typeof(ShinyItemSettings), partialityType)
         {
         }
 

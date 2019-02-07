@@ -5,10 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotE_Combo_Mod
+namespace HomogenyPod_Mod
 {
     class HomogenyPodConfig : PodMod
     {
+        public HomogenyPodConfig(Type partialityType) : base(typeof(HomogenyPodSettings), partialityType)
+        {
+        }
+
         public override string GetAnimationPod()
         {
             return "Armory";

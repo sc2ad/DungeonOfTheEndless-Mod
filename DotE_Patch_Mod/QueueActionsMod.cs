@@ -21,7 +21,6 @@ namespace QueueActions_Mod
 
         public override void Init()
         {
-            mod.PartialityModReference = this;
             mod.Initialize();
 
             mod.settings.ReadSettings();

@@ -12,13 +12,14 @@ namespace ExitFinder_Mod
 {
     public class ExitFinderMod : PartialityMod
     {
-        ScadMod mod = new ScadMod("ExitFinder", typeof(ExitFinderSettings));
+        ScadMod mod = new ScadMod("ExitFinder", typeof(ExitFinderSettings), typeof(ExitFinderMod));
         private static bool DisplayExit = true;
 
         private static Room ExitRoom;
 
         public override void Init()
         {
+            mod.PartialityModReference = this;
             mod.Initialize();
 
             mod.settings.ReadSettings();
