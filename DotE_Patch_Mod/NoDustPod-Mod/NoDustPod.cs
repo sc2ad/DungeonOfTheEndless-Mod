@@ -13,20 +13,26 @@ namespace NoDustPod_Mod
 {
     class NoDustPod : PartialityMod
     {
-        NoDustPodConfig mod = new NoDustPodConfig();
+        NoDustPodConfig mod = new NoDustPodConfig(typeof(NoDustPod));
 
         public override void Init()
         {
+            mod.PartialityModReference = this;
             mod.Initialize();
         }
         public override void OnLoad()
         {
             mod.Load();
 
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
                 On.Dungeon.DoAddDust += Dungeon_DoAddDust;
             }
+        }
+        public void UnLoad()
+        {
+            mod.UnLoad();
+            On.Dungeon.DoAddDust -= Dungeon_DoAddDust;
         }
 
         private void Dungeon_DoAddDust(On.Dungeon.orig_DoAddDust orig, Dungeon self, float dustAmount, bool displayFeedback, bool triggerDungeonFIDSChangedEvent)

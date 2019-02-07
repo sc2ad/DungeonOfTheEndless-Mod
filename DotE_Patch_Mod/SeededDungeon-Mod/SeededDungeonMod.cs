@@ -11,27 +11,21 @@ namespace SeededDungeon_Mod
 {
     public class SeededDungeonMod : PartialityMod
     {
-        ScadMod mod = new ScadMod("SeededDungeon");
+        ScadMod mod = new ScadMod("SeededDungeon", typeof(SeededDungeonSettings), typeof(SeededDungeonMod));
         Dictionary<int, int> seeds = new Dictionary<int, int>();
         public override void Init()
         {
-            mod.default_config = "# Modify this file to change various settings of the SeededDungeon Mod for DotE.\n" + mod.default_config;
+            mod.PartialityModReference = this;
             mod.Initialize();
 
-            // Setup default values for config
-            mod.Values.Add("Log seeds", "true");
-            mod.Values.Add("SeedLog Path", "SeedLog.txt");
-            mod.Values.Add("Read From SeedLog if possible", "false");
-
-
-            mod.ReadConfig();
+            mod.settings.ReadSettings();
 
             mod.Log("Initialized!");
         }
         public override void OnLoad()
         {
             mod.Load();
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
                 // When the level loads, need to instead load a seed from config, for example
                 // So the only things that seem to exist in the same locations are the layouts, layout sizes, and exits
@@ -40,10 +34,16 @@ namespace SeededDungeon_Mod
                 On.DungeonGenerator2.GenerateDungeonCoroutine += DungeonGenerator2_GenerateDungeonCoroutine;
                 On.Dungeon.FillDungeonAsync += Dungeon_FillDungeonAsync;
             }
-            if (Convert.ToBoolean(mod.Values["Read From SeedLog if possible"]))
+            if ((mod.settings as SeededDungeonSettings).ReadFromSeedLog)
             {
                 ReadSeeds();
             }
+        }
+        public void UnLoad()
+        {
+            mod.UnLoad();
+            On.DungeonGenerator2.GenerateDungeonCoroutine -= DungeonGenerator2_GenerateDungeonCoroutine;
+            On.Dungeon.FillDungeonAsync -= Dungeon_FillDungeonAsync;
         }
 
         private System.Collections.IEnumerator Dungeon_FillDungeonAsync(On.Dungeon.orig_FillDungeonAsync orig, Dungeon self)
@@ -69,7 +69,7 @@ namespace SeededDungeon_Mod
                 int seed = new DynData<DungeonGenerator2>(self).Get<int>("randomSeed");
                 mod.Log("Adding a seed to the seeds dictionary: " + seed);
                 seeds.Add(level, seed);
-                if (Convert.ToBoolean(mod.Values["Log seeds"]))
+                if ((mod.settings as SeededDungeonSettings).LogSeeds)
                 {
                     LogSeeds();
                 }
@@ -83,11 +83,11 @@ namespace SeededDungeon_Mod
             {
                 text += "Level: " + level + " seed: " + seeds[level] + "\n";
             }
-            System.IO.File.WriteAllText(mod.Values["SeedLog Path"], text);
+            System.IO.File.WriteAllText((mod.settings as SeededDungeonSettings).SeedLogPath, text);
         }
         private void ReadSeeds()
         {
-            string[] lines = System.IO.File.ReadAllLines(mod.Values["SeedLog Path"]);
+            string[] lines = System.IO.File.ReadAllLines((mod.settings as SeededDungeonSettings).SeedLogPath);
             foreach (string line in lines)
             {
                 if (line.IndexOf("Level: ") == -1 || line.IndexOf(" seed: ") == - 1)
@@ -113,7 +113,7 @@ namespace SeededDungeon_Mod
         private void ReadRoomData()
         {
             mod.Log("Reading room data...");
-            string[] lines = System.IO.File.ReadAllLines(mod.Values["RoomData Path"]);
+            string[] lines = System.IO.File.ReadAllLines((mod.settings as SeededDungeonSettings).RoomDataPath);
             // Need to somehow set various rooms' data to what is provided in this data
         }
         private List<Room> GetRoomList(Dungeon d)

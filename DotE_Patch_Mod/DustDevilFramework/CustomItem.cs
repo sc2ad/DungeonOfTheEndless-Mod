@@ -40,20 +40,34 @@ namespace DustDevilFramework
         public abstract string GetRealName();
         public abstract string GetRealDescription();
 
-        public CustomItem()
+        public CustomItem(Type settingsType, Type partialityType)
         {
             name = GetRealName();
+            settings = (CustomItemSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
+            this.settingsType = settingsType;
+            PartialityModType = partialityType;
+            // NEED TO FIGURE OUT A WAY OF PASSING IN THE SETTINGS TYPE
+            // THIS IS SO THE SETTINGS IS PROPERLY CONSTRUCTED INTO SCADMOD
+            /*
+             * IDEAS:
+             * 1. MAKE A CustomItemsSettings CLASS AND HAVE THIS USE THAT AS A CONSTRUCTOR
+             * - THIS WOULD INCLUDE THE BASELINE SETTINGS DATA FOR CUSTOMITEMS (WHICH IS JUST ENABLED)
+             * 2. USE EXISTING ModSettings CLASS, BUT NEED TO HAVE A BETTER WAY OF DEALING WITH DEFAULTS
+             * - THIS IS BECAUSE DEFAULT SETTINGS ARE PAINFULLY POOR
+             * - FOR EXAMPLE: PODMOD NEEDS TO HAVE DEFAULT CONFIG OF CONTAINING ASSUMEDPOD AND GENERATIONPOD
+             * 
+             * HOW DO I WANT TO DO THIS?
+             */
         }
 
         public void Initialize()
         {
             path = GetRealName() + "_log.txt";
-            config = GetRealName() + "_config.txt";
-            default_config = "# Modify this file to change various settings of the " + GetRealName() + " mod for DotE.\n" + default_config;
             base.Initialize();
 
-            ReadConfig();
-            if (Convert.ToBoolean(Values["Enabled"]))
+            settings.ReadSettings();
+
+            if (settings.Enabled)
             {
                 Log("Attempting to create Localization changes!");
                 CreateLocalizationChanges();
@@ -71,10 +85,15 @@ namespace DustDevilFramework
         public void Load()
         {
             base.Load();
-            if (Convert.ToBoolean(Values["Enabled"]))
+            if (settings.Enabled)
             {
                 On.Session.Update += Session_Update;
             }
+        }
+        public void UnLoad()
+        {
+            base.UnLoad();
+            On.Session.Update -= Session_Update;
         }
 
         private void Session_Update(On.Session.orig_Update orig, Session self)

@@ -85,9 +85,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="QueueActionsSettings.cs" />
     <Compile Include="QueueData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueueActionsMods.cs" />
+    <Compile Include="QueueActionsMod.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

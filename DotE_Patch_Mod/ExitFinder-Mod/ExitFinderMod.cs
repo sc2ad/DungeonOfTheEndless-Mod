@@ -12,32 +12,34 @@ namespace ExitFinder_Mod
 {
     public class ExitFinderMod : PartialityMod
     {
-        ScadMod mod = new ScadMod("ExitFinder");
+        ScadMod mod = new ScadMod("ExitFinder", typeof(ExitFinderSettings), typeof(ExitFinderMod));
         private static bool DisplayExit = true;
 
         private static Room ExitRoom;
 
         public override void Init()
         {
-            mod.default_config = "# Modify this file to change various settings of the ExitFinder Mod for DotE.\n" + mod.default_config;
+            mod.PartialityModReference = this;
             mod.Initialize();
 
-            // Setup default values for config
-            mod.Values.Add("DisplayExit", "True");
-            mod.Values.Add("Key", @"Backslash");
-
-            mod.ReadConfig();
+            mod.settings.ReadSettings();
 
             mod.Log("Initialized!");
         }
         public override void OnLoad()
         {
             mod.Load();
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
                 On.Session.Update += Session_Update;
                 On.Dungeon.SpawnExit += Dungeon_SpawnExit;
             }
+        }
+        public void UnLoad()
+        {
+            mod.UnLoad();
+            On.Session.Update -= Session_Update;
+            On.Dungeon.SpawnExit -= Dungeon_SpawnExit;
         }
 
         private void Dungeon_SpawnExit(On.Dungeon.orig_SpawnExit orig, Dungeon self, Room spawnRoom)
@@ -49,7 +51,7 @@ namespace ExitFinder_Mod
         private void Session_Update(On.Session.orig_Update orig, Session self)
         {
             orig(self);
-            KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), mod.Values["Key"]);
+            KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), (mod.settings as ExitFinderSettings).Key);
             if (Input.GetKeyDown(key))
             {
                 try

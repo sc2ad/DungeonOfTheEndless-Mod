@@ -11,6 +11,9 @@ namespace ShinyHero_Mod
 {
     class ShinyHeroConfig : CustomHero
     {
+        public ShinyHeroConfig(Type partialityType) : base(typeof(ShinyHeroSettings), partialityType)
+        {
+        }
         public override string GetArchetype()
         {
             return "A Guy";

@@ -63,12 +63,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomHero.cs" />
+    <Compile Include="CustomHeroSettings.cs" />
     <Compile Include="CustomItem.cs" />
+    <Compile Include="CustomItemSettings.cs" />
+    <Compile Include="ModSettingsPopupMenuPanel.cs" />
     <Compile Include="DustDevil.cs" />
+    <Compile Include="ModSettings.cs" />
     <Compile Include="PodMod.cs" />
+    <Compile Include="PodSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScadMod.cs" />
     <Compile Include="SimDescriptorWrapper.cs" />
+    <Compile Include="Util.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -87,6 +87,7 @@
   <ItemGroup>
     <Compile Include="NoDustPod.cs" />
     <Compile Include="NoDustPodConfig.cs" />
+    <Compile Include="NoDustPodSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

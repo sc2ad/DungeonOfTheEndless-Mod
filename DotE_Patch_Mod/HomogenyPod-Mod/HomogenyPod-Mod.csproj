@@ -87,6 +87,7 @@
   <ItemGroup>
     <Compile Include="HomogenyPod.cs" />
     <Compile Include="HomogenyPodConfig.cs" />
+    <Compile Include="HomogenyPodSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

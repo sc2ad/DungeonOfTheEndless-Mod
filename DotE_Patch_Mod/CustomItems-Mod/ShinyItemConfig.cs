@@ -11,6 +11,10 @@ namespace OPSashaItem_Mod
 {
     class ShinyItemConfig : CustomItem
     {
+        public ShinyItemConfig(Type partialityType) : base(typeof(ShinyItemSettings), partialityType)
+        {
+        }
+
         public override string GetAttackType()
         {
             return "FireGun";

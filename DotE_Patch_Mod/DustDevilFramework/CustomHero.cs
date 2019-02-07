@@ -62,20 +62,21 @@ namespace DustDevilFramework
 
         private bool displayedData = false;
 
-        public CustomHero()
+        public CustomHero(Type settingsType, Type partialityType)
         {
             name = GetRealName();
+            settings = (CustomItemSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
+            this.settingsType = settingsType;
+            PartialityModType = partialityType;
         }
 
         public void Initialize()
         {
             path = GetRealName() + "_log.txt";
-            config = GetRealName() + "_config.txt";
-            default_config = "# Modify this file to change various settings of the " + GetRealName() + " mod for DotE.\n" + default_config;
             base.Initialize();
 
-            ReadConfig();
-            if (Convert.ToBoolean(Values["Enabled"]))
+            settings.ReadSettings();
+            if (settings.Enabled)
             {
                 Log("Attempting to create Localization changes!");
                 CreateLocalizationChanges();
@@ -90,10 +91,10 @@ namespace DustDevilFramework
             }
             Log("Initialized!");
         }
-        public void Load()
+        public new void Load()
         {
             base.Load();
-            if (Convert.ToBoolean(Values["Enabled"]))
+            if (settings.Enabled)
             {
                 On.SpriteAnimationRuntime2.OverrideClipsFromPath += SpriteAnimationRuntime2_OverrideClipsFromPath;
                 On.Session.Update += Session_Update;
@@ -101,6 +102,16 @@ namespace DustDevilFramework
                 On.UserProfile.GetSelectableHeroes += UserProfile_GetSelectableHeroes;
                 On.Hero.ModifyLocalActiveHeroes += Hero_ModifyLocalActiveHeroes;
             }
+        }
+        public new void UnLoad()
+        {
+            base.UnLoad();
+
+            On.SpriteAnimationRuntime2.OverrideClipsFromPath -= SpriteAnimationRuntime2_OverrideClipsFromPath;
+            On.Session.Update -= Session_Update;
+            On.UserProfile.Load -= UserProfile_Load;
+            On.UserProfile.GetSelectableHeroes -= UserProfile_GetSelectableHeroes;
+            On.Hero.ModifyLocalActiveHeroes -= Hero_ModifyLocalActiveHeroes;
         }
 
         private void Hero_ModifyLocalActiveHeroes(On.Hero.orig_ModifyLocalActiveHeroes orig, bool add, Hero hero)

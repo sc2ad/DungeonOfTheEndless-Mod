@@ -6,33 +6,34 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotE_Combo_Mod
+namespace DustWithCrystal_Mod
 {
     class AllowDustChangingWithCrystalMod : PartialityMod
     {
-        ScadMod mod = new ScadMod();
+        ScadMod mod = new ScadMod("DustAfterCrystal", typeof(AllowDustChangingWithCrystalMod));
         public override void Init()
         {
-            mod.path = @"DustAfterCrystal_log.txt";
-            mod.config = @"DustAfterCrystal_config.txt";
-            mod.default_config = "# Modify this file to change various settings of the DustAfterCrystal Mod for DotE.\n" + mod.default_config;
+            mod.PartialityModReference = this;
             mod.Initialize();
 
-            // Setup default values for config
-            
-
-            mod.ReadConfig();
+            mod.settings.ReadSettings();
 
             mod.Log("Initialized!");
         }
         public override void OnLoad()
         {
             mod.Load();
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
                 On.Room.CanBePowered_refString_bool_bool_bool_bool_bool += Room_CanBePowered;
                 On.Room.CanBeUnpowered += Room_CanBeUnpowered;
             }
+        }
+        public void UnLoad()
+        {
+            mod.UnLoad();
+            On.Room.CanBePowered_refString_bool_bool_bool_bool_bool -= Room_CanBePowered;
+            On.Room.CanBeUnpowered -= Room_CanBeUnpowered;
         }
 
         private bool Room_CanBeUnpowered(On.Room.orig_CanBeUnpowered orig, Room self, bool checkCrystalState, bool checkPoweringPlayer, bool checkPowerChangeCooldown, bool ignoreShipConfig, bool displayError)

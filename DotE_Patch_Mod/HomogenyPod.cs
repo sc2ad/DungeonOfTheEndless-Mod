@@ -9,11 +9,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotE_Combo_Mod
+namespace HomogenyPod_Mod
 {
     class HomogenyPod : PartialityMod
     {
-        HomogenyPodConfig mod = new HomogenyPodConfig();
+        HomogenyPodConfig mod = new HomogenyPodConfig(typeof(HomogenyPod));
 
         private int CurrentFloor = -1;
         private List<SelectedMob> CurrentMobs = new List<SelectedMob>();
@@ -26,10 +26,15 @@ namespace DotE_Combo_Mod
         {
             mod.Load();
 
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
                 On.Dungeon.SpawnMobs += Dungeon_SpawnMobs;
             }
+        }
+        public void UnLoad()
+        {
+            mod.UnLoad();
+            On.Dungeon.SpawnMobs -= Dungeon_SpawnMobs;
         }
 
         private System.Collections.IEnumerator Dungeon_SpawnMobs(On.Dungeon.orig_SpawnMobs orig, Dungeon self, Room spawnRoom, float roomDifficultyValue, MobSpawnType spawnType, StaticString eventType, List<SelectedMob> elligibleMobs, Action<int> spawnCountSetter)

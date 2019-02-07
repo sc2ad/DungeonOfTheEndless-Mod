@@ -78,15 +78,30 @@
   <ItemGroup>
     <Compile Include="AllowDustChangingWithCrystalMod.cs" />
     <Compile Include="CustomHeroMod.cs" />
+    <Compile Include="CustomHeroTestSettings.cs" />
     <Compile Include="DustGeneratorMod.cs" />
+    <Compile Include="DustGeneratorSettings.cs" />
     <Compile Include="DustlessPod.cs" />
     <Compile Include="DustlessPodConfig.cs" />
+    <Compile Include="DustlessPodSettings.cs" />
     <Compile Include="ExitFinderMod.cs" />
+    <Compile Include="ExitFinderSettings.cs" />
     <Compile Include="HomogenyPod.cs" />
     <Compile Include="HomogenyPodConfig.cs" />
-    <Compile Include="HomogenyPodUtil.cs" />
+    <Compile Include="HomogenyPodSettings.cs" />
+    <Compile Include="NoDustPod.cs" />
+    <Compile Include="NoDustPodConfig.cs" />
+    <Compile Include="NoDustPodSettings.cs" />
+    <Compile Include="PingMod.cs" />
+    <Compile Include="PingSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueueActionsMod.cs" />
+    <Compile Include="QueueActionsSettings.cs" />
+    <Compile Include="QueueData.cs" />
     <Compile Include="ResourceLimiterMod.cs" />
+    <Compile Include="ResourceLimiterSettings.cs" />
+    <Compile Include="SimpleCheatsMod.cs" />
+    <Compile Include="SimpleCheatsSettings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

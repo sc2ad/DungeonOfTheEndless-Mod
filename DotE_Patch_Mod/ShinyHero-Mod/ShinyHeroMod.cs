@@ -9,16 +9,21 @@ namespace ShinyHero_Mod
 {
     class ShinyHeroMod : PartialityMod
     {
-        ShinyHeroConfig mod = new ShinyHeroConfig();
+        ShinyHeroConfig mod = new ShinyHeroConfig(typeof(ShinyHeroMod));
 
         public override void Init()
         {
+            mod.PartialityModReference = this;
             mod.Initialize();
-            mod.ReadConfig();
+            mod.settings.ReadSettings();
         }
         public override void OnLoad()
         {
             mod.Load();
+        }
+        public void UnLoad()
+        {
+            mod.UnLoad();
         }
     }
 }

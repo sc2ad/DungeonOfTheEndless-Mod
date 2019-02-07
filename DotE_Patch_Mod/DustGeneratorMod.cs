@@ -7,43 +7,52 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotE_Combo_Mod
+namespace DustGenerator_Mod
 {
     class DustGeneratorMod : PartialityMod
     {
-        ScadMod mod = new ScadMod();
+        ScadMod mod = new ScadMod("DustGenerator", typeof(DustGeneratorSettings), typeof(DustGeneratorMod));
         public override void Init()
         {
-            mod.path = @"DustGenerator_log.txt";
-            mod.config = @"DustGenerator_config.txt";
-            mod.default_config = "# Modify this file to change various settings of the DustGenerator Mod for DotE.\n" + mod.default_config;
+            mod.PartialityModReference = this;
             mod.Initialize();
 
             // Setup default values for config
-            mod.Values.Add("DustPerDoor", "10.0");
-            mod.Values.Add("DustFromProducing", "False");
-            mod.Values.Add("DustFromRoom", "False");
+            if (!mod.settings.Exists())
+            {
+                DustGeneratorSettings temp = mod.settings as DustGeneratorSettings;
+                temp.DustPerDoor = 10;
+                temp.DustFromProducing = true;
+                temp.DustFromRoom = false;
+            }
 
-            mod.ReadConfig();
+            mod.settings.ReadSettings();
 
             mod.Log("Initialized!");
         }
         public override void OnLoad()
         {
             mod.Load();
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
                 On.Dungeon.GetDustProd += Dungeon_GetDustProd;
                 On.Room.Open += Room_Open;
             }
         }
+        public void UnLoad()
+        {
+            // Need to have a way of unloading entirety of the mod from only ScadMod (also deals with unloading partialitymod)
+            mod.UnLoad();
+            On.Dungeon.GetDustProd -= Dungeon_GetDustProd;
+            On.Room.Open -= Room_Open;
+        }
 
         private void Room_Open(On.Room.orig_Open orig, Room self, Door openingDoor, bool ignoreVisibility)
         {
-            if (Convert.ToBoolean(mod.Values["DustFromRoom"]))
+            if ((mod.settings as DustGeneratorSettings).DustFromRoom)
             {
                 // You can reuse a DynData wrapper for multiple get / set operations on the same object
-                new DynData<Room>(self).Set<int>("DustLootAmount", (int)Convert.ToDouble(mod.Values["DustPerDoor"])); // Sets the dust value of this room to 10
+                new DynData<Room>(self).Set<int>("DustLootAmount", (int)(mod.settings as DustGeneratorSettings).DustPerDoor); // Sets the dust value of this room to 10
                 mod.Log("Attempting to spawn: " + self.DustLootAmount + " dust in room!");
                 orig(self, openingDoor, ignoreVisibility);
                 return;
@@ -54,11 +63,11 @@ namespace DotE_Combo_Mod
 
         private float Dungeon_GetDustProd(On.Dungeon.orig_GetDustProd orig, Dungeon self)
         {
-            if (Convert.ToBoolean(mod.Values["DustFromProducing"]))
+            if ((mod.settings as DustGeneratorSettings).DustFromProducing)
             {
-                mod.Log("Attempting to Produce: " + Convert.ToDouble(mod.Values["DustPerDoor"]) + " dust!");
+                mod.Log("Attempting to Produce: " + (mod.settings as DustGeneratorSettings).DustPerDoor + " dust!");
                 orig(self);
-                return (float)Convert.ToDouble(mod.Values["DustPerDoor"]);
+                return (mod.settings as DustGeneratorSettings).DustPerDoor;
             }
             mod.Log("Using default dust production..." + orig(self));
             return orig(self);

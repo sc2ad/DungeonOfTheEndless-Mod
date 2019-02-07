@@ -16,35 +16,36 @@ namespace Ping_Mod
 {
     class PingMod : PartialityMod
     {
-        public static ScadMod mod = new ScadMod("Ping");
+        public static ScadMod mod = new ScadMod("Ping", typeof(PingSettings), typeof(PingMod));
 
         private static short PING_ID = 17346;
 
         public override void Init()
         {
-            mod.default_config = "# Modify this file to change various settings of the Ping Mod for DotE.\n" + mod.default_config;
+            mod.PartialityModReference = this;
             mod.Initialize();
 
-            // Setup default values for config
-            mod.Values.Add("Key", "G");
-            mod.Values.Add("Seconds Active", "3");
-
-            mod.ReadConfig();
+            mod.settings.ReadSettings();
 
             mod.Log("Initialized!");
         }
         public override void OnLoad()
         {
             mod.Load();
-            if (Convert.ToBoolean(mod.Values["Enabled"]))
+            if (mod.settings.Enabled)
             {
                 On.InputManager.Update += InputManager_Update;
             }
         }
+        public void UnLoad()
+        {
+            mod.UnLoad();
+            On.InputManager.Update -= InputManager_Update;
+        }
 
         private void InputManager_Update(On.InputManager.orig_Update orig, InputManager self)
         {   
-            KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), mod.Values["Key"]);
+            KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), (mod.settings as PingSettings).Key);
             if (Input.GetKeyDown(key))
             {
                 // First, find the mouse position as a unity vector
@@ -105,7 +106,7 @@ namespace Ping_Mod
 
             public void Start()
             {
-                lifetime = (float)Convert.ToDouble(mod.Values["Seconds Active"]);
+                lifetime = (mod.settings as PingSettings).SecondsActive;
             }
             public void Update()
             {
