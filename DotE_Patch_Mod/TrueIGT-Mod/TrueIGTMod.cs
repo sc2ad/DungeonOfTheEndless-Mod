@@ -17,9 +17,10 @@ namespace TrueIGT_Mod
         public bool HasStarted = false;
         public float LastGameStartTime = float.NegativeInfinity;
 
-        ScadMod mod = new ScadMod("TrueIGT");
+        ScadMod mod = new ScadMod("TrueIGT", typeof(TrueIGTMod));
         public override void Init()
         {
+            mod.PartialityModReference = this;
             mod.MajorVersion = 2;
             mod.MinorVersion = 5;
             mod.Initialize();

@@ -9,10 +9,11 @@ namespace OPSashaItem_Mod
 {
     class ShinyItemMod : PartialityMod
     {
-        ShinyItemConfig mod = new ShinyItemConfig();
+        ShinyItemConfig mod = new ShinyItemConfig(typeof(ShinyItemMod));
 
         public override void Init()
         {
+            mod.PartialityModReference = this;
             mod.Initialize();
             mod.settings.ReadSettings();
         }

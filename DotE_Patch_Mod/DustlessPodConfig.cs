@@ -5,10 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotE_Combo_Mod
+namespace DustlessPod_Mod
 {
     class DustlessPodConfig : PodMod
     {
+        public DustlessPodConfig(Type partialityType) : base(typeof(DustlessPodSettings), partialityType)
+        {
+        }
+
         public override string GetAnimationPod()
         {
             return "Refreezerator";
@@ -40,7 +44,7 @@ namespace DotE_Combo_Mod
 
         public override int GetLevelCount()
         {
-            return 10;
+            return 12;
         }
 
         public override string GetName()

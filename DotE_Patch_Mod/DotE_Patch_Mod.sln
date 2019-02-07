@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueueActions-Mod", "QueueAc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCheats-Mod", "SimpleCheats-Mod\SimpleCheats-Mod.csproj", "{4DA91547-0CA1-48D2-B8E8-FD89476E8D08}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResourceLimiter-Mod", "ResourceLimiter-Mod\ResourceLimiter-Mod.csproj", "{259A1B2B-748B-4655-9AB4-CE1BDCE951ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,10 @@ Global
 		{4DA91547-0CA1-48D2-B8E8-FD89476E8D08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DA91547-0CA1-48D2-B8E8-FD89476E8D08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DA91547-0CA1-48D2-B8E8-FD89476E8D08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{259A1B2B-748B-4655-9AB4-CE1BDCE951ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{259A1B2B-748B-4655-9AB4-CE1BDCE951ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{259A1B2B-748B-4655-9AB4-CE1BDCE951ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{259A1B2B-748B-4655-9AB4-CE1BDCE951ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

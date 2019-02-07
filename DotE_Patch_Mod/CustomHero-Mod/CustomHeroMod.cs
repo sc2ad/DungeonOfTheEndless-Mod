@@ -14,12 +14,13 @@ namespace CustomHero_Mod
 {
     class CustomHeroMod : PartialityMod
     {
-        ScadMod mod = new ScadMod("CustomHero", typeof(CustomHeroTestSettings));
+        ScadMod mod = new ScadMod("CustomHero", typeof(CustomHeroTestSettings), typeof(CustomHeroMod));
 
         Dictionary<string, string> Ranks = new Dictionary<string, string>();
 
         public override void Init()
         {
+            mod.PartialityModReference = this;
             mod.Initialize();
 
             // Setup default values for config

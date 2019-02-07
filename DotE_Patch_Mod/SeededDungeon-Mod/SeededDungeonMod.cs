@@ -11,10 +11,11 @@ namespace SeededDungeon_Mod
 {
     public class SeededDungeonMod : PartialityMod
     {
-        ScadMod mod = new ScadMod("SeededDungeon", typeof(SeededDungeonSettings));
+        ScadMod mod = new ScadMod("SeededDungeon", typeof(SeededDungeonSettings), typeof(SeededDungeonMod));
         Dictionary<int, int> seeds = new Dictionary<int, int>();
         public override void Init()
         {
+            mod.PartialityModReference = this;
             mod.Initialize();
 
             mod.settings.ReadSettings();

@@ -4,15 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C984CE07-D68C-443D-9558-A317A20CE3FA}</ProjectGuid>
+    <ProjectGuid>{259A1B2B-748B-4655-9AB4-CE1BDCE951ED}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DustDevilFramework</RootNamespace>
-    <AssemblyName>DustDevilFramework</AssemblyName>
+    <RootNamespace>ResourceLimiter_Mod</RootNamespace>
+    <AssemblyName>ResourceLimiter_Mod</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Amplitude">
+      <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\DungeonoftheEndless_Data\Managed\Amplitude.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\DungeonoftheEndless_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -40,12 +43,32 @@
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\DungeonoftheEndless_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="DustDevilFramework">
+      <HintPath>..\DustDevilFramework\bin\Debug\DustDevilFramework.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="HOOKS-Assembly-CSharp">
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\DungeonoftheEndless_Data\Managed\HOOKS-Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="MonoMod">
+      <HintPath>..\..\..\..\..\Partiality\bin\MonoMod.exe</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>..\..\..\..\..\Partiality\bin\MonoMod.RuntimeDetour.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour.HookGen">
+      <HintPath>..\..\..\..\..\Partiality\bin\MonoMod.RuntimeDetour.HookGen.exe</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="MonoMod.Utils">
       <HintPath>..\..\..\..\..\Partiality\bin\MonoMod.Utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Partiality">
+      <HintPath>..\..\..\..\..\Partiality\bin\Partiality.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -62,21 +85,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomHero.cs" />
-    <Compile Include="CustomHeroSettings.cs" />
-    <Compile Include="CustomItem.cs" />
-    <Compile Include="CustomItemSettings.cs" />
-    <Compile Include="ModSettingsPopupMenuPanel.cs" />
-    <Compile Include="CustomModule.cs" />
-    <Compile Include="CustomModuleSettings.cs" />
-    <Compile Include="DustDevil.cs" />
-    <Compile Include="ModSettings.cs" />
-    <Compile Include="PodMod.cs" />
-    <Compile Include="PodSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScadMod.cs" />
-    <Compile Include="SimDescriptorWrapper.cs" />
-    <Compile Include="Util.cs" />
+    <Compile Include="ResourceLimiterMod.cs" />
+    <Compile Include="ResourceLimiterSettings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

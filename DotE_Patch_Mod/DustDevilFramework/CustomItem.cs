@@ -40,11 +40,12 @@ namespace DustDevilFramework
         public abstract string GetRealName();
         public abstract string GetRealDescription();
 
-        public CustomItem(Type settingsType)
+        public CustomItem(Type settingsType, Type partialityType)
         {
             name = GetRealName();
             settings = (CustomItemSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
             this.settingsType = settingsType;
+            PartialityModType = partialityType;
             // NEED TO FIGURE OUT A WAY OF PASSING IN THE SETTINGS TYPE
             // THIS IS SO THE SETTINGS IS PROPERLY CONSTRUCTED INTO SCADMOD
             /*

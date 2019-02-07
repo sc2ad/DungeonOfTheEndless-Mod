@@ -13,13 +13,14 @@ namespace HomogenyPod_Mod
 {
     class HomogenyPod : PartialityMod
     {
-        HomogenyPodConfig mod = new HomogenyPodConfig();
+        HomogenyPodConfig mod = new HomogenyPodConfig(typeof(HomogenyPod));
 
         private int CurrentFloor = -1;
         private List<SelectedMob> CurrentMobs = new List<SelectedMob>();
 
         public override void Init()
         {
+            mod.PartialityModReference = this;
             mod.Initialize();
         }
         public override void OnLoad()

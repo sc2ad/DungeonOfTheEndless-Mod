@@ -11,9 +11,10 @@ namespace DustGenerator_Mod
 {
     class DustGeneratorMod : PartialityMod
     {
-        ScadMod mod = new ScadMod("DustGenerator", typeof(DustGeneratorSettings));
+        ScadMod mod = new ScadMod("DustGenerator", typeof(DustGeneratorSettings), typeof(DustGeneratorMod));
         public override void Init()
         {
+            mod.PartialityModReference = this;
             mod.Initialize();
 
             // Setup default values for config
