@@ -4,9 +4,7 @@ using Amplitude.Unity.Simulation;
 using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DustDevilFramework
 {
@@ -141,7 +139,7 @@ namespace DustDevilFramework
                 Log("Attempting to set the character as Unlocked!");
                 // Find the matching HeroGameStatsData
                 GameConfig config = GameConfig.GetGameConfig();
-                List<string> unlockedHeroes = config.InitUnlockedHeroes.ToList();
+                List<string> unlockedHeroes = Util.GetList(config.InitUnlockedHeroes);
                 unlockedHeroes.Add("Hero_" + GetName());
                 new DynData<GameConfig>(config).Set("InitUnlockedHeroes", unlockedHeroes.ToArray());
                 //HeroGameStatsData old = UserProfile.Data.HeroesGameStats[num];
@@ -429,120 +427,49 @@ namespace DustDevilFramework
 
         public void CreateLocalizationChanges()
         {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Localization\english\ED_Localization_Locales.xml");
-            List<string> linesLst = lines.ToList();
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string line = lines[i];
-                if (line.IndexOf("%Hero_" + GetName()) != -1)
-                {
-                    return;
-                }
-                if (line.IndexOf("%Hero_H0028_Archetype") != -1)
-                {
-                    linesLst.Insert(i + 1, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_Title\">" + GetRealName() + "</LocalizationPair>");
-                    linesLst.Insert(i + 2, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_Biography\">" + GetRealDescription() + "</LocalizationPair>");
-                    linesLst.Insert(i + 3, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_FirstName\">" + GetRealFirstName() + "</LocalizationPair>");
-                    linesLst.Insert(i + 4, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_Intro1\">" + GetIntro1() + "</LocalizationPair>");
-                    linesLst.Insert(i + 5, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_Intro2\">" + GetIntro2() + "</LocalizationPair>");
-                    linesLst.Insert(i + 6, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_Intro3\">" + GetIntro3() + "</LocalizationPair>");
-                    linesLst.Insert(i + 7, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_Archetype\">" + GetArchetype() + "</LocalizationPair>");
-                    linesLst.Insert(i + 8, "  <LocalizationPair Name=\"%HeroName_" + GetName() + "\">" + GetRealName() + "</LocalizationPair>");
-                    linesLst.Insert(i + 9, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_OpenDoor1\">" + GetDoorQuote1() + "</LocalizationPair>");
-                    linesLst.Insert(i +10, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_OpenDoor2\">" + GetDoorQuote2() + "</LocalizationPair>");
-                    linesLst.Insert(i +11, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_OpenDoor3\">" + GetDoorQuote3() + "</LocalizationPair>");
-                    linesLst.Insert(i +12, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_OpenDoor4\">" + GetDoorQuote4() + "</LocalizationPair>");
-                    linesLst.Insert(i +13, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_Wounded1\">" + GetWoundedQuote1() + "</LocalizationPair>");
-                    linesLst.Insert(i +14, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_Wounded2\">" + GetWoundedQuote2() + "</LocalizationPair>");
-                    linesLst.Insert(i +15, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_RemoveCrystal1\">" + GetCrystalQuote1() + "</LocalizationPair>");
-                    linesLst.Insert(i +16, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_RemoveCrystal2\">" + GetCrystalQuote2() + "</LocalizationPair>");
-                    linesLst.Insert(i +17, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_RepairModule1\">" + GetRepairQuote1() + "</LocalizationPair>");
-                    linesLst.Insert(i +18, "  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_RepairModule2\">" + GetRepairQuote2() + "</LocalizationPair>");
-                    linesLst.Insert(i +19, "  <LocalizationPair Name=\"%Hero_" + GetName() + "\">" + GetRealName() + "</LocalizationPair>");
-                }
-            }
-            System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());
+            List<string> linesLst = new List<string>();
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_Title\">" + GetRealName() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_Biography\">" + GetRealDescription() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_FirstName\">" + GetRealFirstName() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_Intro1\">" + GetIntro1() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_Intro2\">" + GetIntro2() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_Intro3\">" + GetIntro3() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_Archetype\">" + GetArchetype() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%HeroName_" + GetName() + "\">" + GetRealName() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_OpenDoor1\">" + GetDoorQuote1() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_OpenDoor2\">" + GetDoorQuote2() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_OpenDoor3\">" + GetDoorQuote3() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_OpenDoor4\">" + GetDoorQuote4() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_Wounded1\">" + GetWoundedQuote1() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_Wounded2\">" + GetWoundedQuote2() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_RemoveCrystal1\">" + GetCrystalQuote1() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_RemoveCrystal2\">" + GetCrystalQuote2() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_RepairModule1\">" + GetRepairQuote1() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "_SituationDialog_RepairModule2\">" + GetRepairQuote2() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Hero_" + GetName() + "\">" + GetRealName() + "</LocalizationPair>");
+            Util.ApplyLocalizationChange("%Hero_H0028_Archetype", 1, linesLst);
         }
 
         public void RemoveLocalizationChanges()
         {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Localization\english\ED_Localization_Locales.xml");
-            List<string> linesLst = lines.ToList();
-            for (int i = 0; i < linesLst.Count; i++)
-            {
-                string s = lines[i];
-                if (s.IndexOf("%Hero_" + GetName() + "_Title") != -1)
-                {
-                    int q = i;
-                    for (int j = i; j < linesLst.Count; j++)
-                    {
-                        if (linesLst[j].IndexOf("%Hero_" + GetName() + "\"") != -1)
-                        {
-                            // This is the stopping point for deleting.
-                            q = j;
-                        }
-                    }
-                    for (int l = i; l <= q; l++)
-                    {
-                        linesLst.RemoveAt(i);
-                    }
-                }
-            }
-            System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());
+            Util.RemoveLocalizationChangeInclusive("%Hero_" + GetName() + "_Title", "  <LocalizationPair Name=\"%Hero_" + GetName() + "\">" + GetRealName() + "</LocalizationPair>");
         }
         public void CreateGUIChanges()
         {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Gui\GuiElements_Hero.xml");
-            foreach (string s in lines)
-            {
-                if (s.IndexOf("%Hero_" + GetName()) != -1)
-                {
-                    return;
-                }
-            }
-            List<string> linesLst = lines.ToList();
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string line = lines[i];
-                if (line.IndexOf("%Hero_H0028_Biography") != -1)
-                {
-                    linesLst.Insert(i + 6, "  <GuiElement Name=\"Hero_" + GetName() + "\">");
-                    linesLst.Insert(i + 7, "    <Title>%Hero_" + GetName() + "</Title>");
-                    linesLst.Insert(i + 8, "    <Description>%Hero_" + GetName() + "_Biography</Description>");
-                    linesLst.Insert(i + 9, "    <Icons>");
-                    linesLst.Insert(i +10, "      <Icon Size=\"Small\" Path=\"GUI/DynamicBitmaps/Heroes/Hero_" + GetIconName() + "\"/>");
-                    linesLst.Insert(i +11, "      <Icon Size=\"Large\" Path=\"GUI/DynamicBitmaps/Heroes/Hero_" + GetIconName() + "_Large\"/>");
-                    linesLst.Insert(i +12, "    </Icons>");
-                    linesLst.Insert(i +13, "  </GuiElement>");
-                }
-            }
-            System.IO.File.WriteAllLines(@"Public\Gui\GuiElements_Hero.xml", linesLst.ToArray());
+            List<string> linesLst = new List<string>();
+            linesLst.Add("  <GuiElement Name=\"Hero_" + GetName() + "\">");
+            linesLst.Add("    <Title>%Hero_" + GetName() + "</Title>");
+            linesLst.Add("    <Description>%Hero_" + GetName() + "_Biography</Description>");
+            linesLst.Add("    <Icons>");
+            linesLst.Add("      <Icon Size=\"Small\" Path=\"GUI/DynamicBitmaps/Heroes/Hero_" + GetIconName() + "\"/>");
+            linesLst.Add("      <Icon Size=\"Large\" Path=\"GUI/DynamicBitmaps/Heroes/Hero_" + GetIconName() + "_Large\"/>");
+            linesLst.Add("    </Icons>");
+            linesLst.Add("  </GuiElement>");
+            Util.ApplyFileChange(@"Public\Gui\GuiElements_Hero.xml" , "%Hero_H0028_Biography", 6, linesLst);
         }
         public void RemoveGUIChanges()
         {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Gui\GuiElements_Hero.xml");
-            List<string> linesLst = lines.ToList();
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string s = lines[i];
-                if (s.IndexOf("  <GuiElement Name=\"Hero_" + GetName() + "\">") != -1)
-                {
-                    int q = i;
-                    for (int j = i; j < lines.Length; j++)
-                    {
-                        if (lines[j].IndexOf("  </GuiElement>") != -1)
-                        {
-                            // This is the stopping point for deleting.
-                            q = j;
-                        }
-                    }
-                    for (int l = i; l <= q; l++)
-                    {
-                        linesLst.RemoveAt(i);
-                    }
-                }
-            }
-            System.IO.File.WriteAllLines(@"Public\Gui\GuiElements_Hero.xml", linesLst.ToArray());
+            Util.RemoveFileChangeInclusive(@"Public\Gui\GuiElements_Hero.xml", "  <GuiElement Name=\"Hero_" + GetName() + "\">", "  </GuiElement>");
         }
     }
 }

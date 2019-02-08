@@ -4,9 +4,7 @@ using Amplitude.Unity.Simulation.SimulationModifierDescriptors;
 using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DustDevilFramework
 {
@@ -241,99 +239,30 @@ namespace DustDevilFramework
         }
         public void CreateLocalizationChanges()
         {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Localization\english\ED_Localization_Locales.xml");
-            foreach (string s in lines)
-            {
-                if (s.IndexOf("%Item_" + GetName()) != -1)
-                {
-                    return;
-                }
-            }
-            List<string> linesLst = lines.ToList();
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string line = lines[i];
-                if (line.IndexOf("%Item_Special054_Description") != -1)
-                {
-                    linesLst.Insert(i + 1, "  <LocalizationPair Name=\"%Item_" + GetName() + "\">" + GetRealName() + "</LocalizationPair>");
-                    linesLst.Insert(i + 2, "  <LocalizationPair Name=\"%Item_" + GetName() + "_Description\">" + GetRealDescription() + "</LocalizationPair>");
-                }
-            }
-            System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());
+            List<string> linesLst = new List<string>();
+            linesLst.Add("  <LocalizationPair Name=\"%Item_" + GetName() + "\">" + GetRealName() + "</LocalizationPair>");
+            linesLst.Add("  <LocalizationPair Name=\"%Item_" + GetName() + "_Description\">" + GetRealDescription() + "</LocalizationPair>");
+            Util.ApplyLocalizationChange("%Item_Special_054_Description", 1, linesLst);
         }
         public void RemoveLocalizationChanges()
         {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Localization\english\ED_Localization_Locales.xml");
-            List<string> linesLst = lines.ToList();
-            for (int i = 0; i < linesLst.Count; i++)
-            {
-                string s = linesLst[i];
-                if (s.IndexOf("%Item_" + GetName()) != -1)
-                {
-                    linesLst.RemoveAt(i);
-                }
-            }
-            System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());
+            Util.RemoveLocalizationChangeInclusive("%Item_" + GetName(), "_Description");
         }
         public void CreateGUIChanges()
         {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Gui\GuiElements_ItemHero.xml");
-            foreach (string s in lines)
-            {
-                if (s.IndexOf("%Item_" + GetName()) != -1)
-                {
-                    return;
-                }
-            }
-            List<string> linesLst = lines.ToList();
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string line = lines[i];
-                if (line.IndexOf("%Item_Special054_Description") != -1)
-                {
-                    linesLst.Insert(i + 5, "  <GuiElement Name=\"" + GetName() + "\">");
-                    linesLst.Insert(i + 6, "    <Title>%Item_" + GetName() + "</Title>");
-                    linesLst.Insert(i + 7, "    <Description>%Item_" + GetName() + "_Description</Description>");
-                    linesLst.Insert(i + 8, "    <Icons>");
-                    linesLst.Insert(i + 9, "      <Icon Size=\"Small\" Path=\"GUI/DynamicBitmaps/Items/" + GetSpriteName() + "\"/>");
-                    linesLst.Insert(i +10, "    </Icons>");
-                    linesLst.Insert(i +11, "  </GuiElement>");
-                }
-            }
-            System.IO.File.WriteAllLines(@"Public\Gui\GuiElements_ItemHero.xml", linesLst.ToArray());
+            List<string> linesLst = new List<string>();
+            linesLst.Add("  <GuiElement Name=\"" + GetName() + "\">");
+            linesLst.Add("    <Title>%Item_" + GetName() + "</Title>");
+            linesLst.Add("    <Description>%Item_" + GetName() + "_Description</Description>");
+            linesLst.Add("    <Icons>");
+            linesLst.Add("      <Icon Size=\"Small\" Path=\"GUI/DynamicBitmaps/Items/" + GetSpriteName() + "\"/>");
+            linesLst.Add("    </Icons>");
+            linesLst.Add("  </GuiElement>");
+            Util.ApplyFileChange(@"Public\Gui\GuiElements_ItemHero.xml", "%Item_Special054_Description", 5, linesLst);
         }
         public void RemoveGUIChanges()
         {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Gui\GuiElements_ItemHero.xml");
-            foreach (string s in lines)
-            {
-                if (s.IndexOf("%Item_" + GetName()) != -1)
-                {
-                    return;
-                }
-            }
-            List<string> linesLst = lines.ToList();
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string s = linesLst[i];
-                if (s.IndexOf("  <GuiElement Name=\"" + GetName() + "\">") != -1)
-                {
-                    int q = i;
-                    for (int j = i; j < linesLst.Count; j++)
-                    {
-                        if (linesLst[j].IndexOf("  </GuiElement>") != -1)
-                        {
-                            // This is the stopping point for deleting.
-                            q = j;
-                        }
-                    }
-                    for (int l = i; l <= q; l++)
-                    {
-                        linesLst.RemoveAt(i);
-                    }
-                }
-            }
-            System.IO.File.WriteAllLines(@"Public\Gui\GuiElements_ItemHero.xml", linesLst.ToArray());
+            Util.RemoveFileChangeInclusive(@"Public\Gui\GuiElements_ItemHero.xml", "Name=\"" + GetName(), "</GuiElement>");
         }
     }
 }
