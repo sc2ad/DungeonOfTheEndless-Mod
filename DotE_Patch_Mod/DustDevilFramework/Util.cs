@@ -191,6 +191,11 @@ namespace DustDevilFramework
             Debug.Log("X: " + trans.X);
             Debug.Log("Y: " + trans.Y);
             Debug.Log("Z: " + trans.Z);
+            Debug.Log("Children Count: " + trans.GetChildren().Count);
+            foreach (AgeTransform t in trans.GetChildren())
+            {
+                Debug.Log("- " + t.transform);
+            }
             Debug.Log("====================================================================================");
         }
     }
