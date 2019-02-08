@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace HomogenyPod_Mod
 {
-    class HomogenyPod : PartialityMod
+    public class HomogenyPod : PartialityMod
     {
         HomogenyPodConfig mod = new HomogenyPodConfig(typeof(HomogenyPod));
 
