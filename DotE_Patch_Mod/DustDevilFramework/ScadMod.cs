@@ -23,7 +23,7 @@ namespace DustDevilFramework
         public ScadMod(string name, Type settingsType, Type partialityModType)
         {
             this.name = name;
-            settings = (ModSettings)settingsType.GetConstructor(new[] { typeof(string) }).Invoke(new object[] { name });
+            settings = Activator.CreateInstance(settingsType, new object[] { name }) as ModSettings;
             this.settingsType = settingsType;
             path = name + "_log.txt";
             PartialityModType = partialityModType;
