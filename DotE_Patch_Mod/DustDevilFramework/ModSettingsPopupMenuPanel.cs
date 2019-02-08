@@ -172,11 +172,11 @@ namespace DustDevilFramework
             modSettingsTable.Height = 0f;
             modSettingsTable.Y = 0;
             modSettingsTable.Width = 612;
-            //modSettingsTable.ChildWidth = 612;
             // I need to make a prefab that is usable for all types of visible settings
             // It should be a lot like the toggle prefab, but it needs to not have the toggle in it because sliders are a thing
-            Transform PREFAB_FOR_SETTINGS = new DynData<OptionsPanel>(optionsPanel).Get<Transform>("controlBindingLinePrefab");
-            modSettingsTable.ReserveChildren(VisibleFields.Count, PREFAB_FOR_SETTINGS, "ModSettings");
+
+            //Transform PREFAB_FOR_SETTINGS = new DynData<OptionsPanel>(optionsPanel).Get<Transform>("controlBindingLinePrefab");
+            //modSettingsTable.ReserveChildren(VisibleFields.Count, PREFAB_FOR_SETTINGS, "ModSettings");
             //modSettingsTable.RefreshChildrenIList();
             modSettingsTable.ArrangeChildren();
             return base.OnLoad();
@@ -185,12 +185,6 @@ namespace DustDevilFramework
         {
             Debug.Log("Showing ModSettings Panel!");
 
-            Util.LogVariousAgeTransformInfo(frame.transform.FindChild("2-LeftPart").GetComponent<AgeTransform>());
-            Util.LogVariousAgeTransformInfo(optionsPanel.transform.FindChild("1-Frame").FindChild("2-LeftPart").GetComponent<AgeTransform>());
-            Util.LogVariousAgeTransformInfo(modSettingsTable);
-            Util.LogVariousAgeTransformInfo(new DynData<OptionsPanel>(optionsPanel).Get<AgeTransform>("controlBindingsTable"));
-            Util.LogVariousAgeTransformInfo(modSettingsScroll.transform.FindChild("ModSettingsViewPort").GetComponent<AgeTransform>());
-            Util.LogVariousAgeTransformInfo(new DynData<OptionsPanel>(optionsPanel).Get<AgeControlScrollView>("controlBindingsScrollView").transform.FindChild("3Viewport").GetComponent<AgeTransform>());
             base.Show(parameters);
             NeedRefresh = true;
         }
@@ -279,29 +273,27 @@ namespace DustDevilFramework
             GameObject.DestroyImmediate(transform.FindChild("1-Frame").gameObject);
             GameObject bg = (GameObject)GameObject.Instantiate(optionsPanel.transform.FindChild("0-Bg").gameObject);
 
-            GameObject modSettingsConfig = (GameObject)GameObject.Instantiate(optionsPanel.transform.FindChild("1-Frame").FindChild("3-RightPart").FindChild("2-ResolutionConfig").gameObject);
-
             bg.transform.SetParent(transform);
             //transform.SetParent(optionsPanel.AgeTransform.GetParent().transform);
 
             bg.name = "ModSettingsBackground";
-            modSettingsConfig.name = "ModSettingsConfig";
 
-            // Destroys the useless LeftSide (which holds the controls)
-            // Instead, we could put stuff like labels there, or something
+            // Destroys the useless RightSide
+            // Instead, we will expand the leftSide to have everything!
             // We need to delete all of its children too, and its children's children, etc.
 
-            Util.DeleteChildrenExclusive(frame.transform.FindChild("2-LeftPart").gameObject);
-            AgeTransform left = frame.transform.FindChild("2-LeftPart").GetComponent<AgeTransform>();
+            frame.transform.FindChild("2-LeftPart").name = "CentralPart";
+
+            Util.DeleteChildrenExclusive(frame.transform.FindChild("CentralPart").gameObject);
+            AgeTransform left = frame.transform.FindChild("CentralPart").GetComponent<AgeTransform>();
             left.Init();
             left.Position = optionsPanel.transform.FindChild("1-Frame").FindChild("2-LeftPart").GetComponent<AgeTransform>().Position;
-            left.PixelMarginTop = optionsPanel.transform.FindChild("1-Frame").FindChild("2-LeftPart").GetComponent<AgeTransform>().PixelMarginTop;
+            left.Width = frame.GetComponent<AgeTransform>().Width;
+            left.PixelMarginTop = 20;
+            left.Height = left.Height + (optionsPanel.transform.FindChild("1-Frame").FindChild("2-LeftPart").GetComponent<AgeTransform>().PixelMarginTop - left.PixelMarginTop);
+            left.Height -= 10;
 
-            Util.DeleteChildrenExclusive(frame.transform.FindChild("3-RightPart").gameObject);
-            Util.DeleteChildrenExclusive(modSettingsConfig);
-
-            modSettingsConfig.transform.SetParent(frame.transform.FindChild("3-RightPart"));
-            modSettingsConfig.GetComponent<AgeTransform>().Position = optionsPanel.transform.FindChild("1-Frame").FindChild("3-RightPart").FindChild("2-ResolutionConfig").GetComponent<AgeTransform>().Position;
+            Util.DeleteChildrenInclusive(frame.transform.FindChild("3-RightPart").gameObject);
 
             //GameObject.DestroyImmediate(frame.transform.FindChild("3-RightPart"));
             AgeControlButton cancel = frame.transform.FindChild("7-CancelButton").GetComponent<AgeControlButton>();
@@ -346,11 +338,8 @@ namespace DustDevilFramework
 
             modSettingsScroll.GetComponent<AgeControlScrollView>().VirtualArea = newTable;
 
-            Debug.Log("Old ControlBindingsTable Parent: " + old.transform.parent);
-
             newTable.Init();
             newTable.Position = oldTable.Position;
-            newTable.Y -= 42;
             newTable.VerticalSpacing = oldTable.VerticalSpacing;
 
             modSettingsTable = newTable;
@@ -391,7 +380,6 @@ namespace DustDevilFramework
 
             GameObject toggleGroup = (GameObject)GameObject.Instantiate(oldObj);
             toggleGroup.name = Util.GetName(m, f);
-            //toggleGroup.transform.SetParent(frame.transform.FindChild("3-RightPart").FindChild("ModSettingsConfig"));
             toggleGroup.transform.SetParent(modSettingsTable.transform);
             Debug.Log("Toggle Group Object Created!");
 
@@ -403,9 +391,7 @@ namespace DustDevilFramework
             Transform label = toggleGroup.transform.GetChild(1);
             label.gameObject.name = Util.GetName(m, f) + "_Label";
             label.GetComponent<AgePrimitiveLabel>().Text = Util.GetName(m, f);
-            toggleGroup.GetComponent<AgeTransform>().Position = oldObj.GetComponent<AgeTransform>().Position;
-            toggle.GetComponent<AgeTransform>().Position = oldObj.transform.GetChild(2).GetComponent<AgeTransform>().Position;
-            //toggleGroup.GetComponent<AgeTransform>().PixelMarginTop = VisibleFields.Count * (settingSpacing + toggleGroup.GetComponent<AgeTransform>().Height);
+            toggleGroup.GetComponent<AgeTransform>().PixelMarginTop = VisibleFields.Count * (settingSpacing + toggleGroup.GetComponent<AgeTransform>().Height);
             Debug.Log("VisibleFields Count: " + VisibleFields.Count);
             toggleControl.OnSwitchMethod = "OnTogglePressed";
             toggleControl.OnSwitchObject = transform.gameObject;
@@ -420,24 +406,8 @@ namespace DustDevilFramework
             // Clones the parent of the scroll (1-ControlsConfig)
             // ScrollBar is child: 2-ControlBindingsScrollView
             GameObject o = (GameObject)GameObject.Instantiate(scroll.gameObject);
-            o.transform.SetParent(frame.transform.FindChild("2-LeftPart"));
+            o.transform.SetParent(frame.transform.FindChild("CentralPart"));
             o.SetActive(true);
-            Debug.Log("Children of O:");
-            foreach (Transform t in o.transform)
-            {
-                Debug.Log("- " + t);
-            }
-            Debug.Log("VirutalArea pos: " + scroll.VirtualArea.Position);
-            Debug.Log("VirtualArea Children Length: " + scroll.VirtualArea.GetChildren().Count);
-            Debug.Log("ViewPort pos: " + scroll.Viewport.Position);
-            Debug.Log("ViewPort Children Length: " + scroll.Viewport.GetChildren().Count);
-            Debug.Log("Parent: " + scroll.transform.parent);
-            Debug.Log("Age Transform Pos: " + scroll.AgeTransform.Position);
-            Debug.Log("Components:");
-            foreach (Component _ in scroll.GetComponents(typeof(Component)))
-            {
-                Debug.Log("- " + _);
-            }
 
             AgeControlScrollView newScroll = o.GetComponent<AgeControlScrollView>();
             o.name = "ModSettingsScrollView";
@@ -446,11 +416,6 @@ namespace DustDevilFramework
             newScroll.AgeTransform.PixelMarginTop = scroll.AgeTransform.PixelMarginTop;
             newScroll.AgeTransform.PixelMarginLeft = scroll.AgeTransform.PixelMarginLeft;
             newScroll.AgeTransform.PixelMarginRight = scroll.AgeTransform.PixelMarginRight;
-
-            Debug.Log("New VirtualArea Parent: " + newScroll.VirtualArea.transform.parent);
-            Debug.Log("Old VirtualArea Parent: " + scroll.VirtualArea.transform.parent);
-            Debug.Log("New VirtualArea PP: " + newScroll.VirtualArea.transform.parent.parent);
-            Debug.Log("Old VirtualArea PP: " + scroll.VirtualArea.transform.parent.parent);
 
             o.transform.FindChild("3Viewport").name = "ModSettingsViewPort";
             o.transform.FindChild("1VerticalScrollBar").name = "ModSettingsScrollBar";
@@ -462,9 +427,6 @@ namespace DustDevilFramework
             newScroll.VerticalScrollBar.Init();
             newScroll.VerticalScrollBar.AgeTransform.Position = scroll.VerticalScrollBar.AgeTransform.Position;
             newScroll.DisplayVertical = AgeScrollbarDisplay.ALWAYS;
-
-            Util.LogVariousAgeTransformInfo(newScroll.AgeTransform);
-            Util.LogVariousAgeTransformInfo(scroll.AgeTransform);
 
             modSettingsScroll = o;
         }
