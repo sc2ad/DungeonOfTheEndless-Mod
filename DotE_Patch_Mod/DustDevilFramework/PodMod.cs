@@ -3,8 +3,10 @@ using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace DustDevilFramework
 {
@@ -26,7 +28,8 @@ namespace DustDevilFramework
         public PodMod(Type settingsType, Type partialityType)
         {
             name = GetName();
-            PodSettings temp = (PodSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
+            PodSettings temp = new PodSettings(name);
+            temp = Activator.CreateInstance(settingsType, new object[] { name }) as PodSettings;
             this.settingsType = settingsType;
             settings = temp;
             // Setup default values for config
