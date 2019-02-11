@@ -17,6 +17,7 @@ namespace DustDevilFramework
         private AgeTransform modSettingsTable;
         private GameObject modSettingsScroll;
         private List<AgeControlSlider> sliders;
+        private List<AgeControlToggle> toggles;
         private Dictionary<ScadMod, Dictionary<FieldInfo, object>> defaultFields;
         List<ScadMod> mods;
         List<ScadMod> modsToModify;
@@ -32,6 +33,7 @@ namespace DustDevilFramework
             VisibleFields = new List<FieldInfo>();
             modsToModify = new List<ScadMod>();
             sliders = new List<AgeControlSlider>();
+            toggles = new List<AgeControlToggle>();
             defaultFields = new Dictionary<ScadMod, Dictionary<FieldInfo, object>>();
             Debug.Log("Construction of Component for GO Complete!");
         }
@@ -92,15 +94,6 @@ namespace DustDevilFramework
             {
                 foreach (FieldInfo f in VisibleFields)
                 {
-                    //if (!defaultFields.ContainsKey(m))
-                    //{
-                    //    defaultFields.Add(m, new Dictionary<FieldInfo, object>());
-                    //}
-                    //if (!defaultFields[m].ContainsKey(f))
-                    //{
-                    //    defaultFields[m].Add(f, f.GetValue(m.settings));
-                    //    continue;
-                    //}
                     try
                     {
                         defaultFields[m][f] = f.GetValue(m.settings);
@@ -333,6 +326,11 @@ namespace DustDevilFramework
                 ResetSlider(s);
             }
             Debug.Log("Reset sliders!");
+            foreach (AgeControlToggle t in toggles)
+            {
+                ResetToggle(t);
+            }
+            Debug.Log("Reset toggles!");
             //requesterPanel.Display("%ResetControlsConfirmMessage", new global::RequesterPanel.ResultEventHandler(this.OnSettingsResetConfrim), global::RequesterPanel.ButtonsMode.YesNo, "%ResetControlsConfirmTitle", -1f, true);
         }
         private void OnConfirmButtonClick(GameObject obj)
@@ -531,6 +529,7 @@ namespace DustDevilFramework
 
 
             VisibleFields.Add(f);
+            toggles.Add(toggleControl);
         }
         public void CreateScrollArea()
         {
@@ -655,6 +654,19 @@ namespace DustDevilFramework
                             }
                         }
                         o.transform.parent.parent.FindChild("30-Value").GetComponent<AgePrimitiveLabel>().Text = o.CurrentValue.ToString();
+                    }
+                }
+            }
+        }
+        private void ResetToggle(AgeControlToggle t)
+        {
+            foreach (ScadMod m in mods)
+            {
+                foreach (FieldInfo f in VisibleFields)
+                {
+                    if (t.name.Equals(Util.GetName(m, f) + "_Toggle"))
+                    {
+                        t.State = (bool)defaultFields[m][f];
                     }
                 }
             }
