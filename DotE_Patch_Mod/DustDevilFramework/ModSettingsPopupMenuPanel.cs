@@ -2,10 +2,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace DustDevilFramework
@@ -16,9 +14,13 @@ namespace DustDevilFramework
     {
         private OptionsPanel optionsPanel;
         private GameObject frame;
+        private AgeTransform modSettingsTable;
+        private GameObject modSettingsScroll;
+        private List<AgeControlSlider> sliders;
+        private List<AgeControlToggle> toggles;
+        private Dictionary<ScadMod, Dictionary<FieldInfo, object>> defaultFields;
         List<ScadMod> mods;
         List<ScadMod> modsToModify;
-        List<FieldInfo> Fields;
         List<FieldInfo> VisibleFields;
 
         private bool saveSettings = false;
@@ -28,17 +30,23 @@ namespace DustDevilFramework
         public ModSettingsPopupMenuPanel()
         {
             Debug.Log("Constructing a ModSettings Popup Menu Panel for a GameObject!");
-            Fields = new List<FieldInfo>();
             VisibleFields = new List<FieldInfo>();
             modsToModify = new List<ScadMod>();
+            sliders = new List<AgeControlSlider>();
+            toggles = new List<AgeControlToggle>();
+            defaultFields = new Dictionary<ScadMod, Dictionary<FieldInfo, object>>();
             Debug.Log("Construction of Component for GO Complete!");
         }
         private void SetupModlist(List<ScadMod> m)
         {
             Debug.Log("Setting up ModList!");
             mods = m;
-            Debug.Log("Creating Frame");
+            Debug.Log("Creating Frame!");
             CreateFrame();
+            Debug.Log("Creating ScrollBar!");
+            CreateScrollArea();
+            Debug.Log("Creating ModSettingsTable!");
+            CreateModSettingsTable();
             Debug.Log("Creating Settings Components!");
             CreateSettings();
         }
@@ -79,7 +87,32 @@ namespace DustDevilFramework
             saveSettings = false;
             Hide();
         }
-
+        private void ResetDefaultSettings()
+        {
+            Debug.Log("Setting up DefaultSettings Dict!");
+            foreach (ScadMod m in mods)
+            {
+                foreach (FieldInfo f in VisibleFields)
+                {
+                    try
+                    {
+                        defaultFields[m][f] = f.GetValue(m.settings);
+                    } catch (ArgumentException e)
+                    {
+                        // Writing to the wrong mod.settings
+                        continue;
+                    }
+                }
+            }
+        }
+        private void AddDefaultSetting(ScadMod m, FieldInfo f, object current)
+        {
+            if (!defaultFields.ContainsKey(m))
+            {
+                defaultFields.Add(m, new Dictionary<FieldInfo, object>());
+            }
+            defaultFields[m].Add(f, current);
+        }
         // This method creates all of the AgeControl items that correspond to mod settings
         // They are placed within the optionsPanel instance variable
         private void CreateSettings()
@@ -120,8 +153,8 @@ namespace DustDevilFramework
                         // Required to have a SettingsRange
                     }
 
-                    //object[] allCustomAttributes = f.GetCustomAttributes(true);
-                    object[] allCustomAttributes = new object[0];
+                    object[] allCustomAttributes = f.GetCustomAttributes(true);
+                    //object[] allCustomAttributes = new object[0];
                     //TODO DEBUG!
 
                     Debug.Log("Attribute count: " + allCustomAttributes.Length);
@@ -141,7 +174,28 @@ namespace DustDevilFramework
                             show = true;
                             Debug.Log("Showing float/int with name: " + Util.GetName(m, f) + " and type: " + f.FieldType + " because it has a SettingsRange of: " + range.Low + " to " + range.High + " with increment: " + range.Increment);
                             // Lets create a slider!
-                            CreateSlider(m, f, range.Low, range.High, (float)f.GetValue(m.settings), range.Increment);
+                            try
+                            {
+                                Debug.Log("Trying as a float...");
+                                float v = (float)f.GetValue(m.settings);
+                                CreateSlider(m, f, range.Low, range.High, v, range.Increment);
+                                AddDefaultSetting(m, f, v);
+                            } catch (Exception _)
+                            {
+                                Debug.Log("Trying as an int...");
+                                try
+                                {
+                                    int v = (int)f.GetValue(m.settings);
+                                    CreateSlider(m, f, range.Low, range.High, v, range.Increment);
+                                    AddDefaultSetting(m, f, v);
+                                } catch (Exception __)
+                                {
+                                    Debug.Log("Trying as a double...");
+                                    double v = (double)f.GetValue(m.settings);
+                                    CreateSlider(m, f, range.Low, range.High, (float)v, range.Increment);
+                                    AddDefaultSetting(m, f, v);
+                                }
+                            }
                             break;
                         }
                     }
@@ -149,7 +203,9 @@ namespace DustDevilFramework
                     {
                         Debug.Log("Showing bool with name: " + Util.GetName(m, f));
                         // Let's create a toggle!
-                        CreateToggle(m, f, (bool)f.GetValue(m.settings));
+                        bool v = (bool)f.GetValue(m.settings);
+                        CreateToggle(m, f, v);
+                        AddDefaultSetting(m, f, v);
                     }
                 }
                 Debug.Log("==========================================");
@@ -158,18 +214,35 @@ namespace DustDevilFramework
         public override void RefreshContent()
         {
             base.RefreshContent();
+            modSettingsScroll.GetComponent<AgeControlScrollView>().OnPositionRecomputed();
 
         }
         protected override IEnumerator OnLoad()
         {
+            UseRefreshLoop = true;
+            modSettingsTable.Height = 0f;
+            modSettingsTable.Y = 0;
+            modSettingsTable.Width = 612;
+            // I need to make a prefab that is usable for all types of visible settings
+            // It should be a lot like the toggle prefab, but it needs to not have the toggle in it because sliders are a thing
+
+            //Transform PREFAB_FOR_SETTINGS = new DynData<OptionsPanel>(optionsPanel).Get<Transform>("controlBindingLinePrefab");
+            //modSettingsTable.ReserveChildren(VisibleFields.Count, PREFAB_FOR_SETTINGS, "ModSettings");
+            //modSettingsTable.RefreshChildrenIList();
+            modSettingsTable.ArrangeChildren();
             return base.OnLoad();
         }
         public override void Show(params object[] parameters)
         {
             Debug.Log("Showing ModSettings Panel!");
+            ResetDefaultSettings();
+            foreach (AgeControlSlider s in sliders)
+            {
+                ResetSlider(s);
+            }
 
             base.Show(parameters);
-
+            NeedRefresh = true;
         }
         protected override IEnumerator OnShow(params object[] parameters)
         {
@@ -186,6 +259,11 @@ namespace DustDevilFramework
             if (saveSettings)
             {
                 Debug.Log("Attempting to write settings to files!");
+                foreach (AgeControlSlider slider in sliders)
+                {
+                    // Check all of the sliders
+                    UpdateSlider(slider);
+                }
                 foreach (ScadMod m in mods)
                 {
                     m.settings.WriteSettings();
@@ -203,6 +281,9 @@ namespace DustDevilFramework
                     }
                 }
                 Debug.Log("Wrote settings to files!");
+            } else
+            {
+                OnResetButtonClick();
             }
             base.Hide(instant);
         }
@@ -231,6 +312,25 @@ namespace DustDevilFramework
         private void OnResetButtonClick()
         {
             //TODO Add!
+            Debug.Log("Resetting Settings!");
+            foreach (ScadMod m in defaultFields.Keys)
+            {
+                foreach (FieldInfo f in defaultFields[m].Keys)
+                {
+                    f.SetValue(m.settings, defaultFields[m][f]);
+                }
+            }
+            Debug.Log("Reset Settings!");
+            foreach (AgeControlSlider s in sliders)
+            {
+                ResetSlider(s);
+            }
+            Debug.Log("Reset sliders!");
+            foreach (AgeControlToggle t in toggles)
+            {
+                ResetToggle(t);
+            }
+            Debug.Log("Reset toggles!");
             //requesterPanel.Display("%ResetControlsConfirmMessage", new global::RequesterPanel.ResultEventHandler(this.OnSettingsResetConfrim), global::RequesterPanel.ButtonsMode.YesNo, "%ResetControlsConfirmTitle", -1f, true);
         }
         private void OnConfirmButtonClick(GameObject obj)
@@ -240,7 +340,6 @@ namespace DustDevilFramework
         }
         public void CreateFrame()
         {
-            Debug.Log("Creating the Frame!");
             DynData<OptionsPanel> d = new DynData<OptionsPanel>(optionsPanel);
             GameObject oldObj = d.Get<AgeControlToggle>("vSyncToggle").transform.parent.parent.parent.parent.gameObject;
             // oldObj in this case is the "Frame" object that we would like to duplicate.
@@ -257,24 +356,27 @@ namespace DustDevilFramework
             GameObject.DestroyImmediate(transform.FindChild("1-Frame").gameObject);
             GameObject bg = (GameObject)GameObject.Instantiate(optionsPanel.transform.FindChild("0-Bg").gameObject);
 
-            GameObject modSettingsConfig = (GameObject)GameObject.Instantiate(optionsPanel.transform.FindChild("1-Frame").FindChild("3-RightPart").FindChild("2-ResolutionConfig").gameObject);
-
             bg.transform.SetParent(transform);
             //transform.SetParent(optionsPanel.AgeTransform.GetParent().transform);
 
             bg.name = "ModSettingsBackground";
-            modSettingsConfig.name = "ModSettingsConfig";
 
-            // Destroys the useless LeftSide (which holds the controls)
-            // Instead, we could put stuff like labels there, or something
+            // Destroys the useless RightSide
+            // Instead, we will expand the leftSide to have everything!
             // We need to delete all of its children too, and its children's children, etc.
 
-            Util.DeleteChildrenInclusive(frame.transform.FindChild("2-LeftPart").gameObject);
-            Util.DeleteChildrenExclusive(frame.transform.FindChild("3-RightPart").gameObject);
-            Util.DeleteChildrenExclusive(modSettingsConfig);
+            frame.transform.FindChild("2-LeftPart").name = "CentralPart";
 
-            modSettingsConfig.transform.SetParent(frame.transform.FindChild("3-RightPart"));
-            modSettingsConfig.GetComponent<AgeTransform>().Position = optionsPanel.transform.FindChild("1-Frame").FindChild("3-RightPart").FindChild("2-ResolutionConfig").GetComponent<AgeTransform>().Position;
+            Util.DeleteChildrenExclusive(frame.transform.FindChild("CentralPart").gameObject);
+            AgeTransform left = frame.transform.FindChild("CentralPart").GetComponent<AgeTransform>();
+            left.Init();
+            left.Position = optionsPanel.transform.FindChild("1-Frame").FindChild("2-LeftPart").GetComponent<AgeTransform>().Position;
+            left.Width = frame.GetComponent<AgeTransform>().Width;
+            left.PixelMarginTop = 20;
+            left.Height = left.Height + (optionsPanel.transform.FindChild("1-Frame").FindChild("2-LeftPart").GetComponent<AgeTransform>().PixelMarginTop - left.PixelMarginTop);
+            left.Height -= 10;
+
+            Util.DeleteChildrenInclusive(frame.transform.FindChild("3-RightPart").gameObject);
 
             //GameObject.DestroyImmediate(frame.transform.FindChild("3-RightPart"));
             AgeControlButton cancel = frame.transform.FindChild("7-CancelButton").GetComponent<AgeControlButton>();
@@ -305,31 +407,96 @@ namespace DustDevilFramework
 
             this.frame = frame;
         }
+        public void CreateModSettingsTable()
+        {
+            DynData<OptionsPanel> d = new DynData<OptionsPanel>(optionsPanel);
+            GameObject old = d.Get<AgeTransform>("controlBindingsTable").gameObject;
+
+            GameObject table = (GameObject)GameObject.Instantiate(old);
+            table.name = "ModSettingsTable";
+            table.transform.SetParent(modSettingsScroll.GetComponent<AgeControlScrollView>().Viewport.transform);
+
+            AgeTransform oldTable = old.GetComponent<AgeTransform>();
+            AgeTransform newTable = table.GetComponent<AgeTransform>();
+
+            modSettingsScroll.GetComponent<AgeControlScrollView>().VirtualArea = newTable;
+
+            newTable.Init();
+            newTable.Position = oldTable.Position;
+            newTable.VerticalSpacing = oldTable.VerticalSpacing;
+
+            modSettingsTable = newTable;
+        }
         public void CreateSlider(ScadMod m, FieldInfo f, float low, float high, float current, float increment)
         {
             Debug.Log("Creating Slider with name: " + Util.GetName(m, f));
             DynData<OptionsPanel> d = new DynData<OptionsPanel>(optionsPanel);
-            GameObject oldObj = d.Get<AgeControlSlider>("masterVolSlider").gameObject;
-            GameObject slider = (GameObject)GameObject.Instantiate(oldObj);
-            slider.transform.parent = transform;
-            Debug.Log("Parent: " + slider.transform.parent);
-            Debug.Log("Slider components:");
-            foreach (Component _ in slider.GetComponents(typeof(Component)))
+            GameObject oldObj = d.Get<AgeControlSlider>("masterVolSlider").transform.parent.parent.gameObject;
+            GameObject sliderGroup = (GameObject)GameObject.Instantiate(oldObj);
+            sliderGroup.name = Util.GetName(m, f);
+            sliderGroup.transform.SetParent(modSettingsTable.transform);
+            Debug.Log("Slider Group Object Created!");
+
+            Debug.Log("OLD:");
+            Debug.Log("Slider: " + d.Get<AgeControlSlider>("masterVolSlider").transform);
+            Debug.Log("Parent: " + d.Get<AgeControlSlider>("masterVolSlider").transform.parent);
+            Debug.Log("Parent's Parent: " + d.Get<AgeControlSlider>("masterVolSlider").transform.parent.parent);
+            Debug.Log("Children");
+            foreach (Transform t in d.Get<AgeControlSlider>("masterVolSlider").transform.parent.parent)
             {
-                Debug.Log("- " + _);
+                Debug.Log("Components:");
+                foreach (Component _ in t.GetComponents(typeof(Component)))
+                {
+                    Debug.Log("- " + _);
+                }
             }
+            Transform slider = sliderGroup.transform.FindChild("20-SliderContainer").FindChild("10-Slider");
+            slider.gameObject.name = Util.GetName(m, f) + "_Slider";
             AgeControlSlider sliderControl = slider.GetComponent<AgeControlSlider>();
-            sliderControl.CurrentValue = current;
+            Debug.Log("Created Slider Control!");
+
+            //slider.GetComponent<AgeTooltip>().Content = Util.GetName(m, f);
+
+            Transform label = sliderGroup.transform.FindChild("0-Title");
+            label.gameObject.name = Util.GetName(m, f) + "_Label";
+            label.GetComponent<AgePrimitiveLabel>().Text = Util.GetName(m, f);
+
+            sliderGroup.GetComponent<AgeTransform>().Position = d.Get<AgeControlSlider>("masterVolSlider").transform.parent.parent.GetComponent<AgeTransform>().Position;
+            sliderGroup.GetComponent<AgeTransform>().PixelMarginTop = VisibleFields.Count * (settingSpacing + sliderGroup.GetComponent<AgeTransform>().Height);
+            Debug.Log("Setup Slider Location!");
+
             sliderControl.MinValue = low;
             sliderControl.MaxValue = high;
             sliderControl.Increment = increment;
-            slider.GetComponent<AgeTooltip>().Content = Util.GetName(m, f);
-            Debug.Log("AgeTfm: " + sliderControl.AgeTransform.Get2DPosition());
+            sliderControl.CurrentValue = current;
+            Debug.Log("Setup Slider Control!");
+
+            sliderControl.AgeTransform.Position = d.Get<AgeControlSlider>("masterVolSlider").AgeTransform.Position;
+            // Set to have same stats as old sliders
+            sliderGroup.transform.FindChild("20-SliderContainer").GetComponent<AgeTransform>().PixelMarginLeft = 36;
+            sliderGroup.transform.FindChild("20-SliderContainer").GetComponent<AgeTransform>().PixelMarginRight = 36;
+            sliderGroup.transform.FindChild("20-SliderContainer").GetComponent<AgeTransform>().PixelMarginBottom = 6;
+            //sliderGroup.transform.FindChild("20-SliderContainer").GetComponent<AgeTransform>().Width = 612;
+            sliderGroup.transform.FindChild("10-SliderBg").GetComponent<AgeTransform>().PixelMarginBottom = 6;
+            sliderGroup.transform.FindChild("30-Value").GetComponent<AgePrimitiveLabel>().Text = sliderControl.CurrentValue.ToString();
+            label.GetComponent<AgePrimitiveLabel>().AgeTransform.Height = 42;
+            label.GetComponent<AgePrimitiveLabel>().AgeTransform.PixelMarginLeft = 8;
+            sliderControl.AgeTransform.GetParent().X = 36;
+            sliderControl.AgeTransform.GetParent().Y = 36;
+            sliderControl.AgeTransform.GetParent().Width = d.Get<AgeControlSlider>("masterVolSlider").AgeTransform.GetParent().Width;
+            sliderGroup.transform.FindChild("30-Value").GetComponent<AgeTransform>().Height = 42;
+
+
+            sliderControl.OnDragMethod = "OnSliderDragged";
+            sliderControl.OnDragObject = transform.gameObject;
             Debug.Log("Arm - Method: " + sliderControl.OnArmMethod + " GameObject: " + sliderControl.OnArmObject);
             Debug.Log("Drag - Method: " + sliderControl.OnDragMethod + " GameObject: " + sliderControl.OnDragObject);
             Debug.Log("Release - Method: " + sliderControl.OnReleaseMethod + " GameObject: " + sliderControl.OnReleaseObject);
 
-            Fields.Add(f);
+
+            VisibleFields.Add(f);
+
+            sliders.Add(sliderControl);
         }
         public void CreateToggle(ScadMod m, FieldInfo f, bool current)
         {
@@ -341,7 +508,7 @@ namespace DustDevilFramework
 
             GameObject toggleGroup = (GameObject)GameObject.Instantiate(oldObj);
             toggleGroup.name = Util.GetName(m, f);
-            toggleGroup.transform.SetParent(frame.transform.FindChild("3-RightPart").FindChild("ModSettingsConfig"));
+            toggleGroup.transform.SetParent(modSettingsTable.transform);
             Debug.Log("Toggle Group Object Created!");
 
             Transform toggle = toggleGroup.transform.GetChild(2);
@@ -349,11 +516,11 @@ namespace DustDevilFramework
             AgeControlToggle toggleControl = toggle.GetComponent<AgeControlToggle>();
             toggleControl.State = current;
             toggle.GetComponent<AgeTooltip>().Content = Util.GetName(m, f);
+
             Transform label = toggleGroup.transform.GetChild(1);
             label.gameObject.name = Util.GetName(m, f) + "_Label";
             label.GetComponent<AgePrimitiveLabel>().Text = Util.GetName(m, f);
-            toggleGroup.GetComponent<AgeTransform>().Position = oldObj.GetComponent<AgeTransform>().Position;
-            toggle.GetComponent<AgeTransform>().Position = oldObj.transform.GetChild(2).GetComponent<AgeTransform>().Position;
+
             toggleGroup.GetComponent<AgeTransform>().PixelMarginTop = VisibleFields.Count * (settingSpacing + toggleGroup.GetComponent<AgeTransform>().Height);
             Debug.Log("VisibleFields Count: " + VisibleFields.Count);
             toggleControl.OnSwitchMethod = "OnTogglePressed";
@@ -362,21 +529,37 @@ namespace DustDevilFramework
 
 
             VisibleFields.Add(f);
+            toggles.Add(toggleControl);
         }
         public void CreateScrollArea()
         {
             AgeControlScrollView scroll = new DynData<OptionsPanel>(optionsPanel).Get<AgeControlScrollView>("controlBindingsScrollView");
-            Debug.Log("VirutalArea pos: " + scroll.VirtualArea.Position);
-            Debug.Log("VirtualArea Children Length: " + scroll.VirtualArea.GetChildren().Count);
-            Debug.Log("ViewPort pos: " + scroll.Viewport.Position);
-            Debug.Log("ViewPort Children Length: " + scroll.Viewport.GetChildren().Count);
-            Debug.Log("Parent: " + scroll.transform.parent);
-            Debug.Log("Age Transform Pos: " + scroll.AgeTransform.Position);
-            Debug.Log("Components:");
-            foreach (Component _ in scroll.GetComponents(typeof(Component)))
-            {
-                Debug.Log("- " + _);
-            }
+            // Clones the parent of the scroll (1-ControlsConfig)
+            // ScrollBar is child: 2-ControlBindingsScrollView
+            GameObject o = (GameObject)GameObject.Instantiate(scroll.gameObject);
+            o.transform.SetParent(frame.transform.FindChild("CentralPart"));
+            o.SetActive(true);
+
+            AgeControlScrollView newScroll = o.GetComponent<AgeControlScrollView>();
+            o.name = "ModSettingsScrollView";
+            newScroll.Init();
+            newScroll.AgeTransform.Position = scroll.AgeTransform.Position;
+            newScroll.AgeTransform.PixelMarginTop = scroll.AgeTransform.PixelMarginTop;
+            newScroll.AgeTransform.PixelMarginLeft = scroll.AgeTransform.PixelMarginLeft;
+            newScroll.AgeTransform.PixelMarginRight = scroll.AgeTransform.PixelMarginRight;
+
+            o.transform.FindChild("3Viewport").name = "ModSettingsViewPort";
+            o.transform.FindChild("1VerticalScrollBar").name = "ModSettingsScrollBar";
+            newScroll.Viewport = o.transform.FindChild("ModSettingsViewPort").GetComponent<AgeTransform>();
+            newScroll.Viewport.Init();
+            newScroll.Viewport.Position = scroll.Viewport.Position;
+            Util.DeleteChildrenInclusive(newScroll.Viewport.transform.FindChild("2-ControlBindingsTable").gameObject);
+            newScroll.VerticalScrollBar = o.transform.FindChild("ModSettingsScrollBar").GetComponent<AgeControlScrollBar>();
+            newScroll.VerticalScrollBar.Init();
+            newScroll.VerticalScrollBar.AgeTransform.Position = scroll.VerticalScrollBar.AgeTransform.Position;
+            newScroll.DisplayVertical = AgeScrollbarDisplay.ALWAYS;
+
+            modSettingsScroll = o;
         }
         private void OnTogglePressed(GameObject o)
         {
@@ -387,7 +570,7 @@ namespace DustDevilFramework
                 {
                     // We need to set the field that corresponds to this toggle to the toggle value
                     // We can cheat by checking the name of the AgeTooltip attatched to 'o'
-                    if (o.GetComponent<AgeTooltip>().Content == Util.GetName(mod, f))
+                    if (o.GetComponent<AgeTooltip>().Content.Equals(Util.GetName(mod, f)))
                     {
                         // This is the field that needs to be modified.
                         // It should be a bool, if the button is working as intended!
@@ -404,26 +587,89 @@ namespace DustDevilFramework
             }
             Debug.Log("A toggle button exists but it doesn't have a matching field in all mods!");
         }
-        private void OnSliderDragged(GameObject o)
+        private void UpdateSlider(AgeControlSlider o)
         {
-            Debug.Log("Registered a Drag Event Press! GO: " + o);
             foreach (ScadMod mod in mods)
             {
                 foreach (FieldInfo f in VisibleFields)
                 {
-                    // We need to set the field that corresponds to this toggle to the toggle value
-                    // We can cheat by checking the name of the AgeTooltip attatched to 'o'
-                    if (o.GetComponent<AgeTooltip>().Content == Util.GetName(mod, f))
+                    if (o.transform.parent.parent.name.Equals(Util.GetName(mod, f)))
                     {
-                        // This is the field that needs to be modified.
-                        // It should be a bool, if the button is working as intended!
-                        Debug.Log("Setting value of: " + Util.GetName(mod, f) + " to: " + o.GetComponent<AgeControlSlider>().CurrentValue + " in settings type: " + mod.settingsType + " in mod: " + mod.name);
-                        f.SetValue(mod.settings, o.GetComponent<AgeControlSlider>().CurrentValue);
+                        Debug.Log("Setting value of: " + Util.GetName(mod, f) + " to: " + o.CurrentValue + " in settings type: " + mod.settingsType + " in mod: " + mod.name);
+                        try
+                        {
+                            f.SetValue(mod.settings, o.CurrentValue);
+                        } catch (Exception e)
+                        {
+                            try
+                            {
+                                f.SetValue(mod.settings, (int)o.CurrentValue);
+                            }
+                            catch (Exception e2)
+                            {
+                                f.SetValue(mod.settings, (double)o.CurrentValue);
+                            }
+                        } 
                         return;
                     }
                 }
             }
             Debug.Log("A slider exists but it doesn't have a matching field in all mods!");
+        }
+        private void OnSliderDragged()
+        {
+            // Find the slider that was dragged and update it.
+            foreach (AgeControlSlider s in sliders)
+            {
+                AgePrimitiveLabel valueLabel = s.transform.parent.parent.FindChild("30-Value").GetComponent<AgePrimitiveLabel>();
+                if (!s.CurrentValue.ToString().Equals(valueLabel.Text))
+                {
+                    valueLabel.Text = s.CurrentValue.ToString();
+                }
+            }
+        }
+        private void ResetSlider(AgeControlSlider o)
+        {
+            foreach (ScadMod m in mods)
+            {
+                foreach (FieldInfo f in VisibleFields)
+                {
+                    if (o.transform.parent.parent.name.Equals(Util.GetName(m, f)))
+                    {
+                        object q = defaultFields[m][f];
+                        Debug.Log("Reseting slider: " + o + " to: " + q);
+                        try
+                        {
+                            o.CurrentValue = (float)q;
+                        }
+                        catch (InvalidCastException e)
+                        {
+                            try
+                            {
+                                o.CurrentValue = (int)q;
+                            }
+                            catch (InvalidCastException e2)
+                            {
+                                o.CurrentValue = (float)(double)q;
+                            }
+                        }
+                        o.transform.parent.parent.FindChild("30-Value").GetComponent<AgePrimitiveLabel>().Text = o.CurrentValue.ToString();
+                    }
+                }
+            }
+        }
+        private void ResetToggle(AgeControlToggle t)
+        {
+            foreach (ScadMod m in mods)
+            {
+                foreach (FieldInfo f in VisibleFields)
+                {
+                    if (t.name.Equals(Util.GetName(m, f) + "_Toggle"))
+                    {
+                        t.State = (bool)defaultFields[m][f];
+                    }
+                }
+            }
         }
     }
 }

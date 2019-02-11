@@ -1,10 +1,8 @@
 using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace DustDevilFramework
@@ -15,7 +13,7 @@ namespace DustDevilFramework
 
         public static int MajorVersion { get; } = 4;
         public static int MinorVersion { get; } = 0;
-        public static int Revision { get; } = 0;
+        public static int Revision { get; } = 5;
 
         private static List<ScadMod> ModList = new List<ScadMod>();
         private static ModSettingsPopupMenuPanel SettingsPanel;

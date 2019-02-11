@@ -2,9 +2,9 @@
 using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
+using UnityEngine;
 
 namespace DustDevilFramework
 {
@@ -26,7 +26,8 @@ namespace DustDevilFramework
         public PodMod(Type settingsType, Type partialityType)
         {
             name = GetName();
-            PodSettings temp = (PodSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
+            PodSettings temp = new PodSettings(name);
+            temp = Activator.CreateInstance(settingsType, new object[] { name }) as PodSettings;
             this.settingsType = settingsType;
             settings = temp;
             // Setup default values for config
@@ -56,8 +57,7 @@ namespace DustDevilFramework
             } else
             {
                 Log("Attempting to remove Localization changes!");
-                Util.RemoveLocalizationChangeInclusive("%ShipTitle_" + GetName(), "</LocalizationPair>");
-                //RemoveLocalizationChanges();
+                Util.RemoveLocalizationChangeInclusive("%ShipTitle_" + GetName(), GetSpecialText() + "</LocalizationPair>");
             }
             Log("Initialized!");
         }
@@ -208,66 +208,6 @@ namespace DustDevilFramework
             {
                 Log("Name: " + s.Name + " localized: " + s.GetLocalizedName() + " desc: " + s.GetLocalizedDescription() + " abscissa val: " + s.AbscissaValue);
             }
-        }
-
-        public void CreateLocalizationChanges()
-        {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Localization\english\ED_Localization_Locales.xml");
-            foreach (string s in lines)
-            {
-                if (s.IndexOf("%ShipTitle_" + GetName()) != -1)
-                {
-                    // The Localization already contains the Key for the pod.
-                    return;
-                }
-            }
-            List<string> linesLst = lines.ToList();
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string line = lines[i];
-                // Inserts it right before infirmary, right after escape pod.
-                if (line.IndexOf("%ShipTitle_Locked_Infirmary") != -1)
-                {
-                    linesLst.Insert(i, "  <LocalizationPair Name=\"%ShipTitle_"+GetName()+"\">"+GetName()+"</LocalizationPair>");
-                    linesLst.Insert(i + 1, "  <LocalizationPair Name=\"%ShipDescription_"+GetName()+"\">"+GetDescription());
-                    linesLst.Insert(i + 2, "");
-                    linesLst.Insert(i + 3, GetSpecialText() + "</LocalizationPair>");
-                }
-            }
-            System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());
-        }
-
-        public void RemoveLocalizationChanges()
-        {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Localization\english\ED_Localization_Locales.xml");
-            List<string> linesLst = lines.ToList();
-            for (int i = 0; i < linesLst.Count; i++)
-            {
-                string s = linesLst[i];
-                if (s.IndexOf("%ShipTitle_" + GetName()) != -1)
-                {
-                    // The Localization already contains the Key for the pod.
-                    linesLst.RemoveAt(i);
-                }
-                if (s.IndexOf("%ShipDescription_" + GetName()) != -1)
-                {
-                    // The Localization already contains the Key for the pod.
-                    int q = i;
-                    for (int j = i; j < linesLst.Count; j++)
-                    {
-                        if (linesLst[j].IndexOf("</LocalizationPair>") != -1)
-                        {
-                            // This is the stopping point for deleting.
-                            q = j;
-                        }
-                    }
-                    for (int l = i; l <= q; l++)
-                    {
-                        linesLst.RemoveAt(i);
-                    }
-                }
-            }
-            System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());
         }
 
         public ShipConfig GetConfig()

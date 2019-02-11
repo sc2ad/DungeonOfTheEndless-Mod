@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -7,11 +6,20 @@ namespace DustDevilFramework
 {
     public class Util
     {
-        // Adds changes after startLocation with offset
-        public static void ApplyLocalizationChange(string startLocation, int offset, string[] linesToWrite)
+        public static List<T> GetList<T>(T[] arr)
         {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Localization\english\ED_Localization_Locales.xml");
-            List<string> linesLst = lines.ToList();
+            List<T> toReturn = new List<T>();
+            foreach (T item in arr)
+            {
+                toReturn.Add(item);
+            }
+            return toReturn;
+        }
+        // Applies a change to a file
+        public static void ApplyFileChange(string filename, string startLocation, int offset, string[] linesToWrite)
+        {
+            string[] lines = System.IO.File.ReadAllLines(filename);
+            List<string> linesLst = GetList(lines);
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
@@ -28,12 +36,12 @@ namespace DustDevilFramework
                     }
                 }
             }
-            System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());
+            System.IO.File.WriteAllLines(filename, linesLst.ToArray());
         }
-        public static void ApplyLocalizationChange(string startLocation, int offset, List<string> linesToWrite)
+        public static void ApplyFileChange(string filename, string startLocation, int offset, List<string> linesToWrite)
         {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Localization\english\ED_Localization_Locales.xml");
-            List<string> linesLst = lines.ToList();
+            string[] lines = System.IO.File.ReadAllLines(filename);
+            List<string> linesLst = GetList(lines);
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
@@ -50,13 +58,22 @@ namespace DustDevilFramework
                     }
                 }
             }
-            System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());
+            System.IO.File.WriteAllLines(filename, linesLst.ToArray());
         }
-        // Deletes changes between startingPoint and endingPoint inclusive
-        public static void RemoveLocalizationChangeInclusive(string startingPoint, string endingPoint)
+        // Adds changes after startLocation with offset
+        public static void ApplyLocalizationChange(string startLocation, int offset, string[] linesToWrite)
         {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Localization\english\ED_Localization_Locales.xml");
-            List<string> linesLst = lines.ToList();
+            ApplyFileChange(@"Public\Localization\english\ED_Localization_Locales.xml", startLocation, offset, linesToWrite);
+        }
+        public static void ApplyLocalizationChange(string startLocation, int offset, List<string> linesToWrite)
+        {
+            ApplyFileChange(@"Public\Localization\english\ED_Localization_Locales.xml", startLocation, offset, linesToWrite);
+        }
+        // Deletes changes from a file
+        public static void RemoveFileChangeInclusive(string filename, string startingPoint, string endingPoint)
+        {
+            string[] lines = System.IO.File.ReadAllLines(filename);
+            List<string> linesLst = GetList(lines);
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
@@ -78,13 +95,12 @@ namespace DustDevilFramework
                     break;
                 }
             }
-            System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());
+            System.IO.File.WriteAllLines(filename, linesLst.ToArray());
         }
-        // Deletes changes between startingPoint and endingPoint exclusive of the end, inclusive of the start
-        public static void RemoveLocalizationChangeExclusiveEnd(string startingPoint, string endingPoint)
+        public static void RemoveFileChangeExclusiveEnd(string filename, string startingPoint, string endingPoint)
         {
-            string[] lines = System.IO.File.ReadAllLines(@"Public\Localization\english\ED_Localization_Locales.xml");
-            List<string> linesLst = lines.ToList();
+            string[] lines = System.IO.File.ReadAllLines(filename);
+            List<string> linesLst = GetList(lines);
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
@@ -106,7 +122,17 @@ namespace DustDevilFramework
                     break;
                 }
             }
-            System.IO.File.WriteAllLines(@"Public\Localization\english\ED_Localization_Locales.xml", linesLst.ToArray());
+            System.IO.File.WriteAllLines(filename, linesLst.ToArray());
+        }
+        // Deletes changes between startingPoint and endingPoint inclusive
+        public static void RemoveLocalizationChangeInclusive(string startingPoint, string endingPoint)
+        {
+            RemoveFileChangeInclusive(@"Public\Localization\english\ED_Localization_Locales.xml", startingPoint, endingPoint);
+        }
+        // Deletes changes between startingPoint and endingPoint exclusive of the end, inclusive of the start
+        public static void RemoveLocalizationChangeExclusiveEnd(string startingPoint, string endingPoint)
+        {
+            RemoveFileChangeExclusiveEnd(@"Public\Localization\english\ED_Localization_Locales.xml", startingPoint, endingPoint);
         }
         // Returns a legible name from the given fieldinfo.Name
         public static string GetName(ScadMod m, FieldInfo f)
@@ -191,6 +217,11 @@ namespace DustDevilFramework
             Debug.Log("X: " + trans.X);
             Debug.Log("Y: " + trans.Y);
             Debug.Log("Z: " + trans.Z);
+            Debug.Log("Children Count: " + trans.GetChildren().Count);
+            foreach (AgeTransform t in trans.GetChildren())
+            {
+                Debug.Log("- " + t.transform);
+            }
             Debug.Log("====================================================================================");
         }
     }

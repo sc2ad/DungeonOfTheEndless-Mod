@@ -14,7 +14,7 @@ using static Amplitude.Interop.Steamworks.SteamNetworking;
 
 namespace Ping_Mod
 {
-    class PingMod : PartialityMod
+    public class PingMod : PartialityMod
     {
         public static ScadMod mod = new ScadMod("Ping", typeof(PingSettings), typeof(PingMod));
 

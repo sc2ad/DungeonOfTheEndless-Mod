@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace NoDustPod_Mod
 {
-    class NoDustPod : PartialityMod
+    public class NoDustPod : PartialityMod
     {
         NoDustPodConfig mod = new NoDustPodConfig(typeof(NoDustPod));
 

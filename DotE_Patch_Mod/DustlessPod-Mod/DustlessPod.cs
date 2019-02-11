@@ -1,4 +1,4 @@
-﻿using MonoMod.Utils;
+using MonoMod.Utils;
 using Partiality.Modloader;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DustlessPod_Mod
 {
-    class DustlessPod : PartialityMod
+    public class DustlessPod : PartialityMod
     {
         DustlessPodConfig mod = new DustlessPodConfig(typeof(DustlessPod));
 

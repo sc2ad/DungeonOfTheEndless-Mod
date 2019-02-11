@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace DustDevilFramework
@@ -75,7 +73,7 @@ namespace DustDevilFramework
                             }
                             catch (ArgumentException __)
                             {
-                                f.SetValue(this, Convert.ToBoolean(spl[1]));
+                                f.SetValue(this, Convert.ToInt32(spl[1]));
                             }
                         }
                         Debug.Log("Set Field with name: " + spl[0] + " to: " + spl[1]);
