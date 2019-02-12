@@ -78,6 +78,8 @@ namespace DuplicateHeroSelection_Mod
             public void OnRightClick()
             {
                 SingletonManager.Get<GameSelectionPanel>(true).TryUnselectHero(GetComponent<HeroSelectionItem>().HeroStats.ConfigName);
+                IAudioEventService service = Services.GetService<IAudioEventService>();
+                service.Play2DEvent("Master/GUI/Main_DeselectHero");
             }
         }
     }
