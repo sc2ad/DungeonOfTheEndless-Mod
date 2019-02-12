@@ -20,14 +20,14 @@ namespace DustDevilFramework
         {
             string[] lines = System.IO.File.ReadAllLines(filename);
             List<string> linesLst = GetList(lines);
+            if (linesLst.Contains(linesToWrite[0]))
+            {
+                // The changes already exist
+                return;
+            }
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
-                if (line.IndexOf(linesToWrite[0]) != -1)
-                {
-                    // The changes already exist
-                    return;
-                }
                 if (line.IndexOf(startLocation) != -1)
                 {
                     for (int q = 0; q < linesToWrite.Length; q++)
@@ -42,14 +42,14 @@ namespace DustDevilFramework
         {
             string[] lines = System.IO.File.ReadAllLines(filename);
             List<string> linesLst = GetList(lines);
+            if (linesLst.Contains(linesToWrite[0]))
+            {
+                // The changes already exist
+                return;
+            }
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
-                if (line.IndexOf(linesToWrite[0]) != -1)
-                {
-                    // The changes already exist
-                    return;
-                }
                 if (line.IndexOf(startLocation) != -1)
                 {
                     for (int q = 0; q < linesToWrite.Count; q++)
