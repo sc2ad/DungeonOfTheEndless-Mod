@@ -39,7 +39,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResourceLimiter-Mod", "Reso
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DuplicateHeroSelection-Mod", "DuplicateHeroSelection-Mod\DuplicateHeroSelection-Mod.csproj", "{E3DC604F-3152-4DA4-8285-C1A9DA090135}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DuplicateHeroSelection-Mod", "DuplicateHeroSelection-Mod\DuplicateHeroSelection-Mod.csproj", "{E3DC604F-3152-4DA4-8285-C1A9DA090135}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TASTools-Mod", "TASTools-Mod\TASTools-Mod.csproj", "{D4C5EC80-BDFB-49A6-9D19-5E0AA144525A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,6 +119,10 @@ Global
 		{E3DC604F-3152-4DA4-8285-C1A9DA090135}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3DC604F-3152-4DA4-8285-C1A9DA090135}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3DC604F-3152-4DA4-8285-C1A9DA090135}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4C5EC80-BDFB-49A6-9D19-5E0AA144525A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4C5EC80-BDFB-49A6-9D19-5E0AA144525A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4C5EC80-BDFB-49A6-9D19-5E0AA144525A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4C5EC80-BDFB-49A6-9D19-5E0AA144525A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
