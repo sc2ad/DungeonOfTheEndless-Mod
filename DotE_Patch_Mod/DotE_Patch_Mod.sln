@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResourceLimiter-Mod", "Reso
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DuplicateHeroSelection-Mod", "DuplicateHeroSelection-Mod\DuplicateHeroSelection-Mod.csproj", "{E3DC604F-3152-4DA4-8285-C1A9DA090135}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DuplicateHeroSelection-Mod", "DuplicateHeroSelection-Mod\DuplicateHeroSelection-Mod.csproj", "{E3DC604F-3152-4DA4-8285-C1A9DA090135}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
