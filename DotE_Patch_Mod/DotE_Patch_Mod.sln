@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DuplicateHeroSelection-Mod"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TASTools-Mod", "TASTools-Mod\TASTools-Mod.csproj", "{D4C5EC80-BDFB-49A6-9D19-5E0AA144525A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeedFinder-Mod", "SeedFinder-Mod\SeedFinder-Mod.csproj", "{5A73ACF7-CA40-4A49-BF66-5A95488CC287}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -119,6 +121,10 @@ Global
 		{E3DC604F-3152-4DA4-8285-C1A9DA090135}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3DC604F-3152-4DA4-8285-C1A9DA090135}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3DC604F-3152-4DA4-8285-C1A9DA090135}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A73ACF7-CA40-4A49-BF66-5A95488CC287}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A73ACF7-CA40-4A49-BF66-5A95488CC287}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A73ACF7-CA40-4A49-BF66-5A95488CC287}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A73ACF7-CA40-4A49-BF66-5A95488CC287}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D4C5EC80-BDFB-49A6-9D19-5E0AA144525A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D4C5EC80-BDFB-49A6-9D19-5E0AA144525A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4C5EC80-BDFB-49A6-9D19-5E0AA144525A}.Release|Any CPU.ActiveCfg = Release|Any CPU
