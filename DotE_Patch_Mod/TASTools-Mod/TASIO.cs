@@ -12,11 +12,11 @@ namespace TASTools_Mod
         {
             foreach (int level in TASInput.seeds.Keys)
             {
-                string[] stringInputs = new string[inputs[level].Count + 2];
+                string[] stringInputs = new string[inputs[level].Count + 1];
                 stringInputs[0] = ":" + level + ":" + TASInput.seeds[level].ToString();
-                for (int i = 2; i < inputs[level].Count + 2; i++)
+                for (int i = 1; i < inputs[level].Count + 1; i++)
                 {
-                    stringInputs[i] = inputs[level][i - 2].ToString();
+                    stringInputs[i] = inputs[level][i - 1].ToString();
                 }
                 System.IO.File.WriteAllLines("level" + level + filePath, stringInputs);
             }
