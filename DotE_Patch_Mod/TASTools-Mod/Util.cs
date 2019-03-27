@@ -8,12 +8,6 @@ namespace TASTools_Mod
 {
     public class Util
     {
-        public static void SetSeedData(SeedData data)
-        {
-            new DynData<DungeonGenerator2>(SingletonManager.Get<DungeonGenerator2>(true)).Set<int>("randomSeed", data.DungeonSeed);
-            RandomGenerator.SetSeed(data.RandomGeneratorSeed);
-            UnityEngine.Random.seed = data.UnityEngineSeed;
-        }
         public static Room GetExitRoom()
         {
             Room r = SingletonManager.Get<Dungeon>(false).ExitRoom;

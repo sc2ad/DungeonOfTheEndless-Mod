@@ -38,8 +38,71 @@ namespace TASTools_Mod
                 On.MinorModule.Update += MinorModule_Update;
                 On.Hero.Update += Hero_Update;
                 On.Mob.Update += Mob_Update;
+                On.Mover.Update += Mover_Update;
+                On.Attacker.Update += Attacker_Update;
+                // Playback
+                On.InputManager.Update_MouseEvents += InputManager_Update_MouseEvents;
+                On.InputManager.GetControlStatus += InputManager_GetControlStatus;
+                On.InputManager.TriggerClickDownEvent += InputManager_TriggerClickDownEvent;
+                On.InputManager.TriggerClickUpEvent += InputManager_TriggerClickUpEvent;
                 On.DungeonGenerator2.GenerateDungeonCoroutine += DungeonGenerator2_GenerateDungeonCoroutine;
             }
+        }
+
+        private void InputManager_TriggerClickUpEvent(On.InputManager.orig_TriggerClickUpEvent orig, InputManager self, string eventName, ref List<ClickDownInfo> clickInfosContainer)
+        {
+            if (HasFlag(State.Playing) && !HasFlag(State.Pausing))
+            {
+                InputManagerHooks.TriggerClickUpEvent(self, eventName, ref clickInfosContainer);
+                return;
+            }
+            orig(self, eventName, ref clickInfosContainer);
+        }
+
+        private void InputManager_TriggerClickDownEvent(On.InputManager.orig_TriggerClickDownEvent orig, InputManager self, string eventName, ref List<ClickDownInfo> clickInfosContainer)
+        {
+            if (HasFlag(State.Playing) && !HasFlag(State.Pausing))
+            {
+                InputManagerHooks.TriggerClickDownEvent(self, eventName, ref clickInfosContainer);
+                return;
+            }
+            orig(self, eventName, ref clickInfosContainer);
+        }
+
+        private bool InputManager_GetControlStatus(On.InputManager.orig_GetControlStatus orig, InputManager self, Control control, ControlStatus controlStatus)
+        {
+            if (HasFlag(State.Playing) && !HasFlag(State.Pausing))
+            {
+                return TASInputPlayer.GetControlStatus(control, controlStatus);
+            }
+            return orig(self, control, controlStatus);
+        }
+
+        private void InputManager_Update_MouseEvents(On.InputManager.orig_Update_MouseEvents orig, InputManager self)
+        {
+            if (HasFlag(State.Playing) && !HasFlag(State.Pausing))
+            {
+                InputManagerHooks.Update_MouseEvents(self);
+            }
+            orig(self);
+        }
+
+        private void Attacker_Update(On.Attacker.orig_Update orig, Attacker self)
+        {
+            if (HasFlag(State.Pausing))
+            {
+                return;
+            }
+            orig(self);
+        }
+
+        private void Mover_Update(On.Mover.orig_Update orig, Mover self)
+        {
+            if (HasFlag(State.Pausing))
+            {
+                return;
+            }
+            orig(self);
         }
 
         private void Mob_Update(On.Mob.orig_Update orig, Mob self)
@@ -84,7 +147,7 @@ namespace TASTools_Mod
             if (HasFlag(State.Playing) && TASInput.seeds.ContainsKey(level))
             {
                 // Then we need to set the seed accordingly!
-                Util.SetSeedData(TASInput.seeds[level]);
+                TASInput.seeds[level].SetSeedData();
                 mod.Log("Set seed to: " + TASInput.seeds[level] + " for level: " + level);
             }
             if (!TASInput.seeds.ContainsKey(level))
@@ -115,11 +178,19 @@ namespace TASTools_Mod
             {
                 // Need to find some way of doing standard processing except for actually updating the game
             }
-            if (HasFlag(State.Playing))
+            if (HasFlag(State.Playing) && !HasFlag(State.Pausing))
             {
                 // Read Inputs from file/RAM and perform them
-                mod.Log("Playing input...");
-                // HEY WAIT I GOTTA DO THIS PART
+                if (TASInput.HasNext(level))
+                {
+                    TASInputPlayer.Update(TASInput.GetNext(level));
+                    mod.Log("Playing input: " + TASInputPlayer.Current);
+                } else
+                {
+                    mod.Log("Completed input playback!");
+                    ToggleState(State.Playing);
+                }
+                
             }
             if (HasFlag(State.Recording))
             {
@@ -190,6 +261,14 @@ namespace TASTools_Mod
             On.MinorModule.Update -= MinorModule_Update;
             On.Hero.Update -= Hero_Update;
             On.Mob.Update -= Mob_Update;
+            On.Mover.Update -= Mover_Update;
+            On.Attacker.Update -= Attacker_Update;
+
+            On.InputManager.Update_MouseEvents -= InputManager_Update_MouseEvents;
+            On.InputManager.GetControlStatus -= InputManager_GetControlStatus;
+            On.InputManager.TriggerClickDownEvent -= InputManager_TriggerClickDownEvent;
+            On.InputManager.TriggerClickUpEvent -= InputManager_TriggerClickUpEvent;
+
             On.DungeonGenerator2.GenerateDungeonCoroutine -= DungeonGenerator2_GenerateDungeonCoroutine;
         }
 

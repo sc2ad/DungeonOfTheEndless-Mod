@@ -86,9 +86,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InputManagerHooks.cs" />
     <Compile Include="SeedData.cs" />
     <Compile Include="State.cs" />
     <Compile Include="TASInput.cs" />
+    <Compile Include="TASInputPlayer.cs" />
     <Compile Include="TASIO.cs" />
     <Compile Include="TASToolsMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

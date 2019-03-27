@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace TASTools_Mod
 {
+    [Serializable]
     public class SeedData
     {
         public int DungeonSeed;
@@ -31,9 +32,21 @@ namespace TASTools_Mod
             RandomGeneratorSeed = Convert.ToInt32(data[1]);
             UnityEngineSeed = Convert.ToInt32(data[2]);
         }
+        public void SetSeedData()
+        {
+            new DynData<DungeonGenerator2>(SingletonManager.Get<DungeonGenerator2>(true)).Set<int>("randomSeed", DungeonSeed);
+            RandomGenerator.SetSeed(RandomGeneratorSeed);
+            UnityEngine.Random.seed = UnityEngineSeed;
+        }
         public override string ToString()
         {
             return DungeonSeed + "," + RandomGeneratorSeed + "," + UnityEngineSeed;
+        }
+        public static void SetSeedData(SeedData data)
+        {
+            new DynData<DungeonGenerator2>(SingletonManager.Get<DungeonGenerator2>(true)).Set<int>("randomSeed", data.DungeonSeed);
+            RandomGenerator.SetSeed(data.RandomGeneratorSeed);
+            UnityEngine.Random.seed = data.UnityEngineSeed;
         }
     }
 }
