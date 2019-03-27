@@ -12,6 +12,12 @@ namespace TASTools_Mod
         {
             foreach (int level in TASInput.seeds.Keys)
             {
+                if (!inputs.ContainsKey(level))
+                {
+                    // The seed exists but there is no TAS data for this level!
+                    // Make it anyway, but with an empty amount of data.
+                    inputs.Add(level, new List<TASInput>());
+                }
                 string[] stringInputs = new string[inputs[level].Count + 1];
                 stringInputs[0] = ":" + level + ":" + TASInput.seeds[level].ToString();
                 for (int i = 1; i < inputs[level].Count + 1; i++)
