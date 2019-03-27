@@ -8,18 +8,6 @@ namespace TASTools_Mod
 {
     public class Util
     {
-        public class SeedData
-        {
-            public int DungeonSeed;
-            public int RandomGeneratorSeed;
-            public int UnityEngineSeed;
-            public SeedData(int d, int r, int u)
-            {
-                DungeonSeed = d;
-                RandomGeneratorSeed = r;
-                UnityEngineSeed = u;
-            }
-        }
         public static void SetSeedData(SeedData data)
         {
             new DynData<DungeonGenerator2>(SingletonManager.Get<DungeonGenerator2>(true)).Set<int>("randomSeed", data.DungeonSeed);
