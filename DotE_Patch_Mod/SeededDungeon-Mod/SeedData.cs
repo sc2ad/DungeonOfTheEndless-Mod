@@ -13,6 +13,9 @@ namespace SeededDungeon_Mod
         public int DungeonSeed;
         public int RandomGeneratorSeed;
         public int UnityEngineSeed;
+
+        public static int RandomGeneratorSavedSeed = 0;
+
         public SeedData()
         {
             DungeonSeed = new DynData<DungeonGenerator2>(SingletonManager.Get<DungeonGenerator2>(true)).Get<int>("randomSeed");
@@ -37,6 +40,9 @@ namespace SeededDungeon_Mod
             new DynData<DungeonGenerator2>(SingletonManager.Get<DungeonGenerator2>(true)).Set<int>("randomSeed", DungeonSeed);
             RandomGenerator.SetSeed(RandomGeneratorSeed);
             UnityEngine.Random.seed = UnityEngineSeed;
+            // Saves Seed for TriggerEvents Consistency!
+            RandomGeneratorSavedSeed = RandomGeneratorSeed;
+            RandomGenerator.SaveSeed();
         }
         public override string ToString()
         {
@@ -44,9 +50,7 @@ namespace SeededDungeon_Mod
         }
         public static void SetSeedData(SeedData data)
         {
-            new DynData<DungeonGenerator2>(SingletonManager.Get<DungeonGenerator2>(true)).Set<int>("randomSeed", data.DungeonSeed);
-            RandomGenerator.SetSeed(data.RandomGeneratorSeed);
-            UnityEngine.Random.seed = data.UnityEngineSeed;
+            data.SetSeedData();
         }
     }
 }

@@ -33,10 +33,8 @@ namespace SeededDungeon_Mod
                 // Other static/dynamic events are unknown based off of solely Seed
                 // However... What if I used recursive logging to find all of the data i need, then use recursive reading/setting in the same order.
                 On.DungeonGenerator2.GenerateDungeonCoroutine += DungeonGenerator2_GenerateDungeonCoroutine;
+                On.Dungeon.TriggerEvents += Dungeon_TriggerEvents;
                 On.ShipConfig.GetLocalizedDescription += ShipConfig_GetLocalizedDescription;
-                On.Dungeon.FillDungeonAsync += Dungeon_FillDungeonAsync;
-                On.Dungeon.SetGenerationParams += Dungeon_SetGenerationParams;
-                On.Dungeon.SetNewGenerationSeed += Dungeon_SetNewGenerationSeed;
             }
             if ((mod.settings as SeededDungeonSettings).ReadFromSeedLog)
             {
@@ -44,21 +42,37 @@ namespace SeededDungeon_Mod
             }
         }
 
-        private void Dungeon_SetNewGenerationSeed(On.Dungeon.orig_SetNewGenerationSeed orig)
-        {
-            mod.Log("Setting new GenerationSeed!");
-            mod.Log("Dungeon.SetNewGenerationSeed");
-            orig();
-        }
-
         public void UnLoad()
         {
             mod.UnLoad();
             On.DungeonGenerator2.GenerateDungeonCoroutine -= DungeonGenerator2_GenerateDungeonCoroutine;
             On.ShipConfig.GetLocalizedDescription -= ShipConfig_GetLocalizedDescription;
-            On.Dungeon.FillDungeonAsync -= Dungeon_FillDungeonAsync;
-            On.Dungeon.SetGenerationParams -= Dungeon_SetGenerationParams;
-            On.Dungeon.SetNewGenerationSeed -= Dungeon_SetNewGenerationSeed;
+            On.Dungeon.TriggerEvents -= Dungeon_TriggerEvents;
+        }
+
+        private System.Collections.IEnumerator Dungeon_TriggerEvents(On.Dungeon.orig_TriggerEvents orig, Dungeon self, Room openingRoom, HeroMobCommon opener, bool canTriggerDungeonEvent)
+        {
+            mod.Log("Triggering Events!");
+            RandomGenerator.RestoreSeed();
+            mod.Log("Restoring Seed!");
+            int temp = RandomGenerator.Seed;
+            RandomGenerator.RestoreSeed();
+            int saved = RandomGenerator.Seed;
+            RandomGenerator.SetSeed(temp);
+
+            mod.Log("Before SeedData: " + new SeedData() + " saved: " + saved);
+
+            // Calls TriggerEvents the proper number of times!
+            yield return self.StartCoroutine(orig(self, openingRoom, opener, canTriggerDungeonEvent));
+            temp = RandomGenerator.Seed;
+            RandomGenerator.RestoreSeed();
+            saved = RandomGenerator.Seed;
+            RandomGenerator.SetSeed(temp);
+            mod.Log("After SeedData: " + new SeedData() + " saved: " + saved);
+
+            mod.Log("Saving Seed!");
+            RandomGenerator.SaveSeed();
+            yield break;
         }
 
         private string ShipConfig_GetLocalizedDescription(On.ShipConfig.orig_GetLocalizedDescription orig, ShipConfig self)
@@ -71,21 +85,6 @@ namespace SeededDungeon_Mod
                 return temp;
             }
             return orig(self);
-        }
-
-        private void Dungeon_SetGenerationParams(On.Dungeon.orig_SetGenerationParams orig, DungeonGenerationParams genParams)
-        {
-            mod.Log("Generation Seed: " + genParams.GenerationSeed);
-            mod.Log("Final Seed: " + genParams.PostGenerationSeed);
-            orig(genParams);
-        }
-
-        private System.Collections.IEnumerator Dungeon_FillDungeonAsync(On.Dungeon.orig_FillDungeonAsync orig, Dungeon self)
-        {
-            mod.Log("Filling Dungeon Async");
-            yield return orig(self);
-            LogRoomData(GetRoomList(self));
-            yield break;
         }
 
         private System.Collections.IEnumerator DungeonGenerator2_GenerateDungeonCoroutine(On.DungeonGenerator2.orig_GenerateDungeonCoroutine orig, DungeonGenerator2 self, int level, Amplitude.StaticString shipName)
@@ -158,8 +157,8 @@ namespace SeededDungeon_Mod
             string text = "Room Count: " + rooms.Count + "\n";
             foreach (Room r in rooms)
             {
-                mod.Log("Name: " + r.name + " event: " + r.StaticRoomEvent + "UID: " + r.UniqueID);
-                text += "Name: " + r.name + " event: " + r.StaticRoomEvent + "UID: " + r.UniqueID + "\n";
+                mod.Log("Name: " + r.name + " event: " + r.StaticRoomEvent + " UID: " + r.UniqueID + " Dust: " + r.DustLootAmount);
+                text += "Name: " + r.name + " event: " + r.StaticRoomEvent + " UID: " + r.UniqueID + " Dust: " + r.DustLootAmount + "\n";
             }
             System.IO.File.WriteAllText((mod.settings as SeededDungeonSettings).RoomDataPath, text);
 
