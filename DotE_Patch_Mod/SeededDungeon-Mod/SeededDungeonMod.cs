@@ -1,4 +1,5 @@
-﻿using DustDevilFramework;
+﻿using Amplitude.Unity.Framework;
+using DustDevilFramework;
 using MonoMod.Utils;
 using Partiality.Modloader;
 using System;
@@ -12,7 +13,7 @@ namespace SeededDungeon_Mod
     public class SeededDungeonMod : PartialityMod
     {
         ScadMod mod = new ScadMod("SeededDungeon", typeof(SeededDungeonSettings), typeof(SeededDungeonMod));
-        Dictionary<int, List<int>> seeds = new Dictionary<int, List<int>>();
+        Dictionary<Amplitude.StaticString, Dictionary<int, SeedData>> shipSeeds = new Dictionary<Amplitude.StaticString, Dictionary<int, SeedData>>();
         public override void Init()
         {
             mod.PartialityModReference = this;
@@ -32,6 +33,7 @@ namespace SeededDungeon_Mod
                 // Other static/dynamic events are unknown based off of solely Seed
                 // However... What if I used recursive logging to find all of the data i need, then use recursive reading/setting in the same order.
                 On.DungeonGenerator2.GenerateDungeonCoroutine += DungeonGenerator2_GenerateDungeonCoroutine;
+                On.ShipConfig.GetLocalizedDescription += ShipConfig_GetLocalizedDescription;
                 On.Dungeon.FillDungeonAsync += Dungeon_FillDungeonAsync;
                 On.Dungeon.SetGenerationParams += Dungeon_SetGenerationParams;
                 On.Dungeon.SetNewGenerationSeed += Dungeon_SetNewGenerationSeed;
@@ -53,9 +55,22 @@ namespace SeededDungeon_Mod
         {
             mod.UnLoad();
             On.DungeonGenerator2.GenerateDungeonCoroutine -= DungeonGenerator2_GenerateDungeonCoroutine;
+            On.ShipConfig.GetLocalizedDescription -= ShipConfig_GetLocalizedDescription;
             On.Dungeon.FillDungeonAsync -= Dungeon_FillDungeonAsync;
             On.Dungeon.SetGenerationParams -= Dungeon_SetGenerationParams;
             On.Dungeon.SetNewGenerationSeed -= Dungeon_SetNewGenerationSeed;
+        }
+
+        private string ShipConfig_GetLocalizedDescription(On.ShipConfig.orig_GetLocalizedDescription orig, ShipConfig self)
+        {
+            if (shipSeeds.ContainsKey(self.Name) && shipSeeds[self.Name].ContainsKey(1))
+            {
+                // If the seed for the first level exists, display the seed at the bottom of the description.
+                string temp = orig(self) + "\n\n#98FB98#Seeds: " + shipSeeds[self.Name][1] + "#98FB98#";
+                mod.Log("Attempting to update description to include seeds!");
+                return temp;
+            }
+            return orig(self);
         }
 
         private void Dungeon_SetGenerationParams(On.Dungeon.orig_SetGenerationParams orig, DungeonGenerationParams genParams)
@@ -75,21 +90,25 @@ namespace SeededDungeon_Mod
 
         private System.Collections.IEnumerator DungeonGenerator2_GenerateDungeonCoroutine(On.DungeonGenerator2.orig_GenerateDungeonCoroutine orig, DungeonGenerator2 self, int level, Amplitude.StaticString shipName)
         {
-            if (seeds.ContainsKey(level))
+            if (shipSeeds.ContainsKey(shipName) && shipSeeds[shipName].ContainsKey(level))
             {
                 // And if I actually want to apply the seed change...
-                mod.Log("Creating the Dungeon with the provided seed from the dictionary: " + seeds[level]);
-                new DynData<DungeonGenerator2>(self).Set<int>("randomSeed", seeds[level][0]);
-                RandomGenerator.SetSeed(seeds[level][1]);
-                UnityEngine.Random.seed = seeds[level][2];
+                mod.Log("Creating the Dungeon with the provided seed from the dictionary: " + shipSeeds[shipName][level]);
+                SingletonManager.Get<Dungeon>(false).EnqueueNotification("Using Seeds: " + shipSeeds[shipName][level]);
+                shipSeeds[shipName][level].SetSeedData();
             }
             yield return orig(self, level, shipName);
-            if (!seeds.ContainsKey(level))
+            if (!shipSeeds.ContainsKey(shipName))
+            {
+                shipSeeds.Add(shipName, new Dictionary<int, SeedData>());
+            }
+            if (!shipSeeds[shipName].ContainsKey(level))
             {
                 // And if I actually want to overwrite the existing seed...
                 int seed = new DynData<DungeonGenerator2>(self).Get<int>("randomSeed");
                 mod.Log("Adding a seed to the seeds dictionary: " + seed);
-                seeds.Add(level, new List<int> { seed, RandomGenerator.Seed, UnityEngine.Random.seed });
+                shipSeeds[shipName].Add(level, new SeedData(seed, RandomGenerator.Seed, UnityEngine.Random.seed));
+                SingletonManager.Get<Dungeon>(false).EnqueueNotification("Added Seeds: " + shipSeeds[shipName][level]);
                 if ((mod.settings as SeededDungeonSettings).LogSeeds)
                 {
                     LogSeeds();
@@ -101,26 +120,36 @@ namespace SeededDungeon_Mod
         private void LogSeeds()
         {
             string text = "Seeds for each level in most recently played Pod\n";
-            foreach (int level in seeds.Keys)
+            foreach (Amplitude.StaticString name in shipSeeds.Keys)
             {
-                text += "Level: " + level + " Dungeon Seed: " + seeds[level][0] + " RandomGenerator Seed: " + seeds[level][1] + " UnityEngine Seed: " + seeds[level][2] + "\n";
+                Dictionary<int, SeedData> seeds = shipSeeds[name];
+                foreach (int level in seeds.Keys)
+                {
+                    text += "N:" + name + ":L:" + level + ":" + seeds[level] + "\n";
+                }
             }
             System.IO.File.WriteAllText((mod.settings as SeededDungeonSettings).SeedLogPath, text);
         }
         private void ReadSeeds()
         {
+            mod.Log("Reading Seeds from: " + (mod.settings as SeededDungeonSettings).SeedLogPath);
             string[] lines = System.IO.File.ReadAllLines((mod.settings as SeededDungeonSettings).SeedLogPath);
             foreach (string line in lines)
             {
-                if (line.IndexOf("Level: ") == -1 || line.IndexOf(" Seed: ") == -1)
+                if (line.IndexOf("N:") == -1)
                 {
                     continue;
                 }
-                string[] spl = line.Split(new string[] { "Level: " }, StringSplitOptions.None);
-                string[] data = spl[0].Split(new string[] { " Dungeon Seed: " }, StringSplitOptions.None);
-                string[] randomGen = data[1].Split(new string[] { " RandomGenerator Seed: " }, StringSplitOptions.None);
-                string[] ex = randomGen[1].Split(new string[] { " UnityEngine Seed: " }, StringSplitOptions.None);
-                seeds.Add(Convert.ToInt32(data[0]), new List<int> { Convert.ToInt32(randomGen[0]), Convert.ToInt32(ex[0]), Convert.ToInt32(ex[1]) });
+                string[] spl = line.Split(new string[] { ":" }, StringSplitOptions.None);
+                Amplitude.StaticString name = spl[1];
+                string level = spl[3];
+                string data = spl[spl.Length - 1];
+                mod.Log("Adding Seed for ship: " + name + " with level: " + level + " with data: " + data);
+                if (!shipSeeds.ContainsKey(name))
+                {
+                    shipSeeds.Add(name, new Dictionary<int, SeedData>());
+                }
+                shipSeeds[name].Add(Convert.ToInt32(level), new SeedData(data));
             }
         }
         private void LogRoomData(List<Room> rooms)

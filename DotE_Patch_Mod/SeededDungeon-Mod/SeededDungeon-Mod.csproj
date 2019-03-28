@@ -85,6 +85,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SeedData.cs" />
     <Compile Include="SeededDungeonMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SeededDungeonSettings.cs" />
