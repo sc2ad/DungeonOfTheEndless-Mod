@@ -68,6 +68,7 @@
     <Compile Include="PodSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScadMod.cs" />
+    <Compile Include="SeedCollection.cs" />
     <Compile Include="SimDescriptorWrapper.cs" />
     <Compile Include="Util.cs" />
   </ItemGroup>
