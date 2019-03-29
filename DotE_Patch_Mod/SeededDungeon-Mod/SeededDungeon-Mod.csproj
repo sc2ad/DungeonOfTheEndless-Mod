@@ -51,6 +51,10 @@
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\DungeonoftheEndless_Data\Managed\HOOKS-Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\..\..\..\..\Partiality\bin\Mono.Cecil.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="MonoMod">
       <HintPath>..\..\..\..\..\Partiality\bin\MonoMod.exe</HintPath>
       <Private>False</Private>

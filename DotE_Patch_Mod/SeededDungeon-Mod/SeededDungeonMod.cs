@@ -1,5 +1,8 @@
 ﻿using Amplitude.Unity.Framework;
 using DustDevilFramework;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using MonoMod.RuntimeDetour.HookGen;
 using MonoMod.Utils;
 using Partiality.Modloader;
 using System;
@@ -35,6 +38,7 @@ namespace SeededDungeon_Mod
                 On.DungeonGenerator2.GenerateDungeonCoroutine += DungeonGenerator2_GenerateDungeonCoroutine;
                 On.Dungeon.TriggerEvents += Dungeon_TriggerEvents;
                 On.ShipConfig.GetLocalizedDescription += ShipConfig_GetLocalizedDescription;
+                //IL.Dungeon.TriggerEvents += Dungeon_TriggerEvents1;
             }
             if ((mod.settings as SeededDungeonSettings).ReadFromSeedLog)
             {
@@ -42,37 +46,121 @@ namespace SeededDungeon_Mod
             }
         }
 
+        // NEED TO UPDATE PARTIALITY TO USE LATEST MONOMOD IN ORDER FOR THIS TO WORK! (USES MONO.CECIL OF A TOO ADVANCED VERSION)
+        // SEE: https://github.com/0xd4d/dnSpy/issues/173
+        // CODE ORIGINALLY BASED OFF OF: https://gist.github.com/0x0ade/1d1013d6ae1ff450aa76f252b0f3b62c
+
+        //private void Dungeon_TriggerEvents1(HookIL il)
+        //{
+        //    mod.Log("Module Definition for Dungeon.TriggerEvents: " + il.Module);
+        //    HookILCursor cursor = il.At(0);
+        //    while (cursor.TryGotoNext(
+        //        i => i.MatchCall<RandomGenerator>("RandomRange")
+        //    ))
+        //    {
+        //        int rangeIndex = cursor.Index;
+        //        mod.Log("Found IL for RandomRange at IL Index: " + rangeIndex);
+        //        // This probably won't work, because if there are calls inside the method call bad things will happen
+        //        cursor.Index -= 2;
+        //        mod.Log("Shifted cursor.Index to: " + cursor.Index);
+
+        //        TypeDefinition generator = null;
+        //        MethodDefinition save = null;
+        //        MethodDefinition restore = null;
+        //        foreach (ModuleDefinition m in il.Module.Assembly.Modules)
+        //        {
+        //            foreach (TypeDefinition d in m.GetTypes()) {
+        //                if (d.IsClass && d.Name.Equals("RandomGenerator"))
+        //                {
+        //                    mod.Log("Found RandomGenerator type definition: " + d);
+        //                    generator = d;
+        //                    foreach (MethodDefinition method in d.Methods)
+        //                    {
+        //                        if (method.Name.Equals("SaveSeed"))
+        //                        {
+        //                            mod.Log("Found SaveSeed method definition: " + method);
+        //                            save = method;
+        //                        }
+        //                        if (method.Name.Equals("RestoreSeed"))
+        //                        {
+        //                            mod.Log("Found RestoreSeed method definition: " + method);
+        //                            restore = method;
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        if (generator == null)
+        //        {
+        //            mod.Log("Could not find RandomGenerator!");
+        //        } else
+        //        {
+        //            if (save == null || restore == null)
+        //            {
+        //                mod.Log("Could not find either save/restore method definitions!");
+        //            } else
+        //            {
+        //                mod.Log("Attempting to write Save to index: " + cursor.Index);
+        //                cursor.Emit(OpCodes.Call, save);
+        //                // This should at least dodge the stloc or stfld that is happening when this method is called
+        //                // But it probably won't dodge the possibility of there being other calls and whatnot
+        //                cursor.Index = rangeIndex + 2;
+        //                mod.Log("Attempting to write Restore to index: " + cursor.Index);
+        //                cursor.Emit(OpCodes.Call, restore);
+        //            }
+        //        }
+        //    }
+        //}
+
         public void UnLoad()
         {
             mod.UnLoad();
             On.DungeonGenerator2.GenerateDungeonCoroutine -= DungeonGenerator2_GenerateDungeonCoroutine;
             On.ShipConfig.GetLocalizedDescription -= ShipConfig_GetLocalizedDescription;
             On.Dungeon.TriggerEvents -= Dungeon_TriggerEvents;
+            //IL.Dungeon.TriggerEvents -= Dungeon_TriggerEvents1;
         }
 
         private System.Collections.IEnumerator Dungeon_TriggerEvents(On.Dungeon.orig_TriggerEvents orig, Dungeon self, Room openingRoom, HeroMobCommon opener, bool canTriggerDungeonEvent)
         {
-            mod.Log("Triggering Events!");
-            RandomGenerator.RestoreSeed();
-            mod.Log("Restoring Seed!");
-            int temp = RandomGenerator.Seed;
-            RandomGenerator.RestoreSeed();
-            int saved = RandomGenerator.Seed;
-            RandomGenerator.SetSeed(temp);
+            if (!shipSeeds.ContainsKey(self.ShipName) || !shipSeeds[self.ShipName].ContainsKey(self.Level))
+            {
+                yield return self.StartCoroutine(orig(self, openingRoom, opener, canTriggerDungeonEvent));
+                yield break;
+            }
+            else
+            {
+                mod.Log("Triggering Events!");
+                RandomGenerator.RestoreSeed();
+                mod.Log("Restoring Seed!");
+                int temp = RandomGenerator.Seed;
+                RandomGenerator.RestoreSeed();
+                int saved = RandomGenerator.Seed;
+                RandomGenerator.SetSeed(temp);
 
-            mod.Log("Before SeedData: " + new SeedData() + " saved: " + saved);
+                mod.Log("Before SeedData: " + new SeedData() + " saved: " + saved);
 
-            // Calls TriggerEvents the proper number of times!
-            yield return self.StartCoroutine(orig(self, openingRoom, opener, canTriggerDungeonEvent));
-            temp = RandomGenerator.Seed;
-            RandomGenerator.RestoreSeed();
-            saved = RandomGenerator.Seed;
-            RandomGenerator.SetSeed(temp);
-            mod.Log("After SeedData: " + new SeedData() + " saved: " + saved);
+                // Calls TriggerEvents the proper number of times. Hangs on this call.
+                // Random deviation seems to appear while this Coroutine is running, possibly due to monster random actions?
+                // Could fix this by storing all before/after seeds, but doesn't that seem lame?
+                // Would like to find a way of only wrapping the Random calls with this so that there is less UnityEngine.Random.seed
+                // noise from other sources that occur during the runtime.
+                // The above will probably not work, so instead wrap everything EXCEPT for the wait in the Random Save/Restore
+                // Possible error from SpawnWaves, SpawnMobs (cause they have dedicated Coroutines that run)
+                yield return self.StartCoroutine(orig(self, openingRoom, opener, canTriggerDungeonEvent));
+                temp = RandomGenerator.Seed;
+                RandomGenerator.RestoreSeed();
+                saved = RandomGenerator.Seed;
+                RandomGenerator.SetSeed(temp);
+                mod.Log("After SeedData: " + new SeedData() + " saved: " + saved);
 
-            mod.Log("Saving Seed!");
-            RandomGenerator.SaveSeed();
-            yield break;
+                // I'm going to cheat for now and SKIP the saving step - the same exact seed is ALWAYS used for RandomGenerator
+                // When using RandomGenerator seeds.
+                //mod.Log("Saving Seed!");
+                //RandomGenerator.SaveSeed();
+
+                yield break;
+            }
         }
 
         private string ShipConfig_GetLocalizedDescription(On.ShipConfig.orig_GetLocalizedDescription orig, ShipConfig self)
