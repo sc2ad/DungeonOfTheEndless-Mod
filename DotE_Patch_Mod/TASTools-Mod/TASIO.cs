@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DustDevilFramework;
+using System;
 using System.Collections.Generic;
 
 namespace TASTools_Mod
@@ -7,16 +8,11 @@ namespace TASTools_Mod
     {
         public static void WriteTAS(Dictionary<int, List<TASInput>> inputs, string filePath)
         {
-            foreach (int level in TASInput.seeds.Keys)
+            foreach (int level in TASInput.inputs.Keys)
             {
-                if (!inputs.ContainsKey(level))
-                {
-                    // The seed exists but there is no TAS data for this level!
-                    // Make it anyway, but with an empty amount of data.
-                    inputs.Add(level, new List<TASInput>());
-                }
+                Dungeon d = SingletonManager.Get<Dungeon>(false);
                 string[] stringInputs = new string[inputs[level].Count + 1];
-                stringInputs[0] = ":" + level + ":" + TASInput.seeds[level].ToString();
+                stringInputs[0] = ":" + level + ":" + TASInput.seeds.GetSeedForShipLevel(d.ShipName, d.Level);
                 for (int i = 1; i < inputs[level].Count + 1; i++)
                 {
                     stringInputs[i] = inputs[level][i - 1].ToString();

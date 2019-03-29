@@ -1,4 +1,5 @@
 ﻿using Amplitude.Unity.Framework;
+using DustDevilFramework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,7 +10,7 @@ namespace TASTools_Mod
     {
         public static TASInput Empty = new TASInput();
         public static Dictionary<int, List<TASInput>> inputs = new Dictionary<int, List<TASInput>>();
-        public static Dictionary<int, SeedData> seeds = new Dictionary<int, SeedData>();
+        public static SeedCollection seeds;
         private static IInputService inputManager;
         private static int currentIndex = 0;
 
@@ -39,20 +40,24 @@ namespace TASTools_Mod
         }
         public static void AddSeed(int level, SeedData data)
         {
-            if (!seeds.ContainsKey(level))
-            {
-                seeds.Add(level, data);
-            }
+            Dungeon d = SingletonManager.Get<Dungeon>(false);
+            seeds.Add(d.ShipName, level, data);
+            //SeedCollection.WriteAll();
         }
         public static void Clear()
         {
             inputs = new Dictionary<int, List<TASInput>>();
-            seeds = new Dictionary<int, SeedData>();
+            Dungeon d = SingletonManager.Get<Dungeon>(false);
+            SeedCollection.ReadAll();
+            seeds = SeedCollection.GetMostCurrentSeeds(d.ShipName, d.Level);
+            if (seeds == null)
+            {
+                seeds = SeedCollection.Create();
+            }
         }
         public static void ClearForLevel(int level)
         {
             inputs[level] = null;
-            seeds[level] = null;
         }
         private static string GetKeys()
         {

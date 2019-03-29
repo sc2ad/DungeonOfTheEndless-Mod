@@ -140,14 +140,14 @@ namespace TASTools_Mod
 
         private System.Collections.IEnumerator DungeonGenerator2_GenerateDungeonCoroutine(On.DungeonGenerator2.orig_GenerateDungeonCoroutine orig, DungeonGenerator2 self, int level, Amplitude.StaticString shipName)
         {
-            
-            if (HasFlag(State.Playing) && TASInput.seeds.ContainsKey(level))
+            SeedData seeds = TASInput.seeds.GetSeedForShipLevel(shipName, level);
+            if (seeds != null)
             {
                 // Then we need to set the seed accordingly!
-                TASInput.seeds[level].SetSeedData();
-                mod.Log("Set seed to: " + TASInput.seeds[level] + " for level: " + level);
+                seeds.SetSeedData();
+                mod.Log("Set seed to: " + seeds + " for level: " + level);
             }
-            if (!TASInput.seeds.ContainsKey(level))
+            else
             {
                 // Add the seed!
                 SeedData data = new SeedData();
@@ -195,6 +195,7 @@ namespace TASTools_Mod
                 // Assumes the current level exists.
                 TASInput.CreateAndAdd(level);
                 mod.Log("Recording input: " + TASInput.inputs[level][TASInput.inputs[level].Count - 1].ToString());
+                // TODO: REMOVE LINE BELOW
                 ToggleState(State.Recording);
             }
             if (HasFlag(State.Saving))

@@ -63,6 +63,7 @@ namespace DustDevilFramework
 
         public bool EnqueNotification;
         public bool AddNewSeeds;
+        public bool Enabled;
         public string ReadFrom;
 
         public static List<SeedCollection> Collections;
@@ -84,7 +85,7 @@ namespace DustDevilFramework
         private static string ShipConfig_GetLocalizedDescription(On.ShipConfig.orig_GetLocalizedDescription orig, ShipConfig self)
         {
             SeedCollection collection = GetMostCurrentSeeds(self.Name, 1);
-            if (collection != null)
+            if (collection != null && collection.Enabled)
             {
                 return orig(self) + "\n\n" + SeedColor + "Seeds: " + collection.GetSeedForShipLevel(self.Name, 1) + SeedColor;
             }
@@ -94,7 +95,7 @@ namespace DustDevilFramework
         private static IEnumerator Dungeon_TriggerEvents(On.Dungeon.orig_TriggerEvents orig, Dungeon self, Room openingRoom, HeroMobCommon opener, bool canTriggerDungeonEvent)
         {
             SeedCollection collection = GetMostCurrentSeeds(self.ShipName, self.Level);
-            if (collection == null)
+            if (collection == null || !collection.Enabled)
             {
                 yield return self.StartCoroutine(orig(self, openingRoom, opener, canTriggerDungeonEvent));
                 yield break;
@@ -127,11 +128,14 @@ namespace DustDevilFramework
             SeedCollection collection = GetMostCurrentSeeds(shipName, level);
             if (collection != null)
             {
-                if (collection.EnqueNotification)
+                if (collection.Enabled)
                 {
-                    SingletonManager.Get<Dungeon>(false).EnqueueNotification("Using Seeds: " + collection.GetSeedForShipLevel(shipName, level));
+                    if (collection.EnqueNotification)
+                    {
+                        SingletonManager.Get<Dungeon>(false).EnqueueNotification("Using Seeds: " + collection.GetSeedForShipLevel(shipName, level));
+                    }
+                    collection.SetSeedForShipLevel(shipName, level);
                 }
-                collection.SetSeedForShipLevel(shipName, level);
                 if (collection.AddNewSeeds)
                 {
                     if (collection.GetSeedsForShip(shipName) == null)
@@ -231,10 +235,11 @@ namespace DustDevilFramework
             ReadFrom = "";
             AddNewSeeds = false;
             EnqueNotification = false;
+            Enabled = true;
         }
         public void WriteSeeds(string file)
         {
-            string text = "Seeds:\nAddNewSeeds:" + AddNewSeeds + "\nEnqueNotification:" + EnqueNotification + "\n";
+            string text = "Seeds:\nAddNewSeeds:" + AddNewSeeds + "\nEnqueNotification:" + EnqueNotification + "\nEnabled:" + Enabled + "\n";
             foreach (StaticString name in seeds.Keys)
             {
                 foreach (int level in seeds[name].Keys)
@@ -260,6 +265,11 @@ namespace DustDevilFramework
                     EnqueNotification = Convert.ToBoolean(line.Split(new string[] { "EnqueNotification:" }, StringSplitOptions.None)[1]);
                     continue;
                 }
+                if (line.IndexOf("Enabled:") != -1)
+                {
+                    Enabled = Convert.ToBoolean(line.Split(new string[] { "Enabled:" }, StringSplitOptions.None));
+                    continue;
+                }
                 if (line.IndexOf("N:") == -1)
                 {
                     continue;
@@ -277,7 +287,7 @@ namespace DustDevilFramework
             if (seeds.Keys.Count == 0)
             {
                 // No seeds were loaded from this file. We need to remove this reference from the list.
-                SeedCollection.Remove(this);
+                Remove(this);
             }
         }
         public Dictionary<int, SeedData> GetSeedsForShip(StaticString ship)
