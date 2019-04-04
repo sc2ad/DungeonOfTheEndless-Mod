@@ -12,7 +12,7 @@ namespace TASTools_Mod
             {
                 Dungeon d = SingletonManager.Get<Dungeon>(false);
                 string[] stringInputs = new string[inputs[level].Count + 1];
-                stringInputs[0] = ":" + level + ":" + TASInput.seeds.GetSeedForShipLevel(d.ShipName, d.Level);
+                stringInputs[0] = ":" + level + ":" + TASInput.seeds.GetSeedForShipLevel(d.ShipName, level);
                 for (int i = 1; i < inputs[level].Count + 1; i++)
                 {
                     stringInputs[i] = inputs[level][i - 1].ToString();

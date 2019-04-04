@@ -203,6 +203,7 @@ namespace TASTools_Mod
             {
                 // We don't have a Dungeon to work with yet!
                 // This should be removed soon and instead of having levels, have time stamps or something else.
+                // That would allow for TAS in menus (without a Dungeon)
                 orig(self);
                 return;
             }
@@ -230,6 +231,7 @@ namespace TASTools_Mod
                 // Read Inputs from real action into file/RAM
                 // Assumes the current level exists.
                 TASInput.CreateAndAdd(level);
+                // Also make sure that the seed is correctly set
                 mod.Log("Recording input: " + TASInput.inputs[level][TASInput.inputs[level].Count - 1].ToString());
                 // TODO: REMOVE LINE BELOW
                 ToggleState(State.Recording);
