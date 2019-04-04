@@ -14,6 +14,7 @@ namespace TASTools_Mod
         public string SaveToFilesKey = KeyCode.O.ToString();
         public string ReadFromFilesKey = KeyCode.Slash.ToString();
         public string ClearKey = KeyCode.C.ToString();
+        public bool IsHuman = false;
 
         public TASToolsSettings(string name) : base(name)
         {

@@ -1,6 +1,7 @@
 ﻿using DustDevilFramework;
 using Partiality.Modloader;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace TASTools_Mod
@@ -37,12 +38,47 @@ namespace TASTools_Mod
                 On.Mob.Update += Mob_Update;
                 On.Mover.Update += Mover_Update;
                 On.Attacker.Update += Attacker_Update;
+                // Precision Seed Control
+                On.Dungeon.TriggerEvents += Dungeon_TriggerEvents;
                 // Playback
                 On.InputManager.Update_MouseEvents += InputManager_Update_MouseEvents;
                 On.InputManager.GetControlStatus += InputManager_GetControlStatus;
                 On.InputManager.TriggerClickDownEvent += InputManager_TriggerClickDownEvent;
                 On.InputManager.TriggerClickUpEvent += InputManager_TriggerClickUpEvent;
                 On.DungeonGenerator2.GenerateDungeonCoroutine += DungeonGenerator2_GenerateDungeonCoroutine;
+            }
+        }
+
+
+        private IEnumerator Dungeon_TriggerEvents(On.Dungeon.orig_TriggerEvents orig, Dungeon self, Room openingRoom, HeroMobCommon opener, bool canTriggerDungeonEvent)
+        {
+            SeedCollection collection = SeedCollection.GetMostCurrentSeeds(self.ShipName, self.Level);
+            if (collection == null || !collection.Enabled || settings.IsHuman)
+            {
+                yield return self.StartCoroutine(orig(self, openingRoom, opener, canTriggerDungeonEvent));
+                yield break;
+            }
+            else
+            {
+                // Load seeds for each door from files/somewhere
+                // Restore the seed for this room openingRoom
+                RandomGenerator.RestoreSeed();
+
+                // Calls TriggerEvents the proper number of times. Hangs on this call.
+                // Random deviation seems to appear while this Coroutine is running, possibly due to monster random actions?
+                // Could fix this by storing all before/after seeds, but doesn't that seem lame?
+                // Would like to find a way of only wrapping the Random calls with this so that there is less UnityEngine.Random.seed
+                // noise from other sources that occur during the runtime.
+                // The above will probably not work, so instead wrap everything EXCEPT for the wait in the Random Save/Restore
+                // Possible error from SpawnWaves, SpawnMobs (cause they have dedicated Coroutines that run)
+                yield return self.StartCoroutine(orig(self, openingRoom, opener, canTriggerDungeonEvent));
+
+                // I'm going to cheat for now and SKIP the saving step - the same exact seed is ALWAYS used for RandomGenerator
+                // When using RandomGenerator seeds.
+                //mod.Log("Saving Seed!");
+                //RandomGenerator.SaveSeed();
+
+                yield break;
             }
         }
 
@@ -261,6 +297,8 @@ namespace TASTools_Mod
             On.Mob.Update -= Mob_Update;
             On.Mover.Update -= Mover_Update;
             On.Attacker.Update -= Attacker_Update;
+
+            On.Dungeon.TriggerEvents -= Dungeon_TriggerEvents;
 
             On.InputManager.Update_MouseEvents -= InputManager_Update_MouseEvents;
             On.InputManager.GetControlStatus -= InputManager_GetControlStatus;

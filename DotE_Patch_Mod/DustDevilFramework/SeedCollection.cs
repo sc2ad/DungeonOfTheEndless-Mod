@@ -75,7 +75,6 @@ namespace DustDevilFramework
                 Collections = new List<SeedCollection>();
                 // Only called once
                 On.DungeonGenerator2.GenerateDungeonCoroutine += DungeonGenerator2_GenerateDungeonCoroutine;
-                On.Dungeon.TriggerEvents += Dungeon_TriggerEvents;
                 On.ShipConfig.GetLocalizedDescription += ShipConfig_GetLocalizedDescription;
             }
             Collections.Add(new SeedCollection());
@@ -87,39 +86,9 @@ namespace DustDevilFramework
             SeedCollection collection = GetMostCurrentSeeds(self.Name, 1);
             if (collection != null && collection.Enabled)
             {
-                return orig(self) + "\n\n" + SeedColor + "Seeds: " + collection.GetSeedForShipLevel(self.Name, 1) + SeedColor;
+                return orig(self) + "\n\n" + SeedColor + "Seeds: " + collection.GetSeedForShipLevel(self.Name, 1).DungeonSeed + "," + collection.GetSeedForShipLevel(self.Name, 1).RandomGeneratorSeed + SeedColor;
             }
             return orig(self);
-        }
-
-        private static IEnumerator Dungeon_TriggerEvents(On.Dungeon.orig_TriggerEvents orig, Dungeon self, Room openingRoom, HeroMobCommon opener, bool canTriggerDungeonEvent)
-        {
-            SeedCollection collection = GetMostCurrentSeeds(self.ShipName, self.Level);
-            if (collection == null || !collection.Enabled)
-            {
-                yield return self.StartCoroutine(orig(self, openingRoom, opener, canTriggerDungeonEvent));
-                yield break;
-            }
-            else
-            {
-                RandomGenerator.RestoreSeed();
-
-                // Calls TriggerEvents the proper number of times. Hangs on this call.
-                // Random deviation seems to appear while this Coroutine is running, possibly due to monster random actions?
-                // Could fix this by storing all before/after seeds, but doesn't that seem lame?
-                // Would like to find a way of only wrapping the Random calls with this so that there is less UnityEngine.Random.seed
-                // noise from other sources that occur during the runtime.
-                // The above will probably not work, so instead wrap everything EXCEPT for the wait in the Random Save/Restore
-                // Possible error from SpawnWaves, SpawnMobs (cause they have dedicated Coroutines that run)
-                yield return self.StartCoroutine(orig(self, openingRoom, opener, canTriggerDungeonEvent));
-
-                // I'm going to cheat for now and SKIP the saving step - the same exact seed is ALWAYS used for RandomGenerator
-                // When using RandomGenerator seeds.
-                //mod.Log("Saving Seed!");
-                //RandomGenerator.SaveSeed();
-
-                yield break;
-            }
         }
 
         private static IEnumerator DungeonGenerator2_GenerateDungeonCoroutine(On.DungeonGenerator2.orig_GenerateDungeonCoroutine orig, DungeonGenerator2 self, int level, StaticString shipName)
