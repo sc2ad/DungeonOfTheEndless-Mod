@@ -67,15 +67,24 @@ namespace DustDevilFramework
         public string ReadFrom;
 
         public static List<SeedCollection> Collections;
+        public static bool Loaded { get; private set; } = false;
+
+        public static void UnLoad()
+        {
+            On.DungeonGenerator2.GenerateDungeonCoroutine -= DungeonGenerator2_GenerateDungeonCoroutine;
+            On.ShipConfig.GetLocalizedDescription -= ShipConfig_GetLocalizedDescription;
+            Loaded = false;
+        }
 
         public static SeedCollection Create()
         {
-            if (Collections == null)
+            if (Collections == null || !Loaded)
             {
                 Collections = new List<SeedCollection>();
                 // Only called once
                 On.DungeonGenerator2.GenerateDungeonCoroutine += DungeonGenerator2_GenerateDungeonCoroutine;
                 On.ShipConfig.GetLocalizedDescription += ShipConfig_GetLocalizedDescription;
+                Loaded = true;
             }
             Collections.Add(new SeedCollection());
             return Collections[Collections.Count - 1];
@@ -236,7 +245,7 @@ namespace DustDevilFramework
                 }
                 if (line.IndexOf("Enabled:") != -1)
                 {
-                    Enabled = Convert.ToBoolean(line.Split(new string[] { "Enabled:" }, StringSplitOptions.None));
+                    Enabled = Convert.ToBoolean(line.Split(new string[] { "Enabled:" }, StringSplitOptions.None)[1]);
                     continue;
                 }
                 if (line.IndexOf("N:") == -1)

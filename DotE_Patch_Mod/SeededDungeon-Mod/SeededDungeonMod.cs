@@ -37,6 +37,19 @@ namespace SeededDungeon_Mod
         {
             orig(self);
             Dungeon d = SingletonManager.Get<Dungeon>(false);
+            if (!(mod.settings as SeededDungeonSettings).OverwriteSeeds)
+            {
+                //mod.Log("Unloading SeedCollection!");
+                SeedCollection.UnLoad();
+            }
+            else
+            {
+                if (!SeedCollection.Loaded)
+                {
+                    mod.Log("Reinitializing SeedCollection because it isn't loaded!");
+                    SeedCollection.ReadAll();
+                }
+            }
             if (d == null)
             {
                 return;
@@ -50,7 +63,9 @@ namespace SeededDungeon_Mod
                     mod.Log("Creating new SeedCollection because there were no matching SeedCollections!");
                     best = SeedCollection.Create();
                 }
-                best.Add(d.ShipName, d.Level, new SeedData());
+                SeedData data = new SeedData();
+                d.EnqueueNotification("Saved SeedData: " + data + " to: " + best.ReadFrom);
+                best.Add(d.ShipName, d.Level, data);
                 SeedCollection.WriteAll();
                 mod.Log("Wrote SeedCollection to: " + best.ReadFrom);
             }
@@ -58,8 +73,10 @@ namespace SeededDungeon_Mod
             {
                 mod.Log("Created new SeedCollection!");
                 SeedCollection best = SeedCollection.Create();
-                best.Add(d.ShipName, d.Level, new SeedData());
+                SeedData data = new SeedData();
+                best.Add(d.ShipName, d.Level, data);
                 SeedCollection.WriteAll();
+                d.EnqueueNotification("Saved SeedData: " + data + " to new: " + best.ReadFrom);
                 mod.Log("Wrote SeedCollection to: " + best.ReadFrom);
             }
         }
@@ -134,6 +151,7 @@ namespace SeededDungeon_Mod
         {
             mod.UnLoad();
             On.InputManager.Update -= InputManager_Update;
+            SeedCollection.UnLoad();
             //IL.Dungeon.TriggerEvents -= Dungeon_TriggerEvents1;
         }
     }

@@ -10,6 +10,7 @@ namespace SeededDungeon_Mod
 {
     public class SeededDungeonSettings : ModSettings
     {
+        public bool OverwriteSeeds = true;
         public string SaveKey = KeyCode.Backspace.ToString();
         public string CreateNewSeedKey = KeyCode.Equals.ToString();
 
