@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeedFinder-Mod", "SeedFinde
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template-Mod", "Template-Mod\Template-Mod.csproj", "{CE167D17-342F-4472-B40E-9C945C4C0093}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GotoFloor-Mod", "GotoFloor-Mod\GotoFloor-Mod.csproj", "{1ED42E29-F9A2-404D-A264-D9F3E2AF53F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -135,6 +137,10 @@ Global
 		{CE167D17-342F-4472-B40E-9C945C4C0093}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE167D17-342F-4472-B40E-9C945C4C0093}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE167D17-342F-4472-B40E-9C945C4C0093}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1ED42E29-F9A2-404D-A264-D9F3E2AF53F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1ED42E29-F9A2-404D-A264-D9F3E2AF53F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1ED42E29-F9A2-404D-A264-D9F3E2AF53F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1ED42E29-F9A2-404D-A264-D9F3E2AF53F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
