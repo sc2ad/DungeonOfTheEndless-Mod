@@ -174,7 +174,7 @@ namespace TASTools_Mod
             orig(self, deltaTime);
         }
 
-        private System.Collections.IEnumerator DungeonGenerator2_GenerateDungeonCoroutine(On.DungeonGenerator2.orig_GenerateDungeonCoroutine orig, DungeonGenerator2 self, int level, Amplitude.StaticString shipName)
+        private IEnumerator DungeonGenerator2_GenerateDungeonCoroutine(On.DungeonGenerator2.orig_GenerateDungeonCoroutine orig, DungeonGenerator2 self, int level, Amplitude.StaticString shipName)
         {
             SeedData seeds = TASInput.seeds.GetSeedForShipLevel(shipName, level);
             if (seeds != null)
