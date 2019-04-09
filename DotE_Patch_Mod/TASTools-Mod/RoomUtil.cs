@@ -2,7 +2,7 @@
 
 namespace TASTools_Mod
 {
-    public class Util
+    public class RoomUtil
     {
         public static Room GetExitRoom()
         {

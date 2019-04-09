@@ -94,7 +94,10 @@
     <Compile Include="TASToolsMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TASToolsSettings.cs" />
-    <Compile Include="Util.cs" />
+    <Compile Include="RoomUtil.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetFileName)" "C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\Mods"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
