@@ -1,0 +1,762 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BepInEx</name>
+    </assembly>
+    <members>
+        <member name="M:BepInEx.Bootstrap.Entrypoint.Main(System.String[])">
+            <summary>
+                The main entrypoint of BepInEx, called from Doorstop.
+            </summary>
+            <param name="args">
+                The arguments passed in from Doorstop. First argument is the path of the currently executing
+                process.
+            </param>
+        </member>
+        <member name="M:BepInEx.Bootstrap.Entrypoint.LocalResolve(System.Object,System.ResolveEventArgs)">
+            <summary>
+                A handler for <see cref="E:System.AppDomain.AssemblyResolve" /> to perform some special handling.
+                <para>
+                    It attempts to check currently loaded assemblies (ignoring the version), and then checks the BepInEx/core path,
+                    BepInEx/patchers path and the BepInEx folder, all in that order.
+                </para>
+            </summary>
+            <param name="sender"></param>
+            <param name="args"></param>
+            <returns></returns>
+        </member>
+        <member name="T:BepInEx.Bootstrap.AssemblyPatcherDelegate">
+            <summary>
+            Delegate used in patching assemblies.
+            </summary>
+            <param name="assembly">The assembly that is being patched.</param>
+        </member>
+        <member name="T:BepInEx.Bootstrap.AssemblyPatcher">
+            <summary>
+            Worker class which is used for loading and patching entire folders of assemblies, or alternatively patching and loading assemblies one at a time.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Bootstrap.AssemblyPatcher.DumpingEnabled">
+            <summary>
+            Configuration value of whether assembly dumping is enabled or not.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Bootstrap.AssemblyPatcher.PatchAll(System.String,System.Collections.Generic.IDictionary{BepInEx.Bootstrap.AssemblyPatcherDelegate,System.Collections.Generic.IEnumerable{System.String}},System.Collections.Generic.IEnumerable{System.Action},System.Collections.Generic.IEnumerable{System.Action})">
+            <summary>
+            Patches and loads an entire directory of assemblies.
+            </summary>
+            <param name="directory">The directory to load assemblies from.</param>
+            <param name="patcherMethodDictionary">The dictionary of patchers and their targeted assembly filenames which they are patching.</param>
+            <param name="initializers">List of initializers to run before any patching starts</param>
+            <param name="finalizers">List of finalizers to run before returning</param>
+        </member>
+        <member name="M:BepInEx.Bootstrap.AssemblyPatcher.Patch(Mono.Cecil.AssemblyDefinition@,BepInEx.Bootstrap.AssemblyPatcherDelegate)">
+            <summary>
+            Patches an individual assembly, without loading it.
+            </summary>
+            <param name="assembly">The assembly definition to apply the patch to.</param>
+            <param name="patcherMethod">The patcher to use to patch the assembly definition.</param>
+        </member>
+        <member name="M:BepInEx.Bootstrap.AssemblyPatcher.Load(Mono.Cecil.AssemblyDefinition)">
+            <summary>
+            Loads an individual assembly defintion into the CLR.
+            </summary>
+            <param name="assembly">The assembly to load.</param>
+        </member>
+        <member name="T:BepInEx.Bootstrap.Preloader">
+            <summary>
+                The main entrypoint of BepInEx, and initializes all patchers and the chainloader.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Bootstrap.Preloader.Finalizers">
+            <summary>
+                The list of finalizers that were loaded from the patcher contract.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Bootstrap.Preloader.Initializers">
+            <summary>
+                The list of initializers that were loaded from the patcher contract.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Bootstrap.Preloader.PatcherDictionary">
+            <summary>
+                The dictionary of currently loaded patchers. The key is the patcher delegate that will be used to patch, and the
+                value is a list of filenames of assemblies that the patcher is targeting.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Bootstrap.Preloader.PreloaderLog">
+            <summary>
+                The log writer that is specific to the preloader.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Bootstrap.Preloader.GetPatcherMethods(System.Reflection.Assembly)">
+            <summary>
+                Scans the assembly for classes that use the patcher contract, and returns a dictionary of the patch methods.
+            </summary>
+            <param name="assembly">The assembly to scan.</param>
+            <returns>A dictionary of delegates which will be used to patch the targeted assemblies.</returns>
+        </member>
+        <member name="M:BepInEx.Bootstrap.Preloader.PatchEntrypoint(Mono.Cecil.AssemblyDefinition@)">
+            <summary>
+                Inserts BepInEx's own chainloader entrypoint into UnityEngine.
+            </summary>
+            <param name="assembly">The assembly that will be attempted to be patched.</param>
+        </member>
+        <member name="M:BepInEx.Bootstrap.Preloader.AllocateConsole">
+            <summary>
+                Allocates a console window for use by BepInEx safely.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Bootstrap.Preloader.AddPatcher(System.Collections.Generic.IEnumerable{System.String},BepInEx.Bootstrap.AssemblyPatcherDelegate)">
+            <summary>
+                Adds the patcher to the patcher dictionary.
+            </summary>
+            <param name="dllNames">The list of DLL filenames to be patched.</param>
+            <param name="patcher">The method that will perform the patching.</param>
+        </member>
+        <member name="T:BepInEx.Bootstrap.Chainloader">
+            <summary>
+            The manager and loader for all plugins, and the entry point for BepInEx plugin system.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Bootstrap.Chainloader.Plugins">
+            <summary>
+            The loaded and initialized list of plugins.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Bootstrap.Chainloader.ManagerObject">
+            <summary>
+            The GameObject that all plugins are attached to as components.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Bootstrap.Chainloader.Initialize(System.String,System.Boolean)">
+            <summary>
+            Initializes BepInEx to be able to start the chainloader.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Bootstrap.Chainloader.Start">
+            <summary>
+            The entrypoint for the BepInEx plugin system.
+            </summary>
+        </member>
+        <member name="T:BepInEx.Bootstrap.TypeLoader">
+            <summary>
+            Provides methods for loading specified types from an assembly.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Bootstrap.TypeLoader.LoadTypes``1(System.String)">
+            <summary>
+            Loads a list of types from a directory containing assemblies, that derive from a base type.
+            </summary>
+            <typeparam name="T">The specific base type to search for.</typeparam>
+            <param name="directory">The directory to search for assemblies.</param>
+            <returns>Returns a list of found derivative types.</returns>
+        </member>
+        <member name="T:BepInEx.BepInPlugin">
+            <summary>
+            This attribute denotes that a class is a plugin, and specifies the required metadata.
+            </summary>
+        </member>
+        <member name="P:BepInEx.BepInPlugin.GUID">
+            <summary>
+            The unique identifier of the plugin. Should not change between plugin versions.
+            </summary>
+        </member>
+        <member name="P:BepInEx.BepInPlugin.Name">
+            <summary>
+            The user friendly name of the plugin. Is able to be changed between versions.
+            </summary>
+        </member>
+        <member name="P:BepInEx.BepInPlugin.Version">
+            <summary>
+            The specfic version of the plugin.
+            </summary>
+        </member>
+        <member name="M:BepInEx.BepInPlugin.#ctor(System.String,System.String,System.String)">
+            <param name="GUID">The unique identifier of the plugin. Should not change between plugin versions.</param>
+            <param name="Name">The user friendly name of the plugin. Is able to be changed between versions.</param>
+            <param name="Version">The specfic version of the plugin.</param>
+        </member>
+        <member name="T:BepInEx.BepInDependency">
+            <summary>
+            This attribute specifies any dependencies that this plugin has on other plugins.
+            </summary>
+        </member>
+        <member name="F:BepInEx.BepInDependency.DependencyFlags.HardDependency">
+            <summary>
+            The plugin has a hard dependency on the referenced plugin, and will not run without it.
+            </summary>
+        </member>
+        <member name="F:BepInEx.BepInDependency.DependencyFlags.SoftDependency">
+            <summary>
+            This plugin has a soft dependency on the referenced plugin, and is able to run without it.
+            </summary>
+        </member>
+        <member name="P:BepInEx.BepInDependency.DependencyGUID">
+            <summary>
+            The GUID of the referenced plugin.
+            </summary>
+        </member>
+        <member name="P:BepInEx.BepInDependency.Flags">
+            <summary>
+            The flags associated with this dependency definition.
+            </summary>
+        </member>
+        <member name="M:BepInEx.BepInDependency.#ctor(System.String,BepInEx.BepInDependency.DependencyFlags)">
+            <param name="DependencyGUID">The GUID of the referenced plugin.</param>
+            <param name="Flags">The flags associated with this dependency definition.</param>
+        </member>
+        <member name="T:BepInEx.BepInProcess">
+            <summary>
+            This attribute specifies which processes this plugin should be run for. Not specifying this attribute will load the plugin under every process.
+            </summary>
+        </member>
+        <member name="P:BepInEx.BepInProcess.ProcessName">
+            <summary>
+            The name of the process that this plugin will run under.
+            </summary>
+        </member>
+        <member name="M:BepInEx.BepInProcess.#ctor(System.String)">
+            <param name="ProcessName">The name of the process that this plugin will run under.</param>
+        </member>
+        <member name="T:BepInEx.MetadataHelper">
+            <summary>
+            Helper class to use for retrieving metadata about a plugin, defined as attributes.
+            </summary>
+        </member>
+        <member name="M:BepInEx.MetadataHelper.GetMetadata(System.Object)">
+            <summary>
+            Retrieves the BepInPlugin metadata from a plugin instance.
+            </summary>
+            <param name="plugin">The plugin instance.</param>
+            <returns>The BepInPlugin metadata of the plugin instance.</returns>
+        </member>
+        <member name="M:BepInEx.MetadataHelper.GetMetadata(System.Type)">
+            <summary>
+            Retrieves the BepInPlugin metadata from a plugin type.
+            </summary>
+            <param name="plugin">The plugin type.</param>
+            <returns>The BepInPlugin metadata of the plugin type.</returns>
+        </member>
+        <member name="M:BepInEx.MetadataHelper.GetAttributes``1(System.Object)">
+            <summary>
+            Gets the specified attributes of an instance, if they exist.
+            </summary>
+            <typeparam name="T">The attribute type to retrieve.</typeparam>
+            <param name="plugin">The plugin instance.</param>
+            <returns>The attributes of the instance, if existing.</returns>
+        </member>
+        <member name="M:BepInEx.MetadataHelper.GetAttributes``1(System.Type)">
+            <summary>
+            Gets the specified attributes of a type, if they exist.
+            </summary>
+            <typeparam name="T">The attribute type to retrieve.</typeparam>
+            <param name="plugin">The plugin type.</param>
+            <returns>The attributes of the type, if existing.</returns>
+        </member>
+        <member name="M:BepInEx.MetadataHelper.GetDependencies(System.Type,System.Collections.Generic.IEnumerable{System.Type})">
+            <summary>
+            Retrieves the dependencies of the specified plugin type.
+            </summary>
+            <param name="Plugin">The plugin type.</param>
+            <param name="AllPlugins">All currently loaded plugin types.</param>
+            <returns>A list of all plugin types that the specified plugin type depends upon.</returns>
+        </member>
+        <member name="T:BepInEx.MissingDependencyException">
+            <summary>
+            An exception which is thrown when a plugin's dependencies cannot be found.
+            </summary>
+        </member>
+        <member name="T:BepInEx.Config">
+            <summary>
+            A helper class to handle persistent data.
+            </summary>
+        </member>
+        <member name="E:BepInEx.Config.ConfigReloaded">
+            <summary>
+            An event that is fired every time the config is reloaded.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Config.SaveOnConfigSet">
+            <summary>
+            If enabled, writes the config to disk every time a value is set.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Config.GetEntry(System.String,System.String,System.String)">
+            <summary>
+            Returns the value of the key if found, otherwise returns the default value.
+            </summary>
+            <param name="key">The key to search for.</param>
+            <param name="defaultValue">The default value to return if the key is not found.</param>
+            <param name="section">The section of the config to search the key for.</param>
+            <returns>The value of the key.</returns>
+        </member>
+        <member name="M:BepInEx.Config.ReloadConfig">
+            <summary>
+            Reloads the config from disk. Unwritten changes are lost.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Config.SaveConfig">
+            <summary>
+            Writes the config to disk.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Config.SetEntry(System.String,System.String,System.String)">
+            <summary>
+            Sets the value of the key in the config.
+            </summary>
+            <param name="key">The key to set the value to.</param>
+            <param name="value">The value to set.</param>
+        </member>
+        <member name="M:BepInEx.Config.HasEntry(System.String,System.String)">
+            <summary>
+            Returns wether a value is currently set.
+            </summary>
+            <param name="key">The key to check against</param>
+            <param name="section">The section to check in</param>
+            <returns>True if the key is present</returns>
+        </member>
+        <member name="M:BepInEx.Config.UnsetEntry(System.String,System.String)">
+            <summary>
+            Removes a value from the config.
+            </summary>
+            <param name="key">The key to remove</param>
+            <param name="section">The section to remove from</param>
+            <returns>True if the key was removed</returns>
+        </member>
+        <member name="M:BepInEx.Config.Sanitize(System.String)">
+            <summary>
+            Replaces any potentially breaking input with underscores.
+            </summary>
+            <param name="text">The text to sanitize.</param>
+            <returns>Sanitized text.</returns>
+        </member>
+        <member name="E:BepInEx.ConfigWrapper`1.SettingChanged">
+            <summary>
+            Fired when the setting is changed. Does not detect changes made outside from this object.
+            </summary>
+        </member>
+        <member name="T:BepInEx.BaseUnityPlugin">
+            <summary>
+            The base plugin type that is used by the BepInEx plugin loader.
+            </summary>
+        </member>
+        <member name="T:BepInEx.BepInLogger">
+            <summary>
+            A helper class to use for logging.
+            </summary>
+        </member>
+        <member name="T:BepInEx.BepInLogger.EntryLoggedEventHandler">
+            <summary>
+            The handler for a entry logged event.
+            </summary>
+            <param name="entry">The text element of the log itself.</param>
+            <param name="show">Whether or not it should be dislpayed to the user.</param>
+        </member>
+        <member name="E:BepInEx.BepInLogger.EntryLogged">
+            <summary>
+            The listener event for an entry being logged.
+            </summary>
+        </member>
+        <member name="M:BepInEx.BepInLogger.Log(System.String,System.Boolean)">
+            <summary>
+            Logs an entry to the logger, and any listeners are notified of the entry.
+            </summary>
+            <param name="entry">The text element of the log itself.</param>
+            <param name="show">Whether or not it should be dislpayed to the user.</param>
+        </member>
+        <member name="M:BepInEx.BepInLogger.Log(System.Object,System.Boolean,System.ConsoleColor)">
+            <summary>
+            Logs an entry to the logger, and any listeners are notified of the entry.
+            </summary>
+            <param name="entry">The text element of the log itself. Uses .ToString().</param>
+            <param name="show">Whether or not it should be dislpayed to the user.</param>
+            <param name="color">The color of the text to show in the console.</param>
+        </member>
+        <member name="M:BepInEx.BepInLogger.Log(System.String,System.Boolean,System.ConsoleColor)">
+            <summary>
+            Logs an entry to the logger, and any listeners are notified of the entry.
+            </summary>
+            <param name="entry">The text element of the log itself.</param>
+            <param name="show">Whether or not it should be dislpayed to the user.</param>
+            <param name="color">The color of the text to show in the console.</param>
+        </member>
+        <member name="T:BepInEx.Common.Utility">
+            <summary>
+            Generic helper properties and methods.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Common.Utility.ExecutingDirectory">
+            <summary>
+            The directory that the game .exe is being run from.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Common.Utility.PluginsDirectory">
+            <summary>
+            The path that the plugins folder is located.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Common.Utility.CombinePaths(System.String[])">
+            <summary>
+            Combines multiple paths together, as the specfic method is not availble in .NET 3.5.
+            </summary>
+            <param name="parts">The multiple paths to combine together.</param>
+            <returns>A combined path.</returns>
+        </member>
+        <member name="M:BepInEx.Common.Utility.SafeParseBool(System.String,System.Boolean)">
+            <summary>
+            Tries to parse a bool, with a default value if unable to parse.
+            </summary>
+            <param name="input">The string to parse</param>
+            <param name="defaultValue">The value to return if parsing is unsuccessful.</param>
+            <returns>Boolean value of input if able to be parsed, otherwise default value.</returns>
+        </member>
+        <member name="M:BepInEx.Common.Utility.ConvertToWWWFormat(System.String)">
+            <summary>
+            Converts a file path into a UnityEngine.WWW format.
+            </summary>
+            <param name="path">The file path to convert.</param>
+            <returns>A converted file path.</returns>
+        </member>
+        <member name="M:BepInEx.Common.Utility.IsNullOrWhiteSpace(System.String)">
+            <summary>
+            Indicates whether a specified string is null, empty, or consists only of white-space characters.
+            </summary>
+            <param name="self">The string to test.</param>
+            <returns>True if the value parameter is null or empty, or if value consists exclusively of white-space characters.</returns>
+        </member>
+        <member name="M:BepInEx.Common.Utility.TryResolveDllAssembly(System.Reflection.AssemblyName,System.String,System.Reflection.Assembly@)">
+            <summary>
+            Try to resolve and load the given assembly DLL.
+            </summary>
+            <param name="assemblyName">Name of the assembly, of the type <see cref="T:System.Reflection.AssemblyName" />.</param>
+            <param name="directory">Directory to search the assembly from.</param>
+            <param name="assembly">The loaded assembly.</param>
+            <returns>True, if the assembly was found and loaded. Otherwise, false.</returns>
+        </member>
+        <member name="T:BepInEx.Logging.BaseLogger">
+            <summary>
+            The base implementation of a logging class.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Logging.BaseLogger.Encoding">
+            <summary>
+            The encoding that the underlying text writer should use. Defaults to UTF-8 BOM.
+            </summary>
+        </member>
+        <member name="T:BepInEx.Logging.BaseLogger.EntryLoggedEventHandler">
+            <summary>
+            The handler for a entry logged event.
+            </summary>
+            <param name="entry">The text element of the log itself.</param>
+            <param name="show">Whether or not it should be dislpayed to the user.</param>
+        </member>
+        <member name="E:BepInEx.Logging.BaseLogger.EntryLogged">
+            <summary>
+            The listener event for an entry being logged.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Logging.BaseLogger.GetDefaultLogLevel">
+            <summary>
+            Retrieves the default log level to use for this logger.
+            </summary>
+            <returns>The default log level to use.</returns>
+        </member>
+        <member name="P:BepInEx.Logging.BaseLogger.DisplayedLevels">
+            <summary>
+            A filter which is used to specify which log levels are not ignored by the logger.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Logging.BaseLogger.Log(BepInEx.Logging.LogLevel,System.Object)">
+            <summary>
+            Logs an entry to the Logger instance.
+            </summary>
+            <param name="level">The level of the entry.</param>
+            <param name="entry">The textual value of the entry.</param>
+        </member>
+        <member name="M:BepInEx.Logging.BaseLogger.Log(System.Object)">
+            <summary>
+            Logs an entry to the Logger instance, with a <see cref="T:BepInEx.Logging.LogLevel"/> of Message.
+            </summary>
+            <param name="entry">The text value of this log entry.</param>
+        </member>
+        <member name="T:BepInEx.Logging.LogLevel">
+            <summary>
+            The level, or severity of a log entry.
+            </summary>
+        </member>
+        <member name="F:BepInEx.Logging.LogLevel.None">
+            <summary>
+            No level selected.
+            </summary>
+        </member>
+        <member name="F:BepInEx.Logging.LogLevel.Fatal">
+            <summary>
+            A fatal error has occurred, which cannot be recovered from.
+            </summary>
+        </member>
+        <member name="F:BepInEx.Logging.LogLevel.Error">
+            <summary>
+            An error has occured, but can be recovered from.
+            </summary>
+        </member>
+        <member name="F:BepInEx.Logging.LogLevel.Warning">
+            <summary>
+            A warning has been produced, but does not necessarily mean that something wrong has happened.
+            </summary>
+        </member>
+        <member name="F:BepInEx.Logging.LogLevel.Message">
+            <summary>
+            An important message that should be displayed to the user.
+            </summary>
+        </member>
+        <member name="F:BepInEx.Logging.LogLevel.Info">
+            <summary>
+            A message of low importance.
+            </summary>
+        </member>
+        <member name="F:BepInEx.Logging.LogLevel.Debug">
+            <summary>
+            A message that would likely only interest a developer.
+            </summary>
+        </member>
+        <member name="F:BepInEx.Logging.LogLevel.All">
+            <summary>
+            All log levels.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Logging.LogLevelExtensions.GetHighestLevel(BepInEx.Logging.LogLevel)">
+            <summary>
+            Gets the highest log level when there could potentially be multiple levels provided.
+            </summary>
+            <param name="levels">The log level(s).</param>
+            <returns>The highest log level supplied.</returns>
+        </member>
+        <member name="M:BepInEx.Logging.LogLevelExtensions.GetConsoleColor(BepInEx.Logging.LogLevel)">
+            <summary>
+            Returns a translation of a log level to it's associated console colour.
+            </summary>
+            <param name="level">The log level(s).</param>
+            <returns>A console color associated with the highest log level supplied.</returns>
+        </member>
+        <member name="T:BepInEx.Logging.PreloaderLogWriter">
+            <summary>
+            A log writer specific to the <see cref="T:BepInEx.Bootstrap.Preloader"/>.
+            </summary>
+            <inheritdoc cref="T:BepInEx.Logging.BaseLogger"/>
+        </member>
+        <member name="P:BepInEx.Logging.PreloaderLogWriter.StringBuilder">
+            <summary>
+            The <see cref="T:System.Text.StringBuilder"/> which contains all logged entries, so it may be passed onto another log writer.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Logging.PreloaderLogWriter.IsRedirectingConsole">
+            <summary>
+            Whether or not the log writer is redirecting console output, so it can be logged.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Logging.PreloaderLogWriter.Enabled">
+            <summary>
+            Whether or not the log writer is writing and/or redirecting.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Logging.PreloaderLogWriter.#ctor(System.Boolean)">
+            <param name="redirectConsole">Whether or not to redirect the console standard output.</param>
+        </member>
+        <member name="M:BepInEx.Logging.PreloaderLogWriter.Enable">
+            <summary>
+            Enables the log writer.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Logging.PreloaderLogWriter.Disable">
+            <summary>
+            Disables the log writer.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Logging.PreloaderLogWriter.Log(BepInEx.Logging.LogLevel,System.Object)">
+            <summary>
+            Logs an entry to the Logger instance.
+            </summary>
+            <param name="level">The level of the entry.</param>
+            <param name="entry">The textual value of the entry.</param>
+        </member>
+        <member name="T:BepInEx.Logging.LoggerTraceListener">
+            <summary>
+            A trace listener that writes to an underlying <see cref="T:BepInEx.Logging.BaseLogger"/> instance.
+            </summary>
+            <inheritdoc cref="T:System.Diagnostics.TraceListener"/>
+        </member>
+        <member name="P:BepInEx.Logging.LoggerTraceListener.Logger">
+            <summary>
+            The logger instance that is being written to.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Logging.LoggerTraceListener.#ctor(BepInEx.Logging.BaseLogger)">
+            <param name="logger">The logger instance to write to.</param>
+        </member>
+        <member name="M:BepInEx.Logging.LoggerTraceListener.Write(System.String)">
+            <summary>
+            Writes a message to the underlying <see cref="T:BepInEx.Logging.BaseLogger"/> instance.
+            </summary>
+            <param name="message">The message to write.</param>
+        </member>
+        <member name="M:BepInEx.Logging.LoggerTraceListener.WriteLine(System.String)">
+            <summary>
+            Writes a message and a newline to the underlying <see cref="T:BepInEx.Logging.BaseLogger"/> instance.
+            </summary>
+            <param name="message">The message to write.</param>
+        </member>
+        <member name="T:BepInEx.Logging.LoggerTraceListener.TraceFixer">
+            <summary>
+            This exists because the Mono implementation of <see cref="T:System.Diagnostics.Trace"/> is/was broken, and would call Write directly instead of calling TraceEvent. This class fixes that with a <see cref="N:BepInEx.Harmony"/> hook.
+            </summary>
+        </member>
+        <member name="T:BepInEx.Logging.UnityLogWriter">
+            <summary>
+            Logs entries using Unity specific outputs.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Logging.UnityLogWriter.WriteToLog(System.String)">
+            <summary>
+            Writes a string specifically to the game output log.
+            </summary>
+            <param name="value">The value to write.</param>
+        </member>
+        <member name="M:BepInEx.Logging.UnityLogWriter.Log(BepInEx.Logging.LogLevel,System.Object)">
+            <summary>
+            Logs an entry to the Logger instance.
+            </summary>
+            <param name="level">The level of the entry.</param>
+            <param name="entry">The textual value of the entry.</param>
+        </member>
+        <member name="M:BepInEx.Logging.UnityLogWriter.ListenUnityLogs">
+            <summary>
+            Start listening to Unity's log message events and sending the messages to BepInEx logger.
+            </summary>
+        </member>
+        <member name="T:BepInEx.Logger">
+            <summary>
+            A static <see cref="T:BepInEx.Logging.BaseLogger"/> instance.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Logger.CurrentLogger">
+            <summary>
+            The current instance of a <see cref="T:BepInEx.Logging.BaseLogger"/> that is being used.
+            </summary>
+        </member>
+        <member name="E:BepInEx.Logger.EntryLogged">
+            <summary>
+            The listener event for an entry being logged.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Logger.Log(BepInEx.Logging.LogLevel,System.Object)">
+            <summary>
+            Logs an entry to the current logger instance.
+            </summary>
+            <param name="level">The level of the entry.</param>
+            <param name="entry">The textual value of the entry.</param>
+        </member>
+        <member name="M:BepInEx.Logger.SetLogger(BepInEx.Logging.BaseLogger)">
+            <summary>
+            Sets the instance being used by the static <see cref="T:BepInEx.Logger"/> class.
+            </summary>
+            <param name="logger">The instance to use in the static class.</param>
+        </member>
+        <member name="T:BepInEx.Paths">
+            <summary>
+                Paths used by BepInEx
+            </summary>
+        </member>
+        <member name="P:BepInEx.Paths.BepInExAssemblyDirectory">
+            <summary>
+                The directory that the core BepInEx DLLs reside in.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Paths.BepInExAssemblyPath">
+            <summary>
+                The path to the core BepInEx DLL.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Paths.BepInExRootPath">
+            <summary>
+                The path to the main BepInEx folder.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Paths.ExecutablePath">
+            <summary>
+                The path of the currently executing program BepInEx is encapsulated in.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Paths.GameRootPath">
+            <summary>
+                The directory that the currently executing process resides in.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Paths.ManagedPath">
+            <summary>
+                The path to the Managed folder of the currently running Unity game.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Paths.PatcherPluginPath">
+            <summary>
+                The path to the patcher plugin folder which resides in the BepInEx folder.
+            </summary>
+        </member>
+        <member name="P:BepInEx.Paths.PluginPath">
+            <summary>
+                The path to the plugin folder which resides in the BepInEx folder.
+            <para>
+            	This is ONLY guaranteed to be set correctly when Chainloader has been initialized.
+            </para>
+            </summary>
+        </member>
+        <member name="P:BepInEx.Paths.ProcessName">
+            <summary>
+                The name of the currently executing process.
+            </summary>
+        </member>
+        <member name="T:BepInEx.Utility">
+            <summary>
+            Generic helper properties and methods.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Utility.CombinePaths(System.String[])">
+            <summary>
+            Combines multiple paths together, as the specific method is not available in .NET 3.5.
+            </summary>
+            <param name="parts">The multiple paths to combine together.</param>
+            <returns>A combined path.</returns>
+        </member>
+        <member name="M:BepInEx.Utility.SafeParseBool(System.String,System.Boolean)">
+            <summary>
+            Tries to parse a bool, with a default value if unable to parse.
+            </summary>
+            <param name="input">The string to parse</param>
+            <param name="defaultValue">The value to return if parsing is unsuccessful.</param>
+            <returns>Boolean value of input if able to be parsed, otherwise default value.</returns>
+        </member>
+        <member name="M:BepInEx.Utility.ConvertToWWWFormat(System.String)">
+            <summary>
+            Converts a file path into a UnityEngine.WWW format.
+            </summary>
+            <param name="path">The file path to convert.</param>
+            <returns>A converted file path.</returns>
+        </member>
+        <member name="M:BepInEx.Utility.IsNullOrWhiteSpace(System.String)">
+            <summary>
+            Indicates whether a specified string is null, empty, or consists only of white-space characters.
+            </summary>
+            <param name="self">The string to test.</param>
+            <returns>True if the value parameter is null or empty, or if value consists exclusively of white-space characters.</returns>
+        </member>
+        <member name="M:BepInEx.Utility.TryResolveDllAssembly(System.Reflection.AssemblyName,System.String,System.Reflection.Assembly@)">
+            <summary>
+            Try to resolve and load the given assembly DLL.
+            </summary>
+            <param name="assemblyName">Name of the assembly, of the type <see cref="T:System.Reflection.AssemblyName" />.</param>
+            <param name="directory">Directory to search the assembly from.</param>
+            <param name="assembly">The loaded assembly.</param>
+            <returns>True, if the assembly was found and loaded. Otherwise, false.</returns>
+        </member>
+    </members>
+</doc>

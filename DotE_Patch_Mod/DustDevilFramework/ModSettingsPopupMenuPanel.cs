@@ -272,12 +272,12 @@ namespace DustDevilFramework
                 {
                     if (m.settings.Enabled)
                     {
-                        Debug.Log("Mod: " + m.PartialityModType.GetMethod("ToString").Invoke(m.PartialityModReference, new object[0]) + " is being Loaded!");
-                        m.PartialityModType.GetMethod("OnLoad").Invoke(m.PartialityModReference, new object[0]);
+                        Debug.Log("Mod: " + m.BepinExPluginType.GetMethod("ToString").Invoke(m.BepinPluginReference, new object[0]) + " is being Loaded!");
+                        m.BepinExPluginType.GetMethod("OnLoad").Invoke(m.BepinPluginReference, new object[0]);
                     } else
                     {
-                        Debug.Log("Mod: " + m.PartialityModType.GetMethod("ToString").Invoke(m.PartialityModReference, new object[0]) + " is being UnLoaded!");
-                        m.PartialityModType.GetMethod("UnLoad").Invoke(m.PartialityModReference, new object[0]);
+                        Debug.Log("Mod: " + m.BepinExPluginType.GetMethod("ToString").Invoke(m.BepinPluginReference, new object[0]) + " is being UnLoaded!");
+                        m.BepinExPluginType.GetMethod("UnLoad").Invoke(m.BepinPluginReference, new object[0]);
                     }
                 }
                 Debug.Log("Wrote settings to files!");

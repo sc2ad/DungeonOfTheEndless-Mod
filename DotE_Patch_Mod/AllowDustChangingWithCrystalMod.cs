@@ -13,7 +13,7 @@ namespace DustWithCrystal_Mod
         ScadMod mod = new ScadMod("DustAfterCrystal", typeof(AllowDustChangingWithCrystalMod));
         public override void Init()
         {
-            mod.PartialityModReference = this;
+            mod.BepinPluginReference = this;
             mod.Initialize();
 
             mod.settings.ReadSettings();

@@ -38,12 +38,13 @@ namespace DustDevilFramework
         public abstract string GetRealName();
         public abstract string GetRealDescription();
 
-        public CustomItem(Type settingsType, Type partialityType)
+        public CustomItem(Type settingsType, Type bepinPluginType)
         {
             name = GetRealName();
             settings = (CustomItemSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
             this.settingsType = settingsType;
-            PartialityModType = partialityType;
+            BepinExPluginType = bepinPluginType;
+            SetupPluginData();
             // NEED TO FIGURE OUT A WAY OF PASSING IN THE SETTINGS TYPE
             // THIS IS SO THE SETTINGS IS PROPERLY CONSTRUCTED INTO SCADMOD
             /*
@@ -60,7 +61,6 @@ namespace DustDevilFramework
 
         public void Initialize()
         {
-            path = GetRealName() + "_log.txt";
             base.Initialize();
 
             settings.ReadSettings();

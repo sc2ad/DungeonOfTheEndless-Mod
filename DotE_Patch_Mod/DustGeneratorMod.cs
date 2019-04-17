@@ -14,7 +14,7 @@ namespace DustGenerator_Mod
         ScadMod mod = new ScadMod("DustGenerator", typeof(DustGeneratorSettings), typeof(DustGeneratorMod));
         public override void Init()
         {
-            mod.PartialityModReference = this;
+            mod.BepinPluginReference = this;
             mod.Initialize();
 
             // Setup default values for config

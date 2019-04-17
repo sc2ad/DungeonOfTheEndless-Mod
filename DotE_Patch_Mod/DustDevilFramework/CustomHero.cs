@@ -12,10 +12,10 @@ namespace DustDevilFramework
     {
         // For Localization/GUI data
 
-        public abstract Amplitude.StaticString GetName();
-        public abstract Amplitude.StaticString GetRealName();
-        public abstract Amplitude.StaticString GetIconName();
-        public abstract Amplitude.StaticString GetAnimationName();
+        public abstract StaticString GetName();
+        public abstract StaticString GetRealName();
+        public abstract StaticString GetIconName();
+        public abstract StaticString GetAnimationName();
         public abstract string GetRealDescription();
         public abstract string GetRealFirstName();
         public abstract string GetIntro1();
@@ -60,17 +60,17 @@ namespace DustDevilFramework
 
         private bool displayedData = false;
 
-        public CustomHero(Type settingsType, Type partialityType)
+        public CustomHero(Type settingsType, Type bepinPluginType)
         {
             name = GetRealName();
             settings = (CustomItemSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
             this.settingsType = settingsType;
-            PartialityModType = partialityType;
+            BepinExPluginType = bepinPluginType;
+            SetupPluginData();
         }
 
         public void Initialize()
         {
-            path = GetRealName() + "_log.txt";
             base.Initialize();
 
             settings.ReadSettings();

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BepInEx.Logging;
+using MonoMod.Utils;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,49 +9,81 @@ namespace DustDevilFramework
     public class ScadMod
     {
         public string name = "placeholder";
-        public string path;
 
-        public ModSettings settings = new ModSettings("placeholder");
+        public ModSettings settings;
         public Type settingsType;
-        public Type PartialityModType;
-        public object PartialityModReference;
+        public Type BepinExPluginType;
+        public BepInEx.BaseUnityPlugin BepinPluginReference;
 
-        public int MajorVersion = 1;
-        public int MinorVersion = 0;
-        public int Revision = 0;
+        private ManualLogSource logger;
 
-        public ScadMod(string name, Type settingsType, Type partialityModType)
+        private BepInEx.BepInPlugin pluginData;
+
+        public Version Version { get; private set; }
+        public string GUID { get; private set; }
+
+
+        public ScadMod(string name, Type settingsType, Type bepinModType, BepInEx.BaseUnityPlugin bepinPlugin)
         {
             this.name = name;
-            settings = Activator.CreateInstance(settingsType, new object[] { name }) as ModSettings;
             this.settingsType = settingsType;
-            path = name + "_log.txt";
-            PartialityModType = partialityModType;
+            BepinExPluginType = bepinModType;
+            BepinPluginReference = bepinPlugin;
+            SetupPluginData();
+            settings = Activator.CreateInstance(settingsType, new object[] { this }) as ModSettings;
         }
-        public ScadMod(string name, Type partialityModType)
+        public ScadMod(string name, Type bepinModType, BepInEx.BaseUnityPlugin bepinPlugin)
         {
             this.name = name;
-            settings = new ModSettings(name);
             settingsType = typeof(ModSettings);
-            path = name + "_log.txt";
-            PartialityModType = partialityModType;
+            BepinExPluginType = bepinModType;
+            BepinPluginReference = bepinPlugin;
+            SetupPluginData();
+            settings = new ModSettings(this);
         }
-        // Don't use this constructor unless you plan on setting settingsType and PartialityModType later!
+        // ONLY USE THIS IF YOU ARE ATTEMPTING TO ADD DATA AFTER CONSTRUCTION (FOR THE CREATION OF ABSTRACT CLASSES ONLY!)
         public ScadMod()
         {
-            path = name + "_log.txt";
         }
-        public void Log(string s)
+        protected void SetupPluginData()
         {
-            System.IO.File.AppendAllText(path, s + "\n");
+            object[] customAttrs = BepinExPluginType.GetCustomAttributes(typeof(BepInEx.BepInPlugin), false);
+            if (customAttrs.Length > 0 && customAttrs[0] != null)
+            {
+                pluginData = customAttrs[0] as BepInEx.BepInPlugin;
+                Log("Overwritting name from: " + name + " to: " + pluginData.Name);
+                name = pluginData.Name;
+            }
+            else
+            {
+                Log(LogLevel.Error, "Could not find valid BepInPlugin attribute on mod: " + name);
+                Log(LogLevel.Warning, "Attempting to use placeholder pluginData!");
+                pluginData = new BepInEx.BepInPlugin("sc2ad.placeholder.guid", "placeholderName", "0.0.0");
+            }
+            Version = pluginData.Version;
+            GUID = pluginData.GUID;
         }
-        public void ClearLog()
+        public void Log(LogLevel level, object s)
         {
-            System.IO.File.WriteAllText(path, "");
+            if (logger == null)
+            {
+                try
+                {
+                    logger = new DynData<BepInEx.BaseUnityPlugin>(BepinPluginReference).Get<ManualLogSource>("Logger");
+                } catch (Exception _)
+                {
+                    // Could not find the Logger for the plugin! Make our own!
+                    logger = Logger.CreateLogSource(@"BepInEx\log\" + name + ".log");
+                }
+            }
+            logger.Log(level, s);
+        }
+        public void Log(object s)
+        {
+            Log(LogLevel.Debug, s);
         }
         public void Initialize()
         {
-            ClearLog();
             Log("===================================================================");
             Log("DATETIME: " + DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToShortTimeString());
             Log("===================================================================");
@@ -60,9 +94,10 @@ namespace DustDevilFramework
         public void Load()
         {
             Log("Loaded!");
-            
-            // Load/Create hooks here!
+
+            // Create and load hooks here!
         }
+
         public void UnLoad()
         {
             Log("Unloaded!");

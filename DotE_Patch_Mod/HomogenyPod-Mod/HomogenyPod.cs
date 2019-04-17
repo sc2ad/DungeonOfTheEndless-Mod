@@ -20,7 +20,7 @@ namespace HomogenyPod_Mod
 
         public override void Init()
         {
-            mod.PartialityModReference = this;
+            mod.BepinPluginReference = this;
             mod.Initialize();
         }
         public override void OnLoad()

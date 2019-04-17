@@ -20,7 +20,7 @@ namespace TrueIGT_Mod
         ScadMod mod = new ScadMod("TrueIGT", typeof(TrueIGTMod));
         public override void Init()
         {
-            mod.PartialityModReference = this;
+            mod.BepinPluginReference = this;
             mod.MajorVersion = 2;
             mod.MinorVersion = 5;
             mod.Initialize();

@@ -17,7 +17,7 @@ namespace DuplicateHeroSelection_Mod
         ScadMod mod = new ScadMod("DuplicateHeroSelection", typeof(DuplicateHeroSelectionSettings), typeof(DuplicateHeroSelectionMod));
         public override void Init()
         {
-            mod.PartialityModReference = this;
+            mod.BepinPluginReference = this;
             mod.Initialize();
 
             mod.settings.ReadSettings();

@@ -10,7 +10,7 @@ namespace SeededDungeon_Mod
         ScadMod mod = new ScadMod("SeededDungeon", typeof(SeededDungeonSettings), typeof(SeededDungeonMod));
         public override void Init()
         {
-            mod.PartialityModReference = this;
+            mod.BepinPluginReference = this;
             mod.Initialize();
 
             mod.settings.ReadSettings();

@@ -3,80 +3,86 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using BepInEx.Configuration;
+using MonoMod.Utils;
 
 namespace DustDevilFramework
 {
     public class ModSettings
     {
         [SettingsIgnore]
-        private string name;
+        private ScadMod mod;
+        [SettingsIgnore]
+        private ConfigFile configFile;
         public bool Enabled = true;
-        public ModSettings(string name)
+        public ModSettings(ScadMod mod)
         {
-            this.name = name;
+            this.mod = mod;
+            try
+            {
+                configFile = new DynData<BepInEx.BaseUnityPlugin>(mod.BepinPluginReference).Get<ConfigFile>("Config");
+            } catch (Exception _)
+            {
+                mod.Log(BepInEx.Logging.LogLevel.Error, "Could not find config file for plugin with name: " + mod.name);
+                string configPath = @"BepInEx\config\" + mod.name + ".cfg";
+                mod.Log(BepInEx.Logging.LogLevel.Warning, "Attempting to use default config: " + configPath);
+                configFile = new ConfigFile(configPath, true);
+            }
         }
         public void WriteSettings()
         {
-            string config = name + "_config.txt";
-
-            string s = "";
             FieldInfo[] fields = GetType().GetFields();
             foreach (FieldInfo q in fields)
             {
-                if (q.Name == "name")
+                if (q.Name == "mod" || q.Name == "configFile")
                 {
                     continue;
                 }
-                s += q.Name + ": " + q.GetValue(this) + "\n";
+                configFile.Wrap("Settings", q.Name, null, q.GetValue(this));
             }
-            Debug.Log("Wrote settings to file: " + config);
-            System.IO.File.WriteAllText(config, s);
+            configFile.Save();
+            configFile.SaveOnConfigSet = true;
+
+            Debug.Log("Wrote settings to file: " + configFile.ConfigFilePath);            
         }
         public void ReadSettings()
         {
-            string config = name + "_config.txt";
-
-            if (!System.IO.File.Exists(config))
+            if (configFile.ConfigDefinitions.Count == 0)
             {
                 WriteSettings();
-                return;
             }
-            string[] lines = System.IO.File.ReadAllLines(config);
-            foreach (string line in lines)
+            configFile.Reload();
+
+            foreach (ConfigDefinition d in configFile.ConfigDefinitions)
             {
-                if (line.StartsWith("#") || line.IndexOf(": ") == -1)
-                {
-                    continue;
-                }
-                string[] spl = line.Split(new string[] { ": " }, StringSplitOptions.None);
-                string value = spl[1].Trim();
                 bool temp = false;
                 foreach (FieldInfo f in GetType().GetFields())
                 {
                     //Debug.Log("Observed Field with name: " + f.Name);
-                    if (f.Name == spl[0])
+                    if (f.Name == d.Key)
                     {
                         // Will this work, cause spl[1] is a string? answer: no
+                        ConfigWrapper<object> wrapper = new ConfigWrapper<object>(configFile, d);
                         try
                         {
-                            f.SetValue(this, spl[1]);
+                            f.SetValue(this, wrapper.Value);
                         }
                         catch (ArgumentException _)
                         {
                             try
                             {
-                                f.SetValue(this, (float)Convert.ToDouble(spl[1]));
+                                f.SetValue(this, (float)Convert.ToDouble(wrapper.Value));
                             }
                             catch (FormatException __)
                             {
-                                f.SetValue(this, Convert.ToBoolean(spl[1]));
+                                f.SetValue(this, Convert.ToBoolean(wrapper.Value));
                             }
                             catch (ArgumentException __)
                             {
-                                f.SetValue(this, Convert.ToInt32(spl[1]));
+                                f.SetValue(this, Convert.ToInt32(wrapper.Value));
                             }
                         }
-                        Debug.Log("Set Field with name: " + spl[0] + " to: " + spl[1]);
+                        Debug.Log("Set Field with name: " + d.Key + " to: " + wrapper.Value);
                         temp = true;
                         break;
                     }
@@ -86,12 +92,12 @@ namespace DustDevilFramework
                     continue;
                 }
                 // This shouldn't happen, this means that something has gone wrong and that the field does not exist
-                Debug.Log("No fields with name matching: " + spl[0]);
+                Debug.Log("No fields with name matching: " + d.Key);
             }
         }
         public bool Exists()
         {
-            return System.IO.File.Exists(name + "_config.txt");
+            return configFile.ConfigDefinitions.Count > 0;
         }
         [AttributeUsage(AttributeTargets.Field)]
         public class SettingsRange : Attribute

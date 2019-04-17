@@ -78,7 +78,7 @@ namespace DustDevilFramework
             string text = "ModList:\n";
             foreach (ScadMod mod in ModList)
             {
-                text += "- " + mod.name + " - " + mod.MajorVersion + "." + mod.MinorVersion + "." + mod.Revision+"\n";
+                text += "- " + mod.name + " - " + mod.Version + "\n";
             }
             
             Debug.Log("Label has alignment: " + label.Alignement + " new label has alignment: " + l2.Alignement);

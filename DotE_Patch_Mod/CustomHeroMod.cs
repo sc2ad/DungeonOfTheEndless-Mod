@@ -20,7 +20,7 @@ namespace CustomHero_Mod
 
         public override void Init()
         {
-            mod.PartialityModReference = this;
+            mod.BepinPluginReference = this;
             mod.Initialize();
 
             // Setup default values for config

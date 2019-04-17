@@ -36,7 +36,7 @@ namespace DustDevilFramework
                 temp.AssumedPod = GetAnimationPod();
                 temp.DungeonPod = GetDungeonPod();
             }
-            PartialityModType = partialityType;
+            BepinExPluginType = partialityType;
         }
 
         public void Initialize()
