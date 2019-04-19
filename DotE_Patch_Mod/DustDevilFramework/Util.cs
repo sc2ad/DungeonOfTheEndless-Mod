@@ -1,3 +1,6 @@
+using BepInEx.Configuration;
+using MonoMod.Utils;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -6,6 +9,20 @@ namespace DustDevilFramework
 {
     public class Util
     {
+        public static ConfigFile GetConfigFile(ScadMod mod)
+        {
+            try
+            {
+                return new DynData<BepInEx.BaseUnityPlugin>(mod.BepinPluginReference).Get<ConfigFile>("Config");
+            }
+            catch (Exception _)
+            {
+                mod.Log(BepInEx.Logging.LogLevel.Error, "Could not find config file for plugin with name: " + mod.name);
+                string configPath = @"BepInEx\config\" + mod.name + ".cfg";
+                mod.Log(BepInEx.Logging.LogLevel.Warning, "Attempting to use default config: " + configPath);
+                return new ConfigFile(configPath, true);
+            }
+        }
         public static List<T> GetList<T>(T[] arr)
         {
             List<T> toReturn = new List<T>();
@@ -135,16 +152,9 @@ namespace DustDevilFramework
             RemoveFileChangeExclusiveEnd(@"Public\Localization\english\ED_Localization_Locales.xml", startingPoint, endingPoint);
         }
         // Returns a legible name from the given fieldinfo.Name
-        public static string GetName(ScadMod m, FieldInfo f)
+        public static string GetName(ScadMod m, ConfigWrapper<object> w)
         {
-            string name = f.Name;
-            if (f.Name.Contains("<"))
-            {
-                // This is an autoproperty
-                // This is okay, just make sure the name is reasonable!
-                name = f.Name.Substring(f.Name.IndexOf("<") + 1, f.Name.LastIndexOf(">") - 1);
-            }
-            return m.name + " - " + name;
+            return m.name + " - " + w.Definition.Key;
         }
         // Deletes all the children of a certain GameObject including the provided GameObject
         public static void DeleteChildrenInclusive(GameObject toDelete)

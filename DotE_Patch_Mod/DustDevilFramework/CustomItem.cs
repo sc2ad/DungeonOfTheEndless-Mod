@@ -1,6 +1,7 @@
 ﻿using Amplitude.Unity.Framework;
 using Amplitude.Unity.Simulation;
 using Amplitude.Unity.Simulation.SimulationModifierDescriptors;
+using BepInEx;
 using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
@@ -38,12 +39,11 @@ namespace DustDevilFramework
         public abstract string GetRealName();
         public abstract string GetRealDescription();
 
-        public CustomItem(Type settingsType, Type bepinPluginType)
+        public CustomItem(Type bepinPluginType, BaseUnityPlugin bepinPlugin)
         {
             name = GetRealName();
-            settings = (CustomItemSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
-            this.settingsType = settingsType;
             BepinExPluginType = bepinPluginType;
+            BepinPluginReference = bepinPlugin;
             SetupPluginData();
             // NEED TO FIGURE OUT A WAY OF PASSING IN THE SETTINGS TYPE
             // THIS IS SO THE SETTINGS IS PROPERLY CONSTRUCTED INTO SCADMOD
@@ -59,13 +59,11 @@ namespace DustDevilFramework
              */
         }
 
-        public void Initialize()
+        public new void Initialize()
         {
             base.Initialize();
 
-            settings.ReadSettings();
-
-            if (settings.Enabled)
+            if (EnabledWrapper.Value)
             {
                 Log("Attempting to create Localization changes!");
                 CreateLocalizationChanges();
@@ -80,15 +78,15 @@ namespace DustDevilFramework
             }
             Log("Initialized!");
         }
-        public void Load()
+        public new void Load()
         {
             base.Load();
-            if (settings.Enabled)
+            if (EnabledWrapper.Value)
             {
                 On.Session.Update += Session_Update;
             }
         }
-        public void UnLoad()
+        public new void UnLoad()
         {
             base.UnLoad();
             On.Session.Update -= Session_Update;

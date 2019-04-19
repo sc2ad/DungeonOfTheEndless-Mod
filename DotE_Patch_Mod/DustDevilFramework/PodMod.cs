@@ -1,4 +1,6 @@
 ﻿using Amplitude.Unity.Framework;
+using BepInEx;
+using BepInEx.Configuration;
 using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
@@ -23,29 +25,26 @@ namespace DustDevilFramework
         public abstract string[] GetUnavailableBlueprints();
         public abstract string[] GetUnavailableItems();
 
-        public PodMod(Type settingsType, Type partialityType)
+        private ConfigWrapper<string> AnimationPodWrapper;
+        private ConfigWrapper<string> DungeonPodWrapper;
+
+        public PodMod(Type bepinPluginType, BaseUnityPlugin bepinPlugin)
         {
             name = GetName();
-            PodSettings temp = new PodSettings(name);
-            temp = Activator.CreateInstance(settingsType, new object[] { name }) as PodSettings;
-            this.settingsType = settingsType;
-            settings = temp;
             // Setup default values for config
-            if (!settings.Exists())
-            {
-                temp.AssumedPod = GetAnimationPod();
-                temp.DungeonPod = GetDungeonPod();
-            }
-            BepinExPluginType = partialityType;
+            BepinExPluginType = bepinPluginType;
+            BepinPluginReference = bepinPlugin;
+            SetupPluginData();
+            ConfigFile file = Util.GetConfigFile(this);
+            AnimationPodWrapper = file.Wrap("Settings", "AnimationPod", "The Pod used for animation", GetAnimationPod());
+            DungeonPodWrapper = file.Wrap("Settings", "DungeonPod", "The Pod used for generating the dungeon", GetDungeonPod());
         }
 
-        public void Initialize()
+        public new void Initialize()
         {
-            path = GetName() + "_log.txt";
             base.Initialize();
 
-            settings.ReadSettings();
-            if (settings.Enabled)
+            if (EnabledWrapper.Value)
             {
                 Log("Attempting to create Localization changes!");
                 List<string> linesLst = new List<string>();
@@ -62,11 +61,11 @@ namespace DustDevilFramework
             Log("Initialized!");
         }
 
-        public void Load()
+        public new void Load()
         {
             base.Load();
 
-            if (settings.Enabled)
+            if (EnabledWrapper.Value)
             {
                 On.GameSelectionPanel.Display += GameSelectionPanel_Display;
 
@@ -80,7 +79,7 @@ namespace DustDevilFramework
             }
         }
 
-        public void UnLoad()
+        public new void UnLoad()
         {
             base.UnLoad();
 
@@ -103,7 +102,7 @@ namespace DustDevilFramework
                 d.Set<int>("randomSeed", randomSeed);
                 Log("Calling GenerateDungeonUsingSeedCoroutine!");
 
-                yield return typeof(DungeonGenerator2).GetMethod("GenerateDungeonCoroutine", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(self, new object[] { level, new Amplitude.StaticString(((PodSettings)settings).DungeonPod) });
+                yield return typeof(DungeonGenerator2).GetMethod("GenerateDungeonCoroutine", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { level, new Amplitude.StaticString(DungeonPodWrapper.Value) });
 
                 yield break;
             }
@@ -136,7 +135,7 @@ namespace DustDevilFramework
             Amplitude.StaticString temp = d.Get<Amplitude.StaticString>("selectedShipName");
             if (temp == GetName())
             {
-                d.Set<Amplitude.StaticString>("selectedShipName", ((PodSettings)settings).AssumedPod);
+                d.Set<Amplitude.StaticString>("selectedShipName", AnimationPodWrapper.Value);
             }
             orig(self);
             d.Set<Amplitude.StaticString>("selectedShipName", temp);
@@ -147,7 +146,7 @@ namespace DustDevilFramework
             Log("Getting an animation for: " + shipName);
             if (shipName == GetName())
             {
-                return orig(self, ((PodSettings)settings).AssumedPod);
+                return orig(self, AnimationPodWrapper.Value);
             }
             return orig(self, shipName);
         }
@@ -158,7 +157,7 @@ namespace DustDevilFramework
             Amplitude.StaticString temp = d.Get<Amplitude.StaticString>("selectedShipName");
             if (temp == GetName())
             {
-                d.Set<Amplitude.StaticString>("selectedShipName", ((PodSettings)settings).AssumedPod);
+                d.Set<Amplitude.StaticString>("selectedShipName", AnimationPodWrapper.Value);
             }
             orig(self, nextOrPrevious, playOutSFX);
             d.Set<Amplitude.StaticString>("selectedShipName", temp);
@@ -171,7 +170,7 @@ namespace DustDevilFramework
             Amplitude.StaticString temp = d.Get<Amplitude.StaticString>("selectedShipName");
             if (temp == GetName())
             {
-                d.Set<Amplitude.StaticString>("selectedShipName", ((PodSettings)settings).AssumedPod);
+                d.Set<Amplitude.StaticString>("selectedShipName", AnimationPodWrapper.Value);
             }
             orig(self);
             d.Set<Amplitude.StaticString>("selectedShipName", temp);

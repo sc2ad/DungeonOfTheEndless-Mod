@@ -1,4 +1,5 @@
-﻿using BepInEx.Logging;
+﻿using BepInEx.Configuration;
+using BepInEx.Logging;
 using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,6 @@ namespace DustDevilFramework
     {
         public string name = "placeholder";
 
-        public ModSettings settings;
-        public Type settingsType;
         public Type BepinExPluginType;
         public BepInEx.BaseUnityPlugin BepinPluginReference;
 
@@ -21,25 +20,14 @@ namespace DustDevilFramework
 
         public Version Version { get; private set; }
         public string GUID { get; private set; }
+        public ConfigWrapper<bool> EnabledWrapper { get; private set; }
 
-
-        public ScadMod(string name, Type settingsType, Type bepinModType, BepInEx.BaseUnityPlugin bepinPlugin)
-        {
-            this.name = name;
-            this.settingsType = settingsType;
-            BepinExPluginType = bepinModType;
-            BepinPluginReference = bepinPlugin;
-            SetupPluginData();
-            settings = Activator.CreateInstance(settingsType, new object[] { this }) as ModSettings;
-        }
         public ScadMod(string name, Type bepinModType, BepInEx.BaseUnityPlugin bepinPlugin)
         {
             this.name = name;
-            settingsType = typeof(ModSettings);
             BepinExPluginType = bepinModType;
             BepinPluginReference = bepinPlugin;
             SetupPluginData();
-            settings = new ModSettings(this);
         }
         // ONLY USE THIS IF YOU ARE ATTEMPTING TO ADD DATA AFTER CONSTRUCTION (FOR THE CREATION OF ABSTRACT CLASSES ONLY!)
         public ScadMod()
@@ -62,6 +50,8 @@ namespace DustDevilFramework
             }
             Version = pluginData.Version;
             GUID = pluginData.GUID;
+            EnabledWrapper = Util.GetConfigFile(this).Wrap<bool>("Settings", "Enabled", "Whether the mod is enabled or not", true);
+            Util.GetConfigFile(this).Save();
         }
         public void Log(LogLevel level, object s)
         {
@@ -88,7 +78,7 @@ namespace DustDevilFramework
             Log("DATETIME: " + DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToShortTimeString());
             Log("===================================================================");
 
-            settings.ReadSettings();
+            Util.GetConfigFile(this).Reload();
             DustDevil.CreateInstance(this);
         }
         public void Load()

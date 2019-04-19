@@ -1,4 +1,5 @@
-﻿using MonoMod.Utils;
+﻿using BepInEx.Configuration;
+using MonoMod.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,10 +19,10 @@ namespace DustDevilFramework
         private GameObject modSettingsScroll;
         private List<AgeControlSlider> sliders;
         private List<AgeControlToggle> toggles;
-        private Dictionary<ScadMod, Dictionary<FieldInfo, object>> defaultFields;
-        List<ScadMod> mods;
-        List<ScadMod> modsToModify;
-        List<FieldInfo> VisibleFields;
+        private Dictionary<ScadMod, Dictionary<ConfigWrapper<object>, object>> DefaultWrappers;
+        protected List<ScadMod> mods;
+        protected List<ScadMod> modsToModify;
+        protected List<ConfigWrapper<object>> VisibleWrappers;
 
         private bool saveSettings = false;
 
@@ -30,11 +31,11 @@ namespace DustDevilFramework
         public ModSettingsPopupMenuPanel()
         {
             Debug.Log("Constructing a ModSettings Popup Menu Panel for a GameObject!");
-            VisibleFields = new List<FieldInfo>();
+            VisibleWrappers = new List<ConfigWrapper<object>>();
             modsToModify = new List<ScadMod>();
             sliders = new List<AgeControlSlider>();
             toggles = new List<AgeControlToggle>();
-            defaultFields = new Dictionary<ScadMod, Dictionary<FieldInfo, object>>();
+            DefaultWrappers = new Dictionary<ScadMod, Dictionary<ConfigWrapper<object>, object>>();
             Debug.Log("Construction of Component for GO Complete!");
         }
         private void SetupModlist(List<ScadMod> m)
@@ -92,11 +93,11 @@ namespace DustDevilFramework
             Debug.Log("Setting up DefaultSettings Dict!");
             foreach (ScadMod m in mods)
             {
-                foreach (FieldInfo f in VisibleFields)
+                foreach (ConfigWrapper<object> f in VisibleWrappers)
                 {
                     try
                     {
-                        defaultFields[m][f] = f.GetValue(m.settings);
+                        DefaultWrappers[m][f] = f.Value;
                     } catch (ArgumentException e)
                     {
                         // Writing to the wrong mod.settings
@@ -105,13 +106,13 @@ namespace DustDevilFramework
                 }
             }
         }
-        private void AddDefaultSetting(ScadMod m, FieldInfo f, object current)
+        private void AddDefaultSetting(ScadMod m, ConfigWrapper<object> f, object current)
         {
-            if (!defaultFields.ContainsKey(m))
+            if (!DefaultWrappers.ContainsKey(m))
             {
-                defaultFields.Add(m, new Dictionary<FieldInfo, object>());
+                DefaultWrappers.Add(m, new Dictionary<ConfigWrapper<object>, object>());
             }
-            defaultFields[m].Add(f, current);
+            DefaultWrappers[m].Add(f, current);
         }
         // This method creates all of the AgeControl items that correspond to mod settings
         // They are placed within the optionsPanel instance variable
@@ -120,92 +121,30 @@ namespace DustDevilFramework
             Debug.Log("Creating Settings!");
             foreach (ScadMod m in mods)
             {
-                Type basicType = m.settingsType;
-                List<FieldInfo> fields = new List<FieldInfo>();
-                while (!basicType.Equals(typeof(object)))
-                {
-                    
-                    Debug.Log("Attempting to find inheritance tree with settings type: " + basicType);
+                Debug.Log("Attempting to find ConfigFile for mod: " + m.name);
+                ConfigFile file = Util.GetConfigFile(m);
 
-                    fields.AddRange(basicType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
-                    Debug.Log("Found: " + fields.Count + " so far.");
-                    if (basicType.Equals(typeof(ModSettings)))
-                    {
-                        Debug.Log("Found a total of: " + fields.Count + " fields");
-                        break;
-                    }
-                    if (basicType.BaseType.Equals(typeof(object)))
-                    {
-                        // You must provide a Settings class that extends ModSettings as the Settings Type!
-                        Debug.LogError("You must provide a Settings class that extends ModSettings as the Settings Type for Mod: " + m.name);
-                        break;
-                    }
-                    basicType = basicType.BaseType;
-                }
-                Debug.Log("Mod: " + m.name + " has settingsType: " + m.settingsType.Name + " with: " + fields.Count + " fields.");
-                foreach (FieldInfo f in fields)
+                Debug.Log("Mod: " + m.name + " with: " + file.ConfigDefinitions.Count + " fields.");
+                foreach (ConfigDefinition d in file.ConfigDefinitions)
                 {
-                    // Now check attributes and if it is something that isn't displayable
-                    bool show = true;
-                    if (f.FieldType.Equals(typeof(float)) || f.FieldType.Equals(typeof(int)))
-                    {
-                        show = false;
-                        // Required to have a SettingsRange
-                    }
+                    // If it exists in the config file, it is meant to be there.
 
-                    object[] allCustomAttributes = f.GetCustomAttributes(true);
-                    //object[] allCustomAttributes = new object[0];
                     //TODO DEBUG!
+                    // NEED TO REDO ATTRIBUTES FOR RANGE HERE NOW THAT I REMOVED MOST OF THAT STUFF WITH BEPINEX
 
-                    Debug.Log("Attribute count: " + allCustomAttributes.Length);
-                    foreach (object ob in allCustomAttributes)
+                    ConfigWrapper<object> wrapper = file.Wrap<object>(d);
+
+                    if (wrapper.GetType().Equals(typeof(bool)))
                     {
-                        //ModSettings.SettingsIgnore ignore = f.GetCustomAttributes<ModSettings.SettingsIgnore>(true).First();
-                        if (ob.GetType().Equals(typeof(ModSettings.SettingsIgnore)))
-                        {
-                            // Hey, it is a SettingsIgnore attribute!
-                            show = false;
-                            Debug.Log("Ignoring setting with name: " + f.Name + " and type: " + f.FieldType);
-                            break;
-                        }
-                        if (ob.GetType().Equals(typeof(ModSettings.SettingsRange)) && (f.FieldType.Equals(typeof(float)) || f.FieldType.Equals(typeof(int))))
-                        {
-                            ModSettings.SettingsRange range = ob as ModSettings.SettingsRange;
-                            show = true;
-                            Debug.Log("Showing float/int with name: " + Util.GetName(m, f) + " and type: " + f.FieldType + " because it has a SettingsRange of: " + range.Low + " to " + range.High + " with increment: " + range.Increment);
-                            // Lets create a slider!
-                            try
-                            {
-                                Debug.Log("Trying as a float...");
-                                float v = (float)f.GetValue(m.settings);
-                                CreateSlider(m, f, range.Low, range.High, v, range.Increment);
-                                AddDefaultSetting(m, f, v);
-                            } catch (Exception _)
-                            {
-                                Debug.Log("Trying as an int...");
-                                try
-                                {
-                                    int v = (int)f.GetValue(m.settings);
-                                    CreateSlider(m, f, range.Low, range.High, v, range.Increment);
-                                    AddDefaultSetting(m, f, v);
-                                } catch (Exception __)
-                                {
-                                    Debug.Log("Trying as a double...");
-                                    double v = (double)f.GetValue(m.settings);
-                                    CreateSlider(m, f, range.Low, range.High, (float)v, range.Increment);
-                                    AddDefaultSetting(m, f, v);
-                                }
-                            }
-                            break;
-                        }
+                        Debug.Log("Showing bool with name: " + Util.GetName(m, wrapper));
+                        CreateToggle(m, wrapper);
+                        AddDefaultSetting(m, wrapper, wrapper.Value);
                     }
-                    if (show && f.FieldType.Equals(typeof(bool)))
+                    else if (wrapper.GetType().Equals(typeof(int)) || wrapper.GetType().Equals(typeof(float)) || wrapper.GetType().Equals(typeof(double)))
                     {
-                        Debug.Log("Showing bool with name: " + Util.GetName(m, f));
-                        // Let's create a toggle!
-                        bool v = (bool)f.GetValue(m.settings);
-                        CreateToggle(m, f, v);
-                        AddDefaultSetting(m, f, v);
+                        Debug.Log("Showing slider with name: " + Util.GetName(m, wrapper));
+                        CreateSlider(m, wrapper, 0, 100, 1);
+                        AddDefaultSetting(m, wrapper, wrapper.Value);
                     }
                 }
                 Debug.Log("==========================================");
@@ -266,11 +205,11 @@ namespace DustDevilFramework
                 }
                 foreach (ScadMod m in mods)
                 {
-                    m.settings.WriteSettings();
+                    Util.GetConfigFile(m).Save();
                 }
                 foreach (ScadMod m in modsToModify)
                 {
-                    if (m.settings.Enabled)
+                    if (m.EnabledWrapper.Value)
                     {
                         Debug.Log("Mod: " + m.BepinExPluginType.GetMethod("ToString").Invoke(m.BepinPluginReference, new object[0]) + " is being Loaded!");
                         m.BepinExPluginType.GetMethod("OnLoad").Invoke(m.BepinPluginReference, new object[0]);
@@ -313,11 +252,11 @@ namespace DustDevilFramework
         {
             //TODO Add!
             Debug.Log("Resetting Settings!");
-            foreach (ScadMod m in defaultFields.Keys)
+            foreach (ScadMod m in DefaultWrappers.Keys)
             {
-                foreach (FieldInfo f in defaultFields[m].Keys)
+                foreach (ConfigWrapper<object> w in DefaultWrappers[m].Keys)
                 {
-                    f.SetValue(m.settings, defaultFields[m][f]);
+                    w.Value = DefaultWrappers[m][w];
                 }
             }
             Debug.Log("Reset Settings!");
@@ -427,13 +366,13 @@ namespace DustDevilFramework
 
             modSettingsTable = newTable;
         }
-        public void CreateSlider(ScadMod m, FieldInfo f, float low, float high, float current, float increment)
+        public void CreateSlider(ScadMod m, ConfigWrapper<object> w, float low, float high, float increment)
         {
-            Debug.Log("Creating Slider with name: " + Util.GetName(m, f));
+            Debug.Log("Creating Slider with name: " + Util.GetName(m, w));
             DynData<OptionsPanel> d = new DynData<OptionsPanel>(optionsPanel);
             GameObject oldObj = d.Get<AgeControlSlider>("masterVolSlider").transform.parent.parent.gameObject;
             GameObject sliderGroup = (GameObject)GameObject.Instantiate(oldObj);
-            sliderGroup.name = Util.GetName(m, f);
+            sliderGroup.name = Util.GetName(m, w);
             sliderGroup.transform.SetParent(modSettingsTable.transform);
             Debug.Log("Slider Group Object Created!");
 
@@ -451,24 +390,24 @@ namespace DustDevilFramework
                 }
             }
             Transform slider = sliderGroup.transform.FindChild("20-SliderContainer").FindChild("10-Slider");
-            slider.gameObject.name = Util.GetName(m, f) + "_Slider";
+            slider.gameObject.name = Util.GetName(m, w) + "_Slider";
             AgeControlSlider sliderControl = slider.GetComponent<AgeControlSlider>();
             Debug.Log("Created Slider Control!");
 
             //slider.GetComponent<AgeTooltip>().Content = Util.GetName(m, f);
 
             Transform label = sliderGroup.transform.FindChild("0-Title");
-            label.gameObject.name = Util.GetName(m, f) + "_Label";
-            label.GetComponent<AgePrimitiveLabel>().Text = Util.GetName(m, f);
+            label.gameObject.name = Util.GetName(m, w) + "_Label";
+            label.GetComponent<AgePrimitiveLabel>().Text = Util.GetName(m, w);
 
             sliderGroup.GetComponent<AgeTransform>().Position = d.Get<AgeControlSlider>("masterVolSlider").transform.parent.parent.GetComponent<AgeTransform>().Position;
-            sliderGroup.GetComponent<AgeTransform>().PixelMarginTop = VisibleFields.Count * (settingSpacing + sliderGroup.GetComponent<AgeTransform>().Height);
+            sliderGroup.GetComponent<AgeTransform>().PixelMarginTop = VisibleWrappers.Count * (settingSpacing + sliderGroup.GetComponent<AgeTransform>().Height);
             Debug.Log("Setup Slider Location!");
 
             sliderControl.MinValue = low;
             sliderControl.MaxValue = high;
             sliderControl.Increment = increment;
-            sliderControl.CurrentValue = current;
+            sliderControl.CurrentValue = (float) w.Value;
             Debug.Log("Setup Slider Control!");
 
             sliderControl.AgeTransform.Position = d.Get<AgeControlSlider>("masterVolSlider").AgeTransform.Position;
@@ -494,41 +433,41 @@ namespace DustDevilFramework
             Debug.Log("Release - Method: " + sliderControl.OnReleaseMethod + " GameObject: " + sliderControl.OnReleaseObject);
 
 
-            VisibleFields.Add(f);
+            VisibleWrappers.Add(w);
 
             sliders.Add(sliderControl);
         }
-        public void CreateToggle(ScadMod m, FieldInfo f, bool current)
+        public void CreateToggle(ScadMod m, ConfigWrapper<object> w)
         {
             // I believe the Old Object's parent is a special display component that contains both text and the toggle button
-            Debug.Log("Creating Toggle with name: " + Util.GetName(m, f));
+            Debug.Log("Creating Toggle with name: " + Util.GetName(m, w));
             DynData<OptionsPanel> d = new DynData<OptionsPanel>(optionsPanel);
             GameObject oldObj = d.Get<AgeControlToggle>("vSyncToggle").transform.parent.gameObject;
             // oldObj is now the group object!
 
             GameObject toggleGroup = (GameObject)GameObject.Instantiate(oldObj);
-            toggleGroup.name = Util.GetName(m, f);
+            toggleGroup.name = Util.GetName(m, w);
             toggleGroup.transform.SetParent(modSettingsTable.transform);
             Debug.Log("Toggle Group Object Created!");
 
             Transform toggle = toggleGroup.transform.GetChild(2);
-            toggle.gameObject.name = Util.GetName(m,f) + "_Toggle";
+            toggle.gameObject.name = Util.GetName(m,w) + "_Toggle";
             AgeControlToggle toggleControl = toggle.GetComponent<AgeControlToggle>();
-            toggleControl.State = current;
-            toggle.GetComponent<AgeTooltip>().Content = Util.GetName(m, f);
+            toggleControl.State = (bool) w.Value;
+            toggle.GetComponent<AgeTooltip>().Content = Util.GetName(m, w);
 
             Transform label = toggleGroup.transform.GetChild(1);
-            label.gameObject.name = Util.GetName(m, f) + "_Label";
-            label.GetComponent<AgePrimitiveLabel>().Text = Util.GetName(m, f);
+            label.gameObject.name = Util.GetName(m, w) + "_Label";
+            label.GetComponent<AgePrimitiveLabel>().Text = Util.GetName(m, w);
 
-            toggleGroup.GetComponent<AgeTransform>().PixelMarginTop = VisibleFields.Count * (settingSpacing + toggleGroup.GetComponent<AgeTransform>().Height);
-            Debug.Log("VisibleFields Count: " + VisibleFields.Count);
+            toggleGroup.GetComponent<AgeTransform>().PixelMarginTop = VisibleWrappers.Count * (settingSpacing + toggleGroup.GetComponent<AgeTransform>().Height);
+            Debug.Log("VisibleFields Count: " + VisibleWrappers.Count);
             toggleControl.OnSwitchMethod = "OnTogglePressed";
             toggleControl.OnSwitchObject = transform.gameObject;
             Debug.Log("Switch - Method: " + toggleControl.OnSwitchMethod + " GameObject: " + toggleControl.OnSwitchObject);
 
 
-            VisibleFields.Add(f);
+            VisibleWrappers.Add(w);
             toggles.Add(toggleControl);
         }
         public void CreateScrollArea()
@@ -566,18 +505,18 @@ namespace DustDevilFramework
             Debug.Log("Registered a Toggle Press! GO: " + o);
             foreach (ScadMod mod in mods)
             {
-                foreach (FieldInfo f in VisibleFields)
+                foreach (ConfigWrapper<object> w in VisibleWrappers)
                 {
                     // We need to set the field that corresponds to this toggle to the toggle value
                     // We can cheat by checking the name of the AgeTooltip attatched to 'o'
-                    if (o.GetComponent<AgeTooltip>().Content.Equals(Util.GetName(mod, f)))
+                    if (o.GetComponent<AgeTooltip>().Content.Equals(Util.GetName(mod, w)))
                     {
                         // This is the field that needs to be modified.
                         // It should be a bool, if the button is working as intended!
-                        Debug.Log("Setting value of: " + Util.GetName(mod, f) + " to: " + o.GetComponent<AgeControlToggle>().State + " in settings type: " + mod.settingsType + " in mod: " + mod.name);
-                        bool prevEnabled = mod.settings.Enabled;
-                        f.SetValue(mod.settings, o.GetComponent<AgeControlToggle>().State);
-                        if (prevEnabled != mod.settings.Enabled)
+                        Debug.Log("Setting value of: " + Util.GetName(mod, w) + " to: " + o.GetComponent<AgeControlToggle>().State + " in mod: " + mod.name);
+                        bool prevEnabled = mod.EnabledWrapper.Value;
+                        w.Value = o.GetComponent<AgeControlToggle>().State;
+                        if (prevEnabled != mod.EnabledWrapper.Value)
                         {
                             modsToModify.Add(mod);
                         }
@@ -591,23 +530,23 @@ namespace DustDevilFramework
         {
             foreach (ScadMod mod in mods)
             {
-                foreach (FieldInfo f in VisibleFields)
+                foreach (ConfigWrapper<object> w in VisibleWrappers)
                 {
-                    if (o.transform.parent.parent.name.Equals(Util.GetName(mod, f)))
+                    if (o.transform.parent.parent.name.Equals(Util.GetName(mod, w)))
                     {
-                        Debug.Log("Setting value of: " + Util.GetName(mod, f) + " to: " + o.CurrentValue + " in settings type: " + mod.settingsType + " in mod: " + mod.name);
+                        Debug.Log("Setting value of: " + Util.GetName(mod, w) + " to: " + o.CurrentValue + " in mod: " + mod.name);
                         try
                         {
-                            f.SetValue(mod.settings, o.CurrentValue);
-                        } catch (Exception e)
+                            w.Value = o.CurrentValue;
+                        } catch (Exception _)
                         {
                             try
                             {
-                                f.SetValue(mod.settings, (int)o.CurrentValue);
+                                w.Value = (int)o.CurrentValue;
                             }
-                            catch (Exception e2)
+                            catch (Exception __)
                             {
-                                f.SetValue(mod.settings, (double)o.CurrentValue);
+                                w.Value = (double)o.CurrentValue;
                             }
                         } 
                         return;
@@ -632,11 +571,11 @@ namespace DustDevilFramework
         {
             foreach (ScadMod m in mods)
             {
-                foreach (FieldInfo f in VisibleFields)
+                foreach (ConfigWrapper<object> w in VisibleWrappers)
                 {
-                    if (o.transform.parent.parent.name.Equals(Util.GetName(m, f)))
+                    if (o.transform.parent.parent.name.Equals(Util.GetName(m, w)))
                     {
-                        object q = defaultFields[m][f];
+                        object q = DefaultWrappers[m][w];
                         Debug.Log("Reseting slider: " + o + " to: " + q);
                         try
                         {
@@ -662,11 +601,11 @@ namespace DustDevilFramework
         {
             foreach (ScadMod m in mods)
             {
-                foreach (FieldInfo f in VisibleFields)
+                foreach (ConfigWrapper<object> w in VisibleWrappers)
                 {
-                    if (t.name.Equals(Util.GetName(m, f) + "_Toggle"))
+                    if (t.name.Equals(Util.GetName(m, w) + "_Toggle"))
                     {
-                        t.State = (bool)defaultFields[m][f];
+                        t.State = (bool)DefaultWrappers[m][w];
                     }
                 }
             }

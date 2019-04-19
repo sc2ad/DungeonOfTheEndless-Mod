@@ -1,6 +1,7 @@
 ﻿using Amplitude;
 using Amplitude.Unity.Framework;
 using Amplitude.Unity.Simulation;
+using BepInEx;
 using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
@@ -60,21 +61,19 @@ namespace DustDevilFramework
 
         private bool displayedData = false;
 
-        public CustomHero(Type settingsType, Type bepinPluginType)
+        public CustomHero(Type bepinPluginType, BaseUnityPlugin bepinPlugin)
         {
             name = GetRealName();
-            settings = (CustomItemSettings)settingsType.TypeInitializer.Invoke(new object[] { name });
-            this.settingsType = settingsType;
             BepinExPluginType = bepinPluginType;
+            BepinPluginReference = bepinPlugin;
             SetupPluginData();
         }
 
-        public void Initialize()
+        public new void Initialize()
         {
             base.Initialize();
 
-            settings.ReadSettings();
-            if (settings.Enabled)
+            if (EnabledWrapper.Value)
             {
                 Log("Attempting to create Localization changes!");
                 CreateLocalizationChanges();
@@ -92,7 +91,7 @@ namespace DustDevilFramework
         public new void Load()
         {
             base.Load();
-            if (settings.Enabled)
+            if (EnabledWrapper.Value)
             {
                 On.SpriteAnimationRuntime2.OverrideClipsFromPath += SpriteAnimationRuntime2_OverrideClipsFromPath;
                 On.Session.Update += Session_Update;
