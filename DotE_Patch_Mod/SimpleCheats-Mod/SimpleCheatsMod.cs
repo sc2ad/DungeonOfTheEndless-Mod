@@ -1,30 +1,40 @@
-﻿using DustDevilFramework;
-using Partiality.Modloader;
+﻿using BepInEx;
+using BepInEx.Configuration;
+using DustDevilFramework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SimpleCheats_Mod
 {
-    class SimpleCheatsMod : PartialityMod
+    [BepInPlugin("com.sc2ad.SimpleCheats", "Simple Cheats", "1.0.0")]
+    public class SimpleCheatsMod : BaseUnityPlugin
     {
-        ScadMod mod = new ScadMod("SimpleCheats", typeof(SimpleCheatsSettings), typeof(SimpleCheatsMod));
-        public override void Init()
+        ScadMod mod;
+
+        private ConfigWrapper<float> incrementWrapper;
+        private ConfigWrapper<string> indKeyWrapper;
+        private ConfigWrapper<string> sciKeyWrapper;
+        private ConfigWrapper<string> foodKeyWrapper;
+        private ConfigWrapper<string> dustKeyWrapper;
+
+        public void Awake()
         {
-            mod.BepinPluginReference = this;
+            mod = new ScadMod("SimpleCheats", typeof(SimpleCheatsMod), this);
+
+            incrementWrapper = Config.Wrap("Settings", "IncrementAmount", "How much to increment for each key press", 10.0f);
+            indKeyWrapper = Config.Wrap("Settings", "IndustryKey", "The key to press to receive industry", KeyCode.M.ToString());
+            sciKeyWrapper = Config.Wrap("Settings", "ScienceKey", "The key to press to receive science", KeyCode.Comma.ToString());
+            foodKeyWrapper = Config.Wrap("Settings", "FoodKey", "The key to press to receive food", KeyCode.Period.ToString());
+            dustKeyWrapper = Config.Wrap("Settings", "DustKey", "The key to press to receive dust", KeyCode.Slash.ToString());
+
             mod.Initialize();
 
-            mod.settings.ReadSettings();
-
-            mod.Log("Initialized!");
+            OnLoad();
         }
-        public override void OnLoad()
+        public void OnLoad()
         {
             mod.Load();
-            if (mod.settings.Enabled)
+            if (mod.EnabledWrapper.Value)
             {
                 On.Dungeon.Update += Dungeon_Update;
             }
@@ -38,26 +48,26 @@ namespace SimpleCheats_Mod
         private void Dungeon_Update(On.Dungeon.orig_Update orig, Dungeon self)
         {
             orig(self);
-            float increment = (mod.settings as SimpleCheatsSettings).IncrementAmount;
-            KeyCode iKey = (KeyCode)Enum.Parse(typeof(KeyCode), (mod.settings as SimpleCheatsSettings).IndustryKey);
+            float increment = incrementWrapper.Value;
+            KeyCode iKey = (KeyCode)Enum.Parse(typeof(KeyCode), indKeyWrapper.Value);
             if (Input.GetKeyDown(iKey))
             {
                 mod.Log("Adding: " + increment + " industry!");
                 Player.LocalPlayer.AddIndustry(increment);
             }
-            KeyCode sKey = (KeyCode)Enum.Parse(typeof(KeyCode), (mod.settings as SimpleCheatsSettings).ScienceKey);
+            KeyCode sKey = (KeyCode)Enum.Parse(typeof(KeyCode), sciKeyWrapper.Value);
             if (Input.GetKeyDown(sKey))
             {
                 mod.Log("Adding: " + increment + " science!");
                 Player.LocalPlayer.AddScience(increment);
             }
-            KeyCode fKey = (KeyCode)Enum.Parse(typeof(KeyCode), (mod.settings as SimpleCheatsSettings).FoodKey);
+            KeyCode fKey = (KeyCode)Enum.Parse(typeof(KeyCode), foodKeyWrapper.Value);
             if (Input.GetKeyDown(fKey))
             {
                 mod.Log("Adding: " + increment + " food!");
                 Player.LocalPlayer.AddFood(increment);
             }
-            KeyCode dKey = (KeyCode)Enum.Parse(typeof(KeyCode), (mod.settings as SimpleCheatsSettings).DustKey);
+            KeyCode dKey = (KeyCode)Enum.Parse(typeof(KeyCode), dustKeyWrapper.Value);
             if (Input.GetKeyDown(dKey))
             {
                 mod.Log("Adding: " + increment + " dust!");

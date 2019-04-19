@@ -46,11 +46,11 @@ namespace DustDevilFramework
             {
                 Log(LogLevel.Error, "Could not find valid BepInPlugin attribute on mod: " + name);
                 Log(LogLevel.Warning, "Attempting to use placeholder pluginData!");
-                pluginData = new BepInEx.BepInPlugin("sc2ad.placeholder.guid", "placeholderName", "0.0.0");
+                pluginData = new BepInEx.BepInPlugin("com.sc2ad.placeholder", "placeholderName", "0.0.0");
             }
             Version = pluginData.Version;
             GUID = pluginData.GUID;
-            EnabledWrapper = Util.GetConfigFile(this).Wrap<bool>("Settings", "Enabled", "Whether the mod is enabled or not", true);
+            EnabledWrapper = Util.GetConfigFile(this).Wrap("Settings", "Enabled", "Whether the mod is enabled or not", true);
             Util.GetConfigFile(this).Save();
         }
         public void Log(LogLevel level, object s)

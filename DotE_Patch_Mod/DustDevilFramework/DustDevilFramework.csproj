@@ -44,8 +44,8 @@
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\core\BepInEx.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="HOOKS-Assembly-CSharp">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\DungeonoftheEndless_Data\Managed\HOOKS-Assembly-CSharp.dll</HintPath>
+    <Reference Include="HOOKS_Assembly-CSharp">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\plugins\DustDevilAPI\HOOKS_Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.Utils">
