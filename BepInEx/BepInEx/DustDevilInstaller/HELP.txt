@@ -1,0 +1,2 @@
+THE COMMAND NEEDED TO GENERATE "HOOKS_Assembly-CSharp.dll" IS AS FOLLOWS:
+MonoMod.RuntimeDetour.HookGen.exe --private --orig "Assembly-CSharp.dll" "HOOKS_Assembly-CSharp.dll"
