@@ -152,9 +152,9 @@ namespace DustDevilFramework
             RemoveFileChangeExclusiveEnd(@"Public\Localization\english\ED_Localization_Locales.xml", startingPoint, endingPoint);
         }
         // Returns a legible name from the given fieldinfo.Name
-        public static string GetName(ScadMod m, ConfigWrapper<object> w)
+        internal static string GetName(ScadMod m, BepInExSettingsPacket packet)
         {
-            return m.name + " - " + w.Definition.Key;
+            return m.name + " - " + packet.Name;
         }
         // Deletes all the children of a certain GameObject including the provided GameObject
         public static void DeleteChildrenInclusive(GameObject toDelete)

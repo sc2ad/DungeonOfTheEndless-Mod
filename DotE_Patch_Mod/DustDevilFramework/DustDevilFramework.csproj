@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DustDevilFramework</RootNamespace>
     <AssemblyName>DustDevilFramework</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -45,11 +45,19 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="HOOKS_Assembly-CSharp">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\plugins\DustDevilAPI\HOOKS_Assembly-CSharp.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\DustDevilInstaller\HOOKS_Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MonoMod">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\DustDevilInstaller\MonoMod.exe</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\DustDevilInstaller\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.Utils">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\patchers\BepInEx.MonoMod.Loader\MonoMod.Utils.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\DustDevilInstaller\MonoMod.Utils.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -61,8 +69,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BepInExSettingsPacket.cs" />
     <Compile Include="CustomHero.cs" />
     <Compile Include="CustomItem.cs" />
+    <Compile Include="LogListener.cs" />
     <Compile Include="ModSettingsPopupMenuPanel.cs" />
     <Compile Include="DustDevil.cs" />
     <Compile Include="PodMod.cs" />

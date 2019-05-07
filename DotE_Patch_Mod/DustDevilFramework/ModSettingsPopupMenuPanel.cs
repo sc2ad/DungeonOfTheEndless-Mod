@@ -19,10 +19,10 @@ namespace DustDevilFramework
         private GameObject modSettingsScroll;
         private List<AgeControlSlider> sliders;
         private List<AgeControlToggle> toggles;
-        private Dictionary<ScadMod, Dictionary<ConfigWrapper<object>, object>> DefaultWrappers;
+        private Dictionary<ScadMod, Dictionary<BepInExSettingsPacket, object>> DefaultWrappers;
         protected List<ScadMod> mods;
         protected List<ScadMod> modsToModify;
-        protected List<ConfigWrapper<object>> VisibleWrappers;
+        internal List<BepInExSettingsPacket> VisibleWrappers;
 
         private bool saveSettings = false;
 
@@ -31,11 +31,11 @@ namespace DustDevilFramework
         public ModSettingsPopupMenuPanel()
         {
             Debug.Log("Constructing a ModSettings Popup Menu Panel for a GameObject!");
-            VisibleWrappers = new List<ConfigWrapper<object>>();
+            VisibleWrappers = new List<BepInExSettingsPacket>();
             modsToModify = new List<ScadMod>();
             sliders = new List<AgeControlSlider>();
             toggles = new List<AgeControlToggle>();
-            DefaultWrappers = new Dictionary<ScadMod, Dictionary<ConfigWrapper<object>, object>>();
+            DefaultWrappers = new Dictionary<ScadMod, Dictionary<BepInExSettingsPacket, object>>();
             Debug.Log("Construction of Component for GO Complete!");
         }
         private void SetupModlist(List<ScadMod> m)
@@ -93,12 +93,29 @@ namespace DustDevilFramework
             Debug.Log("Setting up DefaultSettings Dict!");
             foreach (ScadMod m in mods)
             {
-                foreach (ConfigWrapper<object> f in VisibleWrappers)
+                foreach (BepInExSettingsPacket p in VisibleWrappers)
                 {
                     try
                     {
-                        DefaultWrappers[m][f] = f.Value;
-                    } catch (ArgumentException e)
+                        if (p.Wrapper.GetType().Equals(typeof(ConfigWrapper<bool>)))
+                        {
+                            DefaultWrappers[m][p] = ((ConfigWrapper<bool>)p.Wrapper).Value;
+                        } else if (p.Wrapper.GetType().Equals(typeof(int)))
+                        {
+                            DefaultWrappers[m][p] = ((ConfigWrapper<int>)p.Wrapper).Value;
+                        }
+                        else if (p.Wrapper.GetType().Equals(typeof(ConfigWrapper<double>)))
+                        {
+                            DefaultWrappers[m][p] = ((ConfigWrapper<double>)p.Wrapper).Value;
+                        } else if (p.Wrapper.GetType().Equals(typeof(ConfigWrapper<float>)))
+                        {
+                            DefaultWrappers[m][p] = ((ConfigWrapper<float>)p.Wrapper).Value;
+                        } else
+                        {
+                            // Defaults to string. Potentially dangerous!
+                            DefaultWrappers[m][p] = ((ConfigWrapper<string>)p.Wrapper).Value;
+                        }
+                    } catch (ArgumentException)
                     {
                         // Writing to the wrong mod.settings
                         continue;
@@ -106,13 +123,13 @@ namespace DustDevilFramework
                 }
             }
         }
-        private void AddDefaultSetting(ScadMod m, ConfigWrapper<object> f, object current)
+        private void AddDefaultSetting(ScadMod m, BepInExSettingsPacket p, object current)
         {
             if (!DefaultWrappers.ContainsKey(m))
             {
-                DefaultWrappers.Add(m, new Dictionary<ConfigWrapper<object>, object>());
+                DefaultWrappers.Add(m, new Dictionary<BepInExSettingsPacket, object>());
             }
-            DefaultWrappers[m].Add(f, current);
+            DefaultWrappers[m].Add(p, current);
         }
         // This method creates all of the AgeControl items that correspond to mod settings
         // They are placed within the optionsPanel instance variable
@@ -132,19 +149,48 @@ namespace DustDevilFramework
                     //TODO DEBUG!
                     // NEED TO REDO ATTRIBUTES FOR RANGE HERE NOW THAT I REMOVED MOST OF THAT STUFF WITH BEPINEX
 
-                    ConfigWrapper<object> wrapper = file.Wrap<object>(d);
+                    Debug.Log("Attempting Definition: " + d.Key);
 
-                    if (wrapper.GetType().Equals(typeof(bool)))
+                    //ConfigWrapper<object> wrapper = file.Wrap<object>(d);
+
+                    //Debug.Log("Definition: " + d + " has value: " + wrapper.Value);
+
+                    //if (wrapper.Value == null)
+                    //{
+                    //    Debug.Log("Wrapper value is null!");
+                    //    continue;
+                    //}
+
+                    try
                     {
-                        Debug.Log("Showing bool with name: " + Util.GetName(m, wrapper));
-                        CreateToggle(m, wrapper);
-                        AddDefaultSetting(m, wrapper, wrapper.Value);
-                    }
-                    else if (wrapper.GetType().Equals(typeof(int)) || wrapper.GetType().Equals(typeof(float)) || wrapper.GetType().Equals(typeof(double)))
+                        Debug.Log("Attempting with type: bool");
+                        ConfigWrapper<bool> wrapper = file.Wrap<bool>(d);
+
+                        bool throwAway = wrapper.Value;
+
+                        var packet = new BepInExSettingsPacket(wrapper, wrapper.Definition.Key, typeof(bool));
+
+                        Debug.Log("Showing bool with name: " + Util.GetName(m, packet));
+                        CreateToggle(m, packet);
+                        AddDefaultSetting(m, packet, throwAway);
+                    } catch (Exception)
                     {
-                        Debug.Log("Showing slider with name: " + Util.GetName(m, wrapper));
-                        CreateSlider(m, wrapper, 0, 100, 1);
-                        AddDefaultSetting(m, wrapper, wrapper.Value);
+                        try
+                        {
+                            Debug.Log("Attempting with type: float");
+                            ConfigWrapper<float> wrapper = file.Wrap<float>(d);
+
+                            float throwAway = wrapper.Value;
+
+                            var packet = new BepInExSettingsPacket(wrapper, wrapper.Definition.Key, typeof(float));
+
+                            Debug.Log("Showing slider with name: " + Util.GetName(m, packet));
+                            CreateSlider(m, packet, 0, 100, 1);
+                            AddDefaultSetting(m, packet, throwAway);
+                        } catch (Exception e)
+                        {
+                            Debug.Log("Skipping Item with Name: " + d.Key + " as it was unparseable for settings!");
+                        }
                     }
                 }
                 Debug.Log("==========================================");
@@ -254,9 +300,29 @@ namespace DustDevilFramework
             Debug.Log("Resetting Settings!");
             foreach (ScadMod m in DefaultWrappers.Keys)
             {
-                foreach (ConfigWrapper<object> w in DefaultWrappers[m].Keys)
+                foreach (BepInExSettingsPacket p in DefaultWrappers[m].Keys)
                 {
-                    w.Value = DefaultWrappers[m][w];
+                    if (p.Wrapper.GetType().Equals(typeof(ConfigWrapper<bool>)))
+                    {
+                        ((ConfigWrapper<bool>)p.Wrapper).Value = (bool)DefaultWrappers[m][p];
+                    }
+                    else if (p.Wrapper.GetType().Equals(typeof(int)))
+                    {
+                        ((ConfigWrapper<int>)p.Wrapper).Value = (int)DefaultWrappers[m][p];
+                    }
+                    else if (p.Wrapper.GetType().Equals(typeof(ConfigWrapper<double>)))
+                    {
+                        ((ConfigWrapper<double>)p.Wrapper).Value = (double)DefaultWrappers[m][p];
+                    }
+                    else if (p.Wrapper.GetType().Equals(typeof(ConfigWrapper<float>)))
+                    {
+                        ((ConfigWrapper<float>)p.Wrapper).Value = (float)DefaultWrappers[m][p];
+                    }
+                    else
+                    {
+                        // Defaults to string. Potentially dangerous!
+                        ((ConfigWrapper<string>)p.Wrapper).Value = (string)DefaultWrappers[m][p];
+                    }
                 }
             }
             Debug.Log("Reset Settings!");
@@ -366,7 +432,7 @@ namespace DustDevilFramework
 
             modSettingsTable = newTable;
         }
-        public void CreateSlider(ScadMod m, ConfigWrapper<object> w, float low, float high, float increment)
+        internal void CreateSlider(ScadMod m, BepInExSettingsPacket w, float low, float high, float increment)
         {
             Debug.Log("Creating Slider with name: " + Util.GetName(m, w));
             DynData<OptionsPanel> d = new DynData<OptionsPanel>(optionsPanel);
@@ -407,7 +473,16 @@ namespace DustDevilFramework
             sliderControl.MinValue = low;
             sliderControl.MaxValue = high;
             sliderControl.Increment = increment;
-            sliderControl.CurrentValue = (float) w.Value;
+            if (w.Type.Equals(typeof(int)))
+            {
+                sliderControl.CurrentValue = ((ConfigWrapper<int>)w.Wrapper).Value;
+            } else if (w.Type.Equals(typeof(float)))
+            {
+                sliderControl.CurrentValue = ((ConfigWrapper<float>)w.Wrapper).Value;
+            } else if (w.Type.Equals(typeof(double)))
+            {
+                sliderControl.CurrentValue = (float)((ConfigWrapper<double>)w.Wrapper).Value;
+            }
             Debug.Log("Setup Slider Control!");
 
             sliderControl.AgeTransform.Position = d.Get<AgeControlSlider>("masterVolSlider").AgeTransform.Position;
@@ -437,7 +512,7 @@ namespace DustDevilFramework
 
             sliders.Add(sliderControl);
         }
-        public void CreateToggle(ScadMod m, ConfigWrapper<object> w)
+        internal void CreateToggle(ScadMod m, BepInExSettingsPacket w)
         {
             // I believe the Old Object's parent is a special display component that contains both text and the toggle button
             Debug.Log("Creating Toggle with name: " + Util.GetName(m, w));
@@ -451,9 +526,9 @@ namespace DustDevilFramework
             Debug.Log("Toggle Group Object Created!");
 
             Transform toggle = toggleGroup.transform.GetChild(2);
-            toggle.gameObject.name = Util.GetName(m,w) + "_Toggle";
+            toggle.gameObject.name = Util.GetName(m, w) + "_Toggle";
             AgeControlToggle toggleControl = toggle.GetComponent<AgeControlToggle>();
-            toggleControl.State = (bool) w.Value;
+            toggleControl.State = ((ConfigWrapper<bool>)w.Wrapper).Value;
             toggle.GetComponent<AgeTooltip>().Content = Util.GetName(m, w);
 
             Transform label = toggleGroup.transform.GetChild(1);
@@ -505,17 +580,17 @@ namespace DustDevilFramework
             Debug.Log("Registered a Toggle Press! GO: " + o);
             foreach (ScadMod mod in mods)
             {
-                foreach (ConfigWrapper<object> w in VisibleWrappers)
+                foreach (BepInExSettingsPacket p in VisibleWrappers)
                 {
                     // We need to set the field that corresponds to this toggle to the toggle value
                     // We can cheat by checking the name of the AgeTooltip attatched to 'o'
-                    if (o.GetComponent<AgeTooltip>().Content.Equals(Util.GetName(mod, w)))
+                    if (o.GetComponent<AgeTooltip>().Content.Equals(Util.GetName(mod, p)))
                     {
                         // This is the field that needs to be modified.
                         // It should be a bool, if the button is working as intended!
-                        Debug.Log("Setting value of: " + Util.GetName(mod, w) + " to: " + o.GetComponent<AgeControlToggle>().State + " in mod: " + mod.name);
+                        Debug.Log("Setting value of: " + Util.GetName(mod, p) + " to: " + o.GetComponent<AgeControlToggle>().State + " in mod: " + mod.name);
                         bool prevEnabled = mod.EnabledWrapper.Value;
-                        w.Value = o.GetComponent<AgeControlToggle>().State;
+                        ((ConfigWrapper<bool>)p.Wrapper).Value = o.GetComponent<AgeControlToggle>().State;
                         if (prevEnabled != mod.EnabledWrapper.Value)
                         {
                             modsToModify.Add(mod);
@@ -530,23 +605,23 @@ namespace DustDevilFramework
         {
             foreach (ScadMod mod in mods)
             {
-                foreach (ConfigWrapper<object> w in VisibleWrappers)
+                foreach (BepInExSettingsPacket p in VisibleWrappers)
                 {
-                    if (o.transform.parent.parent.name.Equals(Util.GetName(mod, w)))
+                    if (o.transform.parent.parent.name.Equals(Util.GetName(mod, p)))
                     {
-                        Debug.Log("Setting value of: " + Util.GetName(mod, w) + " to: " + o.CurrentValue + " in mod: " + mod.name);
+                        Debug.Log("Setting value of: " + Util.GetName(mod, p) + " to: " + o.CurrentValue + " in mod: " + mod.name);
                         try
                         {
-                            w.Value = o.CurrentValue;
-                        } catch (Exception _)
+                            ((ConfigWrapper<float>)p.Wrapper).Value = o.CurrentValue;
+                        } catch (Exception)
                         {
                             try
                             {
-                                w.Value = (int)o.CurrentValue;
+                                ((ConfigWrapper<int>)p.Wrapper).Value = (int)o.CurrentValue;
                             }
-                            catch (Exception __)
+                            catch (Exception)
                             {
-                                w.Value = (double)o.CurrentValue;
+                                ((ConfigWrapper<double>)p.Wrapper).Value = (double)o.CurrentValue;
                             }
                         } 
                         return;
@@ -571,23 +646,23 @@ namespace DustDevilFramework
         {
             foreach (ScadMod m in mods)
             {
-                foreach (ConfigWrapper<object> w in VisibleWrappers)
+                foreach (BepInExSettingsPacket p in VisibleWrappers)
                 {
-                    if (o.transform.parent.parent.name.Equals(Util.GetName(m, w)))
+                    if (o.transform.parent.parent.name.Equals(Util.GetName(m, p)))
                     {
-                        object q = DefaultWrappers[m][w];
+                        object q = DefaultWrappers[m][p];
                         Debug.Log("Reseting slider: " + o + " to: " + q);
                         try
                         {
                             o.CurrentValue = (float)q;
                         }
-                        catch (InvalidCastException e)
+                        catch (InvalidCastException)
                         {
                             try
                             {
                                 o.CurrentValue = (int)q;
                             }
-                            catch (InvalidCastException e2)
+                            catch (InvalidCastException)
                             {
                                 o.CurrentValue = (float)(double)q;
                             }
@@ -601,11 +676,11 @@ namespace DustDevilFramework
         {
             foreach (ScadMod m in mods)
             {
-                foreach (ConfigWrapper<object> w in VisibleWrappers)
+                foreach (BepInExSettingsPacket p in VisibleWrappers)
                 {
-                    if (t.name.Equals(Util.GetName(m, w) + "_Toggle"))
+                    if (t.name.Equals(Util.GetName(m, p) + "_Toggle"))
                     {
-                        t.State = (bool)DefaultWrappers[m][w];
+                        t.State = (bool)DefaultWrappers[m][p];
                     }
                 }
             }

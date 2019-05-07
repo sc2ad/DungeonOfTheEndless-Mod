@@ -9,7 +9,7 @@ namespace SimpleCheats_Mod
     [BepInPlugin("com.sc2ad.SimpleCheats", "Simple Cheats", "1.0.0")]
     public class SimpleCheatsMod : BaseUnityPlugin
     {
-        ScadMod mod;
+        private ScadMod mod;
 
         private ConfigWrapper<float> incrementWrapper;
         private ConfigWrapper<string> indKeyWrapper;

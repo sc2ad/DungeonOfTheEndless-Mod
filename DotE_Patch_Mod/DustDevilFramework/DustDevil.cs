@@ -26,9 +26,22 @@ namespace DustDevilFramework
             }
             ModList.Add(mod);
         }
+
+        public static ScadMod GetMod(string guid, Version lowestVersion)
+        {
+            foreach (ScadMod m in ModList)
+            {
+                if (m.GUID == guid && m.Version >= lowestVersion)
+                {
+                    return m;
+                }
+            }
+            return null;
+        }
         private DustDevil()
         {
             On.MainMenuPanel.OnLoad += MainMenuPanel_OnLoad;
+            LogListener.Create();
             //On.MainMenuPanel.RefreshContent += MainMenuPanel_RefreshContent;
         }
 

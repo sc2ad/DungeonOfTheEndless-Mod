@@ -53,22 +53,19 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="HOOKS_Assembly-CSharp">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\plugins\DustDevilAPI\HOOKS_Assembly-CSharp.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\DustDevilInstaller\HOOKS_Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\BepInEx.MonoMod.Loader\MonoMod.exe</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\DustDevilInstaller\MonoMod.exe</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour">
-      <HintPath>C:\Users\adamz\Desktop\Code\DotE Modding\DungeonOfTheEndless-Mod\BepInEx\BepInEx\patchers\BepInEx.MonoMod.RuntimeDetour.HookGen\MonoMod.RuntimeDetour.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="MonoMod.RuntimeDetour.HookGen">
-      <HintPath>C:\Users\adamz\Desktop\Code\DotE Modding\DungeonOfTheEndless-Mod\BepInEx\BepInEx\patchers\BepInEx.MonoMod.RuntimeDetour.HookGen\MonoMod.RuntimeDetour.HookGen.exe</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\DustDevilInstaller\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.Utils">
-      <HintPath>C:\Users\adamz\Desktop\Code\DotE Modding\DungeonOfTheEndless-Mod\BepInEx\BepInEx\patchers\BepInEx.MonoMod.RuntimeDetour.HookGen\MonoMod.Utils.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\DustDevilInstaller\MonoMod.Utils.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
