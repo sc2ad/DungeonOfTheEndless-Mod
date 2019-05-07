@@ -1,26 +1,35 @@
 ﻿using DustDevilFramework;
-using Partiality.Modloader;
 using System;
 using UnityEngine;
+using BepInEx;
+using BepInEx.Configuration;
 
 namespace SeededDungeon_Mod
 {
-    public class SeededDungeonMod : PartialityMod
+    [BepInPlugin("com.sc2ad.SeededDungeon", "Seeded Dungeon", "1.0.0")]
+    public class SeededDungeonMod : BaseUnityPlugin
     {
-        ScadMod mod = new ScadMod("SeededDungeon", typeof(SeededDungeonSettings), typeof(SeededDungeonMod));
-        public override void Init()
+        private ScadMod mod;
+
+        private ConfigWrapper<bool> overwriteWrapper;
+        private ConfigWrapper<string> saveKeyWrapper;
+        private ConfigWrapper<string> createNewSeedKeyWrapper;
+        public void Awake()
         {
-            mod.BepinPluginReference = this;
+            mod = new ScadMod("SeededDungeon", typeof(SeededDungeonMod), this);
+
+            overwriteWrapper = Config.Wrap("Settings", "OverwriteSeeds", "Whether to overwrite seeds or create new ones.", true);
+            saveKeyWrapper = Config.Wrap("Settings", "SaveKey", "The UnityEngine.KeyCode to use for saving seeds.", KeyCode.Backspace.ToString());
+            createNewSeedKeyWrapper = Config.Wrap("Settings", "CreateNewSeedKey", "The UnityEngine.KeyCode to use for creating new seeds.", KeyCode.Equals.ToString());
+
             mod.Initialize();
 
-            mod.settings.ReadSettings();
-
-            mod.Log("Initialized!");
+            OnLoad();
         }
-        public override void OnLoad()
+        public void OnLoad()
         {
             mod.Load();
-            if (mod.settings.Enabled)
+            if (mod.EnabledWrapper.Value)
             {
                 // This reads all of the seeds that we have in local files into RAM so that we can use it.
                 SeedCollection.ReadAll();
@@ -28,7 +37,6 @@ namespace SeededDungeon_Mod
                 // So the only things that seem to exist in the same locations are the layouts, layout sizes, and exits
                 // Other static/dynamic events are unknown based off of solely Seed
                 // However... What if I used recursive logging to find all of the data i need, then use recursive reading/setting in the same order.
-                //IL.Dungeon.TriggerEvents += Dungeon_TriggerEvents1;
                 On.InputManager.Update += InputManager_Update;
             }
         }
@@ -37,9 +45,8 @@ namespace SeededDungeon_Mod
         {
             orig(self);
             Dungeon d = SingletonManager.Get<Dungeon>(false);
-            if (!(mod.settings as SeededDungeonSettings).OverwriteSeeds)
+            if (!overwriteWrapper.Value)
             {
-                //mod.Log("Unloading SeedCollection!");
                 SeedCollection.UnLoad();
             }
             else
@@ -54,7 +61,7 @@ namespace SeededDungeon_Mod
             {
                 return;
             }
-            if (Input.GetKeyUp((KeyCode) Enum.Parse(typeof(KeyCode), (mod.settings as SeededDungeonSettings).SaveKey)))
+            if (Input.GetKeyUp((KeyCode) Enum.Parse(typeof(KeyCode), saveKeyWrapper.Value)))
             {
                 mod.Log("Saving SeedData to SeedCollection!");
                 SeedCollection best = SeedCollection.GetMostCurrentSeeds(d.ShipName, d.Level);
@@ -69,7 +76,7 @@ namespace SeededDungeon_Mod
                 SeedCollection.WriteAll();
                 mod.Log("Wrote SeedCollection to: " + best.ReadFrom);
             }
-            if (Input.GetKeyUp((KeyCode) Enum.Parse(typeof(KeyCode), (mod.settings as SeededDungeonSettings).CreateNewSeedKey)))
+            if (Input.GetKeyUp((KeyCode) Enum.Parse(typeof(KeyCode), createNewSeedKeyWrapper.Value)))
             {
                 mod.Log("Created new SeedCollection!");
                 SeedCollection best = SeedCollection.Create();
@@ -81,78 +88,11 @@ namespace SeededDungeon_Mod
             }
         }
 
-        // NEED TO UPDATE PARTIALITY TO USE LATEST MONOMOD IN ORDER FOR THIS TO WORK! (USES MONO.CECIL OF A TOO ADVANCED VERSION)
-        // SEE: https://github.com/0xd4d/dnSpy/issues/173
-        // CODE ORIGINALLY BASED OFF OF: https://gist.github.com/0x0ade/1d1013d6ae1ff450aa76f252b0f3b62c
-
-        //private void Dungeon_TriggerEvents1(HookIL il)
-        //{
-        //    mod.Log("Module Definition for Dungeon.TriggerEvents: " + il.Module);
-        //    HookILCursor cursor = il.At(0);
-        //    while (cursor.TryGotoNext(
-        //        i => i.MatchCall<RandomGenerator>("RandomRange")
-        //    ))
-        //    {
-        //        int rangeIndex = cursor.Index;
-        //        mod.Log("Found IL for RandomRange at IL Index: " + rangeIndex);
-        //        // This probably won't work, because if there are calls inside the method call bad things will happen
-        //        cursor.Index -= 2;
-        //        mod.Log("Shifted cursor.Index to: " + cursor.Index);
-
-        //        TypeDefinition generator = null;
-        //        MethodDefinition save = null;
-        //        MethodDefinition restore = null;
-        //        foreach (ModuleDefinition m in il.Module.Assembly.Modules)
-        //        {
-        //            foreach (TypeDefinition d in m.GetTypes()) {
-        //                if (d.IsClass && d.Name.Equals("RandomGenerator"))
-        //                {
-        //                    mod.Log("Found RandomGenerator type definition: " + d);
-        //                    generator = d;
-        //                    foreach (MethodDefinition method in d.Methods)
-        //                    {
-        //                        if (method.Name.Equals("SaveSeed"))
-        //                        {
-        //                            mod.Log("Found SaveSeed method definition: " + method);
-        //                            save = method;
-        //                        }
-        //                        if (method.Name.Equals("RestoreSeed"))
-        //                        {
-        //                            mod.Log("Found RestoreSeed method definition: " + method);
-        //                            restore = method;
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        if (generator == null)
-        //        {
-        //            mod.Log("Could not find RandomGenerator!");
-        //        } else
-        //        {
-        //            if (save == null || restore == null)
-        //            {
-        //                mod.Log("Could not find either save/restore method definitions!");
-        //            } else
-        //            {
-        //                mod.Log("Attempting to write Save to index: " + cursor.Index);
-        //                cursor.Emit(OpCodes.Call, save);
-        //                // This should at least dodge the stloc or stfld that is happening when this method is called
-        //                // But it probably won't dodge the possibility of there being other calls and whatnot
-        //                cursor.Index = rangeIndex + 2;
-        //                mod.Log("Attempting to write Restore to index: " + cursor.Index);
-        //                cursor.Emit(OpCodes.Call, restore);
-        //            }
-        //        }
-        //    }
-        //}
-
         public void UnLoad()
         {
             mod.UnLoad();
             On.InputManager.Update -= InputManager_Update;
             SeedCollection.UnLoad();
-            //IL.Dungeon.TriggerEvents -= Dungeon_TriggerEvents1;
         }
     }
 }

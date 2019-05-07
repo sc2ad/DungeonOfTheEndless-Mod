@@ -49,7 +49,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="DustDevilFramework">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\DungeonoftheEndless_Data\Managed\DustDevilFramework.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Dungeon of the Endless\BepInEx\plugins\DustDevilFramework\DustDevilFramework.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="HOOKS_Assembly-CSharp">

@@ -184,6 +184,11 @@ namespace DustDevilFramework
                     CreateAndRead(file);
                 }
             }
+            if (!Loaded)
+            {
+                // This means that no seeds were loaded. Let us create a seed collection and then end.
+                Create();
+            }
         }
         public static void WriteAll()
         {
