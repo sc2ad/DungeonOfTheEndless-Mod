@@ -2,32 +2,35 @@
 using Amplitude.Unity.Framework;
 using DustDevilFramework;
 using MonoMod.Utils;
-using Partiality.Modloader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using BepInEx;
 using UnityEngine;
+using BepInEx.Configuration;
 
 namespace DuplicateHeroSelection_Mod
 {
-    public class DuplicateHeroSelectionMod : PartialityMod
+    [BepInPlugin("com.sc2ad.DuplicateHeroSelection", "Duplicate Hero Selection", "1.0.0")]
+    public class DuplicateHeroSelectionMod : BaseUnityPlugin
     {
-        ScadMod mod = new ScadMod("DuplicateHeroSelection", typeof(DuplicateHeroSelectionSettings), typeof(DuplicateHeroSelectionMod));
-        public override void Init()
+        private ScadMod mod;
+        private ConfigWrapper<int> allowedDuplicateCountWrapper;
+        public void Awake()
         {
-            mod.BepinPluginReference = this;
+            mod = new ScadMod("DuplicateHeroSelection", typeof(DuplicateHeroSelectionMod), this);
+
+            allowedDuplicateCountWrapper = Config.Wrap<int>("Settings", "AllowedDuplicateCount", "The number of duplicate heroes allowed.", 4);
+
             mod.Initialize();
 
-            mod.settings.ReadSettings();
-
-            mod.Log("Initialized!");
+            OnLoad();
         }
-        public override void OnLoad()
+        public void OnLoad()
         {
             mod.Load();
-            if (mod.settings.Enabled)
+            if (mod.EnabledWrapper.Value)
             {
                 On.HeroSelectionItem.OnLeftClick += HeroSelectionItem_OnLeftClick;
             }
@@ -47,7 +50,7 @@ namespace DuplicateHeroSelection_Mod
             {
                 self.gameObject.AddComponent<RightClickScript>();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 mod.Log("Already added RightClickScript!");
             }
@@ -60,7 +63,7 @@ namespace DuplicateHeroSelection_Mod
                     duplicates++;
                 }
             }
-            if (duplicates < (mod.settings as DuplicateHeroSelectionSettings).AllowedDuplicateCount)
+            if (duplicates < allowedDuplicateCountWrapper.Value)
             {
                 // Try selecting it again!
                 mod.Log("Selecting Hero: " + self.HeroStats.ConfigName + " again!");
