@@ -1,40 +1,33 @@
-﻿using DustDevilFramework;
+﻿using BepInEx;
+using DustDevilFramework;
 using MonoMod.Utils;
-using Partiality.Modloader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace TrueIGT_Mod
 {
-    class TrueIGTMod : PartialityMod
+    [BepInPlugin("com.sc2ad.TrueIGT", "TrueIGT", "2.5.0")]
+    public class TrueIGTMod : BaseUnityPlugin
     {
-        //public static Dictionary<DateTime, bool> dict = new Dictionary<DateTime, bool>(); // For some reason, using normal values doesn't want to work.
+        internal DateTime StartTime;
+        internal bool HasStarted = false;
+        internal float LastGameStartTime = float.NegativeInfinity;
 
-        public static DateTime StartTime;
-        public bool HasStarted = false;
-        public float LastGameStartTime = float.NegativeInfinity;
-
-        ScadMod mod = new ScadMod("TrueIGT", typeof(TrueIGTMod));
-        public override void Init()
+        internal ScadMod mod;
+        public void Awake()
         {
-            mod.BepinPluginReference = this;
-            mod.MajorVersion = 2;
-            mod.MinorVersion = 5;
+            mod = new ScadMod("TrueIGT", typeof(TrueIGTMod), this);
+
             mod.Initialize();
 
-            // Setup default values for config
-
-            mod.settings.ReadSettings();
-
-            mod.Log("Initialized!");
+            OnLoad();
         }
-        public override void OnLoad()
+        public void OnLoad()
         {
             mod.Load();
-            if (mod.settings.Enabled)
+            if (mod.EnabledWrapper.Value)
             {
                 On.Dungeon.RPC_DoLevelOver += Dungeon_RPC_DoLevelOver;
                 On.Session.Update += Session_Update;
@@ -141,7 +134,7 @@ namespace TrueIGT_Mod
             self.Statistics.IncrementStat(DungeonStatistics.Stat_GameTime, -(UnityEngine.Time.time - self.GameStartTime));
             self.Statistics.IncrementStat(DungeonStatistics.Stat_GameTime, (float)(DateTime.Now - StartTime).TotalSeconds);
             mod.Log("Time game played (RealIGT): " + self.Statistics.GetStat(DungeonStatistics.Stat_GameTime));
-            // This should never error, cause it is using that start time to actually do everything. If StarTime is invalid, then it won't enter this if statement
+            // This should never error, cause it is using that start time to actually do everything. If StartTime is invalid, then it won't enter this if statement
         }
     }
 }
