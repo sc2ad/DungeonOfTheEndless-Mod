@@ -1,35 +1,55 @@
 ﻿using DustDevilFramework;
-using Partiality.Modloader;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BepInEx;
+using BepInEx.Configuration;
+using UnityEngine;
 
 namespace TASTools_Mod
 {
-    public class TASToolsMod : PartialityMod
+    [BepInPlugin("com.sc2ad.TASTools", "TASTools", "1.0.0")]
+    public class TASToolsMod : BaseUnityPlugin
     {
-        ScadMod mod = new ScadMod("TASToolsMod", typeof(TASToolsSettings), typeof(TASToolsMod));
+        private ConfigWrapper<string> tasFileExtensionWrapper;
+        private ConfigWrapper<string> playKeyWrapper;
+        private ConfigWrapper<string> recordKeyWrapper;
+        private ConfigWrapper<string> pauseKeyWrapper;
+        private ConfigWrapper<string> resetKeyWrapper;
+        private ConfigWrapper<string> saveKeyWrapper;
+        private ConfigWrapper<string> saveToFilesKeyWrapper;
+        private ConfigWrapper<string> readFromFilesKeyWrapper;
+        private ConfigWrapper<string> clearKeyWrapper;
+        private ConfigWrapper<bool> isHumanWrapper;
+
+        ScadMod mod;
 
         State state = State.None;
         string SaveKey;
 
-        private TASToolsSettings settings;
-
-        public override void Init()
+        public void Awake()
         {
-            mod.BepinPluginReference = this;
+            mod = new ScadMod("TASToolsMod", typeof(TASToolsMod), this);
+
+            tasFileExtensionWrapper = Config.Wrap("Settings", "TasFileExtension", "The file extension for all TAS files.", ".tas");
+            playKeyWrapper = Config.Wrap("Settings", "PlayKey", "The UnityEngine.KeyCode to use for playing the TAS.", KeyCode.Quote.ToString());
+            recordKeyWrapper = Config.Wrap("Settings", "RecordKey", "The UnityEngine.KeyCode to use for recording the TAS.", KeyCode.Semicolon.ToString());
+            pauseKeyWrapper = Config.Wrap("Settings", "PauseKey", "The UnityEngine.KeyCode to use for pausing the TAS.", KeyCode.P.ToString());
+            resetKeyWrapper = Config.Wrap("Settings", "ResetKey", "The UnityEngine.KeyCode to use for resetting the current state.", KeyCode.RightBracket.ToString());
+            saveKeyWrapper = Config.Wrap("Settings", "SaveKey", "The UnityEngine.KeyCode to use for saving the current state.", KeyCode.LeftBracket.ToString());
+            saveToFilesKeyWrapper = Config.Wrap("Settings", "SaveToFilesKey", "The UnityEngine.KeyCode to use for saving the TAS to files.", KeyCode.O.ToString());
+            readFromFilesKeyWrapper = Config.Wrap("Settings", "ReadFromFilesKey", "The UnityEngine.KeyCode to use for reading the TAS from files.", KeyCode.Slash.ToString());
+            clearKeyWrapper = Config.Wrap("Settings", "ClearKey", "The UnityEngine.KeyCode to use for clearing the TAS.", KeyCode.C.ToString());
+            isHumanWrapper = Config.Wrap("Settings", "IsHuman", "Whether the TAS is only taking actions humans can, or if it is also setting the seed.", false);
+
             mod.Initialize();
 
-            mod.settings.ReadSettings();
-
-            settings = (mod.settings as TASToolsSettings);
-
-            mod.Log("Initialized!");
+            OnLoad();
         }
-        public override void OnLoad()
+        public void OnLoad()
         {
             mod.Load();
-            if (mod.settings.Enabled)
+            if (mod.EnabledWrapper.Value)
             {
                 On.InputManager.Update += InputManager_Update;
                 On.Module.BuildingUpdate += Module_BuildingUpdate;
@@ -53,7 +73,7 @@ namespace TASTools_Mod
         private IEnumerator Dungeon_TriggerEvents(On.Dungeon.orig_TriggerEvents orig, Dungeon self, Room openingRoom, HeroMobCommon opener, bool canTriggerDungeonEvent)
         {
             SeedCollection collection = SeedCollection.GetMostCurrentSeeds(self.ShipName, self.Level);
-            if (collection == null || !collection.Enabled || settings.IsHuman)
+            if (collection == null || !collection.Enabled || isHumanWrapper.Value)
             {
                 yield return self.StartCoroutine(orig(self, openingRoom, opener, canTriggerDungeonEvent));
                 yield break;
@@ -248,8 +268,8 @@ namespace TASTools_Mod
             if (HasFlag(State.SavingToFile))
             {
                 // Assume the Dungeon exists, use it to determine the level to write the TAS for.
-                mod.Log("Writing files with *" + settings.TasFileExtension);
-                TASIO.WriteTAS(TASInput.inputs, settings.TasFileExtension);
+                mod.Log("Writing files with *" + tasFileExtensionWrapper.Value);
+                TASIO.WriteTAS(TASInput.inputs, tasFileExtensionWrapper.Value);
                 ToggleState(State.SavingToFile);
             }
             if (HasFlag(State.ReadingFromFiles))
@@ -257,8 +277,8 @@ namespace TASTools_Mod
                 // Don't assume that the Dungeon exists, but read the many information things from the TAS file.
                 // The trick with this is that the seed also needs to be read.
                 TASInput.Clear();
-                mod.Log("Reading from *" + settings.TasFileExtension + " files...");
-                foreach (string file in System.IO.Directory.GetFiles(".", "*" + settings.TasFileExtension))
+                mod.Log("Reading from *" + tasFileExtensionWrapper.Value + " files...");
+                foreach (string file in System.IO.Directory.GetFiles(".", "*" + tasFileExtensionWrapper.Value))
                 {
                     // Let's just load all of the info into the TASInput RAM
                     mod.Log("Reading file: " + file);
@@ -335,35 +355,35 @@ namespace TASTools_Mod
 
         private void UpdateState()
         {
-            if (TestKeyPress(settings.PlayKey))
+            if (TestKeyPress(playKeyWrapper.Value))
             {
                 ToggleState(State.Playing);
             }
-            else if (TestKeyPress(settings.PauseKey))
+            else if (TestKeyPress(pauseKeyWrapper.Value))
             {
                 ToggleState(State.Pausing);
             }
-            else if (TestKeyPress(settings.RecordKey))
+            else if (TestKeyPress(recordKeyWrapper.Value))
             {
                 ToggleState(State.Recording);
             }
-            else if (TestKeyPress(settings.ResetKey))
+            else if (TestKeyPress(resetKeyWrapper.Value))
             {
                 ToggleState(State.Resetting);
             }
-            else if (TestKeyPress(settings.SaveKey))
+            else if (TestKeyPress(saveKeyWrapper.Value))
             {
                 ToggleState(State.Saving);
             }
-            else if (TestKeyPress(settings.ReadFromFilesKey))
+            else if (TestKeyPress(readFromFilesKeyWrapper.Value))
             {
                 ToggleState(State.ReadingFromFiles);
             }
-            else if (TestKeyPress(settings.SaveToFilesKey))
+            else if (TestKeyPress(saveToFilesKeyWrapper.Value))
             {
                 ToggleState(State.SavingToFile);
             }
-            else if (TestKeyPress(settings.ClearKey))
+            else if (TestKeyPress(clearKeyWrapper.Value))
             {
                 ToggleState(State.Clearing);
             }
