@@ -1,43 +1,41 @@
-﻿using DustDevilFramework;
-using Partiality.Modloader;
+﻿using BepInEx;
+using BepInEx.Configuration;
+using DustDevilFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Template_Mod
 {
-    class TemplateMod : PartialityMod
+    [BepInPlugin("com.sc2ad.TemplatePlugin", "Template Name", "1.0.0")]
+    public class TemplateMod : BaseUnityPlugin
     {
-        internal ScadMod mod = new ScadMod("TemplateName", typeof(TemplateSettings), typeof(TemplateMod));
+        private ScadMod mod;
 
-        /// <summary>
-        /// This is the private reference variable to your settings that has the correct type, as oppossed to mod.settings.
-        /// This gets set to after mod.settings is read from.
-        /// </summary>
-        private TemplateSettings settings;
+        private ConfigWrapper<bool> regenerateConfigWrapper;
 
-        public override void Init()
+        public void Awake()
         {
-            mod.PartialityModReference = this;
+            mod = new ScadMod("TemplateName", typeof(TemplateMod), this);
+
+            // Wrap Settings here!
+            regenerateConfigWrapper = Config.Wrap("Settings", "RegenerateConfig", "Regenerates the Config file to use with this plugin.", false);
+
             mod.Initialize();
 
-            // Versioning
-            mod.MajorVersion = 0;
-            mod.MinorVersion = 0;
-            mod.Revision = 1;
-
-            mod.settings.ReadSettings();
-
-            settings = (mod.settings as TemplateSettings);
-
-            mod.Log("Initialized!");
+            OnLoad();
         }
-        public override void OnLoad()
+        public void OnLoad()
         {
             mod.Load();
-            if (mod.settings.Enabled)
+            if (regenerateConfigWrapper.Value)
+            {
+                // Regenerate the Config file!
+                // Then save it to the disk again! (Not necessary)
+                Config.Save();
+            }
+            if (mod.EnabledWrapper.Value)
             {
                 // Add hooks here!
             }
