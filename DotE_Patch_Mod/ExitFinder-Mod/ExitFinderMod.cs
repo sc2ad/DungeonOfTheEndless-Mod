@@ -1,35 +1,38 @@
 ﻿using DustDevilFramework;
-using Partiality.Modloader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+using BepInEx;
 using UnityEngine;
+using BepInEx.Configuration;
 
 namespace ExitFinder_Mod
 {
-    public class ExitFinderMod : PartialityMod
+    [BepInPlugin("com.sc2ad.ExitFinder", "Exit Finder", "1.0.0")]
+    public class ExitFinderMod : BaseUnityPlugin
     {
-        ScadMod mod = new ScadMod("ExitFinder", typeof(ExitFinderSettings), typeof(ExitFinderMod));
-        private static bool DisplayExit = true;
-
+        ScadMod mod;
         private static Room ExitRoom;
 
-        public override void Init()
+        private ConfigWrapper<bool> displayExitWrapper;
+        private ConfigWrapper<string> keyWrapper;
+
+        public void Awake()
         {
-            mod.BepinPluginReference = this;
+            mod = new ScadMod("ExitFinder", typeof(ExitFinderMod), this);
+
+            displayExitWrapper = Config.Wrap<bool>("Settings", "DisplayExit", "Displays the exit to all players.", true);
+            keyWrapper = Config.Wrap<string>("Settings", "Key", "The UnityEngine.KeyCode to use for displaying the exit.", KeyCode.Backslash.ToString());
+
             mod.Initialize();
 
-            mod.settings.ReadSettings();
-
-            mod.Log("Initialized!");
+            OnLoad();
         }
-        public override void OnLoad()
+        public void OnLoad()
         {
             mod.Load();
-            if (mod.settings.Enabled)
+            if (mod.EnabledWrapper.Value)
             {
                 On.Session.Update += Session_Update;
                 On.Dungeon.SpawnExit += Dungeon_SpawnExit;
@@ -51,7 +54,7 @@ namespace ExitFinder_Mod
         private void Session_Update(On.Session.orig_Update orig, Session self)
         {
             orig(self);
-            KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), (mod.settings as ExitFinderSettings).Key);
+            KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), keyWrapper.Value);
             if (Input.GetKeyDown(key))
             {
                 try
@@ -64,13 +67,13 @@ namespace ExitFinder_Mod
                         // The exit already exists, don't make another one!
                         return;
                     }
-                    if (DisplayExit)
+                    if (displayExitWrapper.Value)
                     {
                         mod.Log("Attemping to display exit...");
                         ExitRoom.AddCrystalSlot(true);
                         d.DisplayCrystalAndExitOffscreenMarkers(ExitRoom.CrystalModuleSlots[0].transform).Show(true);
                     }
-                } catch (NullReferenceException e)
+                } catch (NullReferenceException)
                 {
                     // The Dungeon/GUI has yet to be setup!
                     // Let's just wait a bit and log it.

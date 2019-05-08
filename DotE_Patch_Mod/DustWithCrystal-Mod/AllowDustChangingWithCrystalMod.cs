@@ -1,29 +1,27 @@
-﻿using DustDevilFramework;
-using Partiality.Modloader;
+﻿using BepInEx;
+using DustDevilFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DustWithCrystal_Mod
 {
-    class AllowDustChangingWithCrystalMod : PartialityMod
+    [BepInPlugin("com.sc2ad.AllowDustUsageWithCrystal", "Allow Dust Usage With Crystal", "1.0.0")]
+    class AllowDustChangingWithCrystalMod : BaseUnityPlugin
     {
-        ScadMod mod = new ScadMod("DustAfterCrystal", typeof(AllowDustChangingWithCrystalMod));
-        public override void Init()
+        ScadMod mod;
+        public void Awake()
         {
-            mod.BepinPluginReference = this;
+            mod = new ScadMod("DustAfterCrystal", typeof(AllowDustChangingWithCrystalMod), this);
             mod.Initialize();
 
-            mod.settings.ReadSettings();
-
-            mod.Log("Initialized!");
+            OnLoad();
         }
-        public override void OnLoad()
+        public void OnLoad()
         {
             mod.Load();
-            if (mod.settings.Enabled)
+            if (mod.EnabledWrapper.Value)
             {
                 On.Room.CanBePowered_refString_bool_bool_bool_bool_bool += Room_CanBePowered;
                 On.Room.CanBeUnpowered += Room_CanBeUnpowered;
