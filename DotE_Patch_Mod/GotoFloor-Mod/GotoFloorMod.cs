@@ -1,4 +1,4 @@
-﻿using Amplitude.Unity.Audio;
+using Amplitude.Unity.Audio;
 using Amplitude.Unity.Framework;
 using DustDevilFramework;
 using MonoMod.Utils;
@@ -46,7 +46,7 @@ namespace GotoFloor_Mod
         {
             orig(self);
             List<Hero> heroes = Hero.GetAllPlayersActiveRecruitedHeroes();
-            if (!CompletedSkip && self.Level == 1 && levelTargetWrapper.Value >= 2 && self.ShipConfig != null && self.RoomCount != 0 && self.StartRoom != null && heroes != null && heroes.Count > 0 && heroes[0] != null && heroes[0].RoomElement != null && levelTargetWrapper.Value <= 12)
+            if (!CompletedSkip && self.Level == 1 && levelTargetWrapper.Value >= 2 && self.ShipConfig != null && self.RoomCount != 0 && self.StartRoom != null && heroes != null && heroes.Count > 0 && heroes[0] != null && heroes[0].RoomElement != null)
             {
                 Room exit = self.StartRoom;
 
