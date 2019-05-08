@@ -2,47 +2,38 @@
 using Amplitude.Unity.Framework;
 using DustDevilFramework;
 using MonoMod.Utils;
-using Partiality.Modloader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using BepInEx;
+using UnityEngine;
+using BepInEx.Configuration;
 
 namespace GotoFloor_Mod
 {
-    class GotoFloorMod : PartialityMod
+    [BepInPlugin("com.sc2ad.GotoFloor", "GotoFloor", "1.0.0")]
+    class GotoFloorMod : BaseUnityPlugin
     {
-        internal ScadMod mod = new ScadMod("GotoFloor", typeof(GotoFloorSettings), typeof(GotoFloorMod));
-
-        /// <summary>
-        /// This is the private reference variable to your settings that has the correct type, as oppossed to mod.settings.
-        /// This gets set to after mod.settings is read from.
-        /// </summary>
-        private GotoFloorSettings settings;
+        private ScadMod mod;
 
         private bool CompletedSkip = false;
+        private ConfigWrapper<int> levelTargetWrapper;
 
-        public override void Init()
+        public void Awake()
         {
-            mod.PartialityModReference = this;
+            mod = new ScadMod("GotoFloor", typeof(GotoFloorMod), this);
+
+            levelTargetWrapper = Config.Wrap<int>("Settings", "LevelTarget", "The target level to go to. Must be between 2 and 12.", 12);
+
             mod.Initialize();
 
-            // Versioning
-            mod.MajorVersion = 0;
-            mod.MinorVersion = 0;
-            mod.Revision = 1;
-
-            mod.settings.ReadSettings();
-
-            settings = (mod.settings as GotoFloorSettings);
-
-            mod.Log("Initialized!");
+            OnLoad();
         }
-        public override void OnLoad()
+        public void OnLoad()
         {
             mod.Load();
-            if (mod.settings.Enabled)
+            if (mod.EnabledWrapper.Value)
             {
                 On.Dungeon.PrepareForNewGame += Dungeon_PrepareForNewGame;
                 On.Dungeon.PrepareForNextLevel += Dungeon_PrepareForNextLevel;
@@ -55,7 +46,7 @@ namespace GotoFloor_Mod
         {
             orig(self);
             List<Hero> heroes = Hero.GetAllPlayersActiveRecruitedHeroes();
-            if (!CompletedSkip && self.Level == 1 && settings.LevelTarget != 1 && self.ShipConfig != null && self.RoomCount != 0 && self.StartRoom != null && heroes != null && heroes.Count > 0 && heroes[0] != null && heroes[0].RoomElement != null)
+            if (!CompletedSkip && self.Level == 1 && levelTargetWrapper.Value >= 2 && self.ShipConfig != null && self.RoomCount != 0 && self.StartRoom != null && heroes != null && heroes.Count > 0 && heroes[0] != null && heroes[0].RoomElement != null && levelTargetWrapper.Value <= 12)
             {
                 Room exit = self.StartRoom;
 
@@ -79,10 +70,12 @@ namespace GotoFloor_Mod
 
                 mod.Log("Attempting to plug exit and end level immediately!");
                 self.NotifyCrystalStateChanged(CrystalState.Unplugged);
-                new DynData<Dungeon>(self).Set("ExitRoom", exit);
+                self.ExitRoom = exit;
+                //new DynData<Dungeon>(self).Set("ExitRoom", exit);
 
                 mod.Log("Setting heroes to contain crystal and be in exit room!");
-                new DynData<Hero>(heroes[0]).Set("HasCrystal", true);
+                typeof(Hero).GetProperty("HasCrystal").SetValue(heroes[0], true, null);
+                //new DynData<Hero>(heroes[0]).Set("HasCrystal", true);
                 foreach (Hero h in heroes)
                 {
                     h.RoomElement.SetParentRoom(exit);
@@ -91,7 +84,7 @@ namespace GotoFloor_Mod
                 // Must be greater than 0!
                 float delay = 1f;
                 new DynData<Dungeon>(self).Set("vistoryScreenDisplayDelay", delay);
-                mod.Log("Attempting to end level with wait delay of: ");
+                mod.Log("Attempting to end level with wait delay of: " + delay);
                 self.LevelOver(true);
                 self.OnCrystalPlugged();
                 CompletedSkip = true;
@@ -103,8 +96,9 @@ namespace GotoFloor_Mod
             Dungeon d = SingletonManager.Get<Dungeon>(false);
             if (d.Level == 1)
             {
-                mod.Log("Setting Level for next level to: " + (settings.LevelTarget - 1));
-                new DynData<Dungeon>(d).Set("Level", settings.LevelTarget - 1);
+                mod.Log("Setting Level for next level to: " + (levelTargetWrapper.Value - 1));
+                //new DynData<Dungeon>(d).Set("Level", levelTargetWrapper.Value - 1);
+                typeof(Dungeon).GetProperty("Level").SetValue(d, levelTargetWrapper.Value - 1, null);
             }
             orig();
             CompletedSkip = false;
@@ -116,8 +110,8 @@ namespace GotoFloor_Mod
             // Get the nextDungeonGenerationParams to modify!
             var field = typeof(Dungeon).GetField("nextDungeonGenerationParams", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
             DungeonGenerationParams p = (DungeonGenerationParams)field.GetValue(null);
-            p.Level = settings.LevelTarget;
-            mod.Log("Set the nextDungeonGenerationParams to level: " + settings.LevelTarget);
+            p.Level = levelTargetWrapper.Value;
+            mod.Log("Set the nextDungeonGenerationParams to level: " + levelTargetWrapper.Value);
             CompletedSkip = false;
         }
 

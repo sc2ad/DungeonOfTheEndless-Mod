@@ -120,6 +120,11 @@ namespace TrueIGT_Mod
 
         private void Dungeon_RPC_DoLevelOver(On.Dungeon.orig_RPC_DoLevelOver orig, Dungeon self, bool victory)
         {
+            if (float.IsNegativeInfinity(LastGameStartTime))
+            {
+                // So if the door wasn't even opened, and we exited the game, we should just count the time as one second.
+                StartTime = DateTime.Now.AddSeconds(-1);
+            }
             mod.Log("Times: ");
             mod.Log(StartTime.ToLongTimeString());
 
