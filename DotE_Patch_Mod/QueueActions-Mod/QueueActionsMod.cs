@@ -1,37 +1,41 @@
 ﻿using Amplitude.Unity.Framework;
 using DustDevilFramework;
 using MonoMod.Utils;
-using Partiality.Modloader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
+using BepInEx;
+using BepInEx.Configuration;
 
 namespace QueueActions_Mod
 {
-    class QueueActionsMod : PartialityMod
+    [BepInPlugin("com.sc2ad.QueueActions", "QueueActions", "1.0.0")]
+    class QueueActionsMod : BaseUnityPlugin
     {
-        ScadMod mod = new ScadMod("QueueActions", typeof(QueueActionsSettings), typeof(QueueActionsMod));
+        ScadMod mod;
 
         //List<QueueData> queue = new List<QueueData>();
         // Each Hero needs to have their own queue.
         Dictionary<Hero, List<QueueData>> queue = new Dictionary<Hero, List<QueueData>>();
 
-        public override void Init()
+        private ConfigWrapper<string> keyWrapper;
+
+        public void Awake()
         {
-            mod.BepinPluginReference = this;
+            mod = new ScadMod("QueueActions", typeof(QueueActionsMod), this);
+
+            keyWrapper = Config.Wrap<string>("Settings", "Key", "The UnityEngine.KeyCode used to queue up actions.", KeyCode.LeftShift.ToString());
+
             mod.Initialize();
 
-            mod.settings.ReadSettings();
-
-            mod.Log("Initialized!");
+            OnLoad();
         }
-        public override void OnLoad()
+        public void OnLoad()
         {
             mod.Load();
-            if (mod.settings.Enabled)
+            if (mod.EnabledWrapper.Value)
             {
                 On.Hero.OnRightClickDown += Hero_OnRightClickDown;
                 On.NPCMerchant.OnRightClickDown += NPCMerchant_OnRightClickDown;
@@ -132,7 +136,7 @@ namespace QueueActions_Mod
 
         private bool ConditionalAddToQueue(QueueData data)
         {
-            KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), (mod.settings as QueueActionsSettings).Key);
+            KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), keyWrapper.Value);
             if (Input.GetKey(key))
             {
                 mod.Log("ShiftKey Down!");
