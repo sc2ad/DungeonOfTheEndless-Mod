@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GotoFloor-Mod", "GotoFloor-
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DungeonModifications-Mod", "DungeonModifications-Mod\DungeonModifications-Mod.csproj", "{BF373E53-A11E-4825-AFCE-90D8CC39FF0D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManyHeroes-Mod", "ManyHeroes-Mod\ManyHeroes-Mod.csproj", "{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -523,6 +525,26 @@ Global
 		{BF373E53-A11E-4825-AFCE-90D8CC39FF0D}.Release|x64.Build.0 = Release|Any CPU
 		{BF373E53-A11E-4825-AFCE-90D8CC39FF0D}.Release|x86.ActiveCfg = Release|Any CPU
 		{BF373E53-A11E-4825-AFCE-90D8CC39FF0D}.Release|x86.Build.0 = Release|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Debug|ARM.Build.0 = Debug|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Debug|x64.Build.0 = Debug|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Debug|x86.Build.0 = Debug|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Release|ARM.ActiveCfg = Release|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Release|ARM.Build.0 = Release|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Release|ARM64.Build.0 = Release|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Release|x64.ActiveCfg = Release|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Release|x64.Build.0 = Release|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Release|x86.ActiveCfg = Release|Any CPU
+		{60BE2DB7-050D-49EE-A03A-E1A2A9C6C059}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
