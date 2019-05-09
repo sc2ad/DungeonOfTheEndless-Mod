@@ -142,13 +142,18 @@ namespace DustDevilFramework
                 ConfigFile file = Util.GetConfigFile(m);
 
                 Debug.Log("Mod: " + m.name + " with: " + file.ConfigDefinitions.Count + " fields.");
+
                 foreach (ConfigDefinition d in file.ConfigDefinitions)
                 {
                     // If it exists in the config file, it is meant to be there.
 
                     //TODO DEBUG!
                     // NEED TO REDO ATTRIBUTES FOR RANGE HERE NOW THAT I REMOVED MOST OF THAT STUFF WITH BEPINEX
-
+                    if (d.Section.Equals(DustDevil.IGNORED_SETTINGS_SECTION_NAME))
+                    {
+                        Debug.Log("Ignoring Definition: " + d.Key);
+                        continue;
+                    }
                     Debug.Log("Attempting Definition: " + d.Key);
 
                     //ConfigWrapper<object> wrapper = file.Wrap<object>(d);
@@ -165,6 +170,7 @@ namespace DustDevilFramework
                     {
                         Debug.Log("Attempting with type: bool");
                         ConfigWrapper<bool> wrapper = file.Wrap<bool>(d);
+                        Debug.Log("File path: " + file.ConfigFilePath);
 
                         bool throwAway = wrapper.Value;
 
@@ -185,9 +191,30 @@ namespace DustDevilFramework
                             var packet = new BepInExSettingsPacket(wrapper, wrapper.Definition.Key, typeof(float));
 
                             Debug.Log("Showing slider with name: " + Util.GetName(m, packet));
-                            CreateSlider(m, packet, 0, 100, 1);
+
+                            // Get SliderRange of this definition.
+                            SliderRange sliderRange = new SliderRange();
+                            try
+                            {
+                                Debug.Log("Attempting to find slider range for slider: " + d.Key);
+
+                                // Attempt to get the lower and upper settings...
+                                ConfigWrapper<float> lowWrapper = file.Wrap<float>(DustDevil.IGNORED_SETTINGS_SECTION_NAME, d.Key + "Min", "The minimum value for " + d.Key + ".", sliderRange.lower);
+                                ConfigWrapper<float> highWrapper = file.Wrap<float>(DustDevil.IGNORED_SETTINGS_SECTION_NAME, d.Key + "Max", "The maximum value for " + d.Key + ".", sliderRange.upper);
+                                sliderRange = new SliderRange(lowWrapper.Value, highWrapper.Value);
+                                // Attempt to get the increment...
+                                ConfigWrapper<float> incrementWrapper = file.Wrap<float>(DustDevil.IGNORED_SETTINGS_SECTION_NAME, d.Key + "Increment", "How much to increment " + d.Key + " by.", sliderRange.increment);
+                                sliderRange.increment = incrementWrapper.Value;
+                            }
+                            catch (Exception)
+                            {
+                                Debug.Log("Error when attempting to get a slider range object. Will use most recent functional slider range.");
+                            }
+
+                            Debug.Log("Creating a slider with SliderRange: " + sliderRange);
+                            CreateSlider(m, packet, sliderRange);
                             AddDefaultSetting(m, packet, throwAway);
-                        } catch (Exception e)
+                        } catch (Exception)
                         {
                             Debug.Log("Skipping Item with Name: " + d.Key + " as it was unparseable for settings!");
                         }
@@ -252,6 +279,7 @@ namespace DustDevilFramework
                 foreach (ScadMod m in mods)
                 {
                     Util.GetConfigFile(m).Save();
+                    Util.GetConfigFile(m).Reload();
                 }
                 foreach (ScadMod m in modsToModify)
                 {
@@ -264,6 +292,11 @@ namespace DustDevilFramework
                         Debug.Log("Mod: " + m.BepinExPluginType.GetMethod("ToString").Invoke(m.BepinPluginReference, new object[0]) + " is being UnLoaded!");
                         m.BepinExPluginType.GetMethod("UnLoad").Invoke(m.BepinPluginReference, new object[0]);
                     }
+                }
+                foreach (ScadMod m in mods)
+                {
+                    Util.GetConfigFile(m).Save();
+                    Util.GetConfigFile(m).Reload();
                 }
                 Debug.Log("Wrote settings to files!");
             } else
@@ -432,7 +465,7 @@ namespace DustDevilFramework
 
             modSettingsTable = newTable;
         }
-        internal void CreateSlider(ScadMod m, BepInExSettingsPacket w, float low, float high, float increment)
+        internal void CreateSlider(ScadMod m, BepInExSettingsPacket w, SliderRange range)
         {
             Debug.Log("Creating Slider with name: " + Util.GetName(m, w));
             DynData<OptionsPanel> d = new DynData<OptionsPanel>(optionsPanel);
@@ -470,9 +503,9 @@ namespace DustDevilFramework
             sliderGroup.GetComponent<AgeTransform>().PixelMarginTop = VisibleWrappers.Count * (settingSpacing + sliderGroup.GetComponent<AgeTransform>().Height);
             Debug.Log("Setup Slider Location!");
 
-            sliderControl.MinValue = low;
-            sliderControl.MaxValue = high;
-            sliderControl.Increment = increment;
+            sliderControl.MinValue = range.lower;
+            sliderControl.MaxValue = range.upper;
+            sliderControl.Increment = range.increment;
             if (w.Type.Equals(typeof(int)))
             {
                 sliderControl.CurrentValue = ((ConfigWrapper<int>)w.Wrapper).Value;
@@ -591,8 +624,11 @@ namespace DustDevilFramework
                         Debug.Log("Setting value of: " + Util.GetName(mod, p) + " to: " + o.GetComponent<AgeControlToggle>().State + " in mod: " + mod.name);
                         bool prevEnabled = mod.EnabledWrapper.Value;
                         ((ConfigWrapper<bool>)p.Wrapper).Value = o.GetComponent<AgeControlToggle>().State;
-                        if (prevEnabled != mod.EnabledWrapper.Value)
+                        if (prevEnabled != mod.EnabledWrapper.Value || Util.GetName(mod, p).EndsWith("- Enabled"))
                         {
+                            Debug.Log("Changed Enabled State of: " + mod.name);
+                            // Just to make sure... Not sure (entirely) why this is nescessary...
+                            mod.EnabledWrapper.Value = o.GetComponent<AgeControlToggle>().State;
                             modsToModify.Add(mod);
                         }
                         return;

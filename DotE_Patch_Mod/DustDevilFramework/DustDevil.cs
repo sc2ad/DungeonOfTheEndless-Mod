@@ -18,6 +18,8 @@ namespace DustDevilFramework
         private static List<ScadMod> ModList = new List<ScadMod>();
         private static ModSettingsPopupMenuPanel SettingsPanel;
 
+        public static readonly string IGNORED_SETTINGS_SECTION_NAME = "SettingsIgnore";
+
         public static void CreateInstance(ScadMod mod)
         {
             if (Instance == null)

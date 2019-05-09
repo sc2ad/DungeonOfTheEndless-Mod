@@ -80,6 +80,7 @@
     <Compile Include="ScadMod.cs" />
     <Compile Include="SeedCollection.cs" />
     <Compile Include="SimDescriptorWrapper.cs" />
+    <Compile Include="SliderRange.cs" />
     <Compile Include="Util.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
