@@ -19,11 +19,12 @@ namespace DungeonModifications_Mod
 
         public void Awake()
         {
-            mod = new ScadMod("TemplateName", typeof(DungeonModificationsMod), this);
+            mod = new ScadMod("Dungeon Modifications", typeof(DungeonModificationsMod), this);
 
             // Wrap Settings here!
             capRoomsWrapper = Config.Wrap("Settings", "CapRooms", "Whether to cap the number of rooms provided by the config value: MaxRooms or not.", true);
             maxRoomWrapper = Config.Wrap("Settings", "MaxRooms", "Maximum number of rooms to have in the dungeon.", 4);
+            Config.Wrap("SettingsIgnore", "MaxRoomsMin", defaultValue: 4);
 
             mod.Initialize();
 
@@ -35,15 +36,8 @@ namespace DungeonModifications_Mod
             if (mod.EnabledWrapper.Value)
             {
                 On.DungeonGenerator2.GenerateDungeonCoroutine += DungeonGenerator2_GenerateDungeonCoroutine;
-                On.DungeonGenerator2.Start += DungeonGenerator2_Start;
                 // Add hooks here!
             }
-        }
-
-        private void DungeonGenerator2_Start(On.DungeonGenerator2.orig_Start orig, DungeonGenerator2 self)
-        {
-            mod.Log("Starting DungeonGeneration!");
-            orig(self);
         }
 
         private System.Collections.IEnumerator DungeonGenerator2_GenerateDungeonCoroutine(On.DungeonGenerator2.orig_GenerateDungeonCoroutine orig, DungeonGenerator2 self, int level, Amplitude.StaticString shipName)
@@ -88,7 +82,6 @@ namespace DungeonModifications_Mod
         {
             mod.UnLoad();
             On.DungeonGenerator2.GenerateDungeonCoroutine -= DungeonGenerator2_GenerateDungeonCoroutine;
-            On.DungeonGenerator2.Start -= DungeonGenerator2_Start;
             // Remove hooks here!
         }
     }

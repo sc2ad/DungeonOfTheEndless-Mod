@@ -26,6 +26,9 @@ namespace GotoFloor_Mod
 
             levelTargetWrapper = Config.Wrap<int>("Settings", "LevelTarget", "The target level to go to. Must be between 2 and 12.", 12);
 
+            Config.Wrap("SettingsIgnore", "LevelTargetMin", defaultValue: 1);
+            Config.Wrap("SettingsIgnore", "LevelTargetMax", defaultValue: 50);
+
             mod.Initialize();
 
             OnLoad();

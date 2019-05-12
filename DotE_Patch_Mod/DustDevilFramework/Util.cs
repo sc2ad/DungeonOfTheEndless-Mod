@@ -15,7 +15,7 @@ namespace DustDevilFramework
             {
                 return new DynData<BepInEx.BaseUnityPlugin>(mod.BepinPluginReference).Get<ConfigFile>("Config");
             }
-            catch (Exception _)
+            catch (Exception)
             {
                 mod.Log(BepInEx.Logging.LogLevel.Error, "Could not find config file for plugin with name: " + mod.name);
                 string configPath = @"BepInEx\config\" + mod.name + ".cfg";

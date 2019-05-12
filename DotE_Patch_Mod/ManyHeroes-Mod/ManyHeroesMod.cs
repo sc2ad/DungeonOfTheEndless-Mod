@@ -28,6 +28,11 @@ namespace ManyHeroes_Mod
             maxHeroCountWrapper = Config.Wrap("Settings", "MaxHeroCount", "Maximum heroes ever allowed.", 10);
             maxHeroShipCountWrapper = Config.Wrap("Settings", "MaxHeroShipCount", "Maximum number of heroes allowed for a selected ship.", 10);
 
+            Config.Wrap("SettingsIgnore", "MaxHeroCountMin", defaultValue: 4);
+            Config.Wrap("SettingsIgnore", "MaxHeroCountMax", defaultValue: 100);
+            Config.Wrap("SettingsIgnore", "MaxHeroShipCountMin", defaultValue: 1);
+            Config.Wrap("SettingsIgnore", "MaxHeroShipCountMax", defaultValue: 100);
+
             mod.Initialize();
 
             OnLoad();

@@ -14,6 +14,7 @@ namespace Template_Mod
         private ScadMod mod;
 
         private ConfigWrapper<bool> regenerateConfigWrapper;
+        private ConfigWrapper<int> someIntWrapper;
 
         public void Awake()
         {
@@ -21,6 +22,10 @@ namespace Template_Mod
 
             // Wrap Settings here!
             regenerateConfigWrapper = Config.Wrap("Settings", "RegenerateConfig", "Regenerates the Config file to use with this plugin.", false);
+            someIntWrapper = Config.Wrap("Settings", "SomeInt", "Some random integer used by the template mod.", 0);
+            Config.Wrap("SettingsIgnore", "SomeIntMin", defaultValue: 0);
+            Config.Wrap("SettingsIgnore", "SomeIntMax", defaultValue: 5);
+            Config.Wrap("SettingsIgnore", "SomeIntIncrement", defaultValue: 2);
 
             mod.Initialize();
 

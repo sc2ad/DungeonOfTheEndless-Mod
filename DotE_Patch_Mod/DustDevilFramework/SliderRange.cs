@@ -7,24 +7,28 @@ namespace DustDevilFramework
 {
     class SliderRange
     {
-        internal float lower = 0;
-        internal float upper = 100;
-        internal float increment = 1;
+        internal float Min { get; } = 0;
+        internal float Max { get; } = 100;
+        internal float Increment { get; private set; } = 1;
         internal SliderRange() { }
         internal SliderRange(float l, float u, float i)
         {
-            lower = l;
-            upper = u;
-            increment = i;
+            Min = l;
+            Max = u;
+            Increment = i;
         }
         internal SliderRange(float l, float u)
         {
-            lower = l;
-            upper = u;
+            Min = l;
+            Max = u;
+        }
+        public void SetIncrement(float incr)
+        {
+            Increment = incr;
         }
         public override string ToString()
         {
-            return "(" + lower + ", " + upper + ", " + increment + ")";
+            return "(" + Min + ", " + Max + ", " + Increment + ")";
         }
     }
 }

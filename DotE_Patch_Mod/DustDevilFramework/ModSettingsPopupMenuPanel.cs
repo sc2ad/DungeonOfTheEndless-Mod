@@ -199,12 +199,12 @@ namespace DustDevilFramework
                                 Debug.Log("Attempting to find slider range for slider: " + d.Key);
 
                                 // Attempt to get the lower and upper settings...
-                                ConfigWrapper<float> lowWrapper = file.Wrap<float>(DustDevil.IGNORED_SETTINGS_SECTION_NAME, d.Key + "Min", "The minimum value for " + d.Key + ".", sliderRange.lower);
-                                ConfigWrapper<float> highWrapper = file.Wrap<float>(DustDevil.IGNORED_SETTINGS_SECTION_NAME, d.Key + "Max", "The maximum value for " + d.Key + ".", sliderRange.upper);
+                                ConfigWrapper<float> lowWrapper = file.Wrap<float>(DustDevil.IGNORED_SETTINGS_SECTION_NAME, d.Key + "Min", "The minimum value for " + d.Key + ".", sliderRange.Min);
+                                ConfigWrapper<float> highWrapper = file.Wrap<float>(DustDevil.IGNORED_SETTINGS_SECTION_NAME, d.Key + "Max", "The maximum value for " + d.Key + ".", sliderRange.Max);
                                 sliderRange = new SliderRange(lowWrapper.Value, highWrapper.Value);
                                 // Attempt to get the increment...
-                                ConfigWrapper<float> incrementWrapper = file.Wrap<float>(DustDevil.IGNORED_SETTINGS_SECTION_NAME, d.Key + "Increment", "How much to increment " + d.Key + " by.", sliderRange.increment);
-                                sliderRange.increment = incrementWrapper.Value;
+                                ConfigWrapper<float> incrementWrapper = file.Wrap<float>(DustDevil.IGNORED_SETTINGS_SECTION_NAME, d.Key + "Increment", "How much to increment " + d.Key + " by.", sliderRange.Increment);
+                                sliderRange.SetIncrement(incrementWrapper.Value);
                             }
                             catch (Exception)
                             {
@@ -503,9 +503,9 @@ namespace DustDevilFramework
             sliderGroup.GetComponent<AgeTransform>().PixelMarginTop = VisibleWrappers.Count * (settingSpacing + sliderGroup.GetComponent<AgeTransform>().Height);
             Debug.Log("Setup Slider Location!");
 
-            sliderControl.MinValue = range.lower;
-            sliderControl.MaxValue = range.upper;
-            sliderControl.Increment = range.increment;
+            sliderControl.MinValue = range.Min;
+            sliderControl.MaxValue = range.Max;
+            sliderControl.Increment = range.Increment;
             if (w.Type.Equals(typeof(int)))
             {
                 sliderControl.CurrentValue = ((ConfigWrapper<int>)w.Wrapper).Value;
