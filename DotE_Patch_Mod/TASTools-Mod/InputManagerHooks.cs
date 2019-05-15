@@ -6,8 +6,20 @@ using UnityEngine;
 
 namespace TASTools_Mod
 {
+    // Might want to do the following (instead of hooking on input calls):
+    // Completely overwrite input by hooking into UnityEngine.dll and changing Input to do what we desire.
+    // That way, we don't have to "necessarily" hook into these methods AT ALL, as we are literally overwriting the mouse
+    // position to be what we desire.
     class InputManagerHooks
     {
+        // IL Of interest: 
+        // 15	002F	call	valuetype [UnityEngine]UnityEngine.Vector3 [UnityEngine]UnityEngine.Input::get_mousePosition()
+        public static void TriggerClickDownEventIL(il il)
+        {
+            var c = il.At(0);
+
+            if (!c.TryGotoNext(i => i.MatchCall))
+        }
         public static void TriggerClickDownEvent(InputManager self, string eventName, ref List<ClickDownInfo> clickInfosContainer)
         {
             DynData<InputManager> d = new DynData<InputManager>(self);

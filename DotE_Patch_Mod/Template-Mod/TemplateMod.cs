@@ -13,7 +13,7 @@ namespace Template_Mod
     {
         private ScadMod mod;
 
-        private ConfigWrapper<bool> regenerateConfigWrapper;
+        private ConfigWrapper<bool> someBoolWrapper;
         private ConfigWrapper<int> someIntWrapper;
 
         public void Awake()
@@ -21,8 +21,10 @@ namespace Template_Mod
             mod = new ScadMod("TemplateName", typeof(TemplateMod), this);
 
             // Wrap Settings here!
-            regenerateConfigWrapper = Config.Wrap("Settings", "RegenerateConfig", "Regenerates the Config file to use with this plugin.", false);
+            someBoolWrapper = Config.Wrap("Settings", "SomeBoolean", "Some boolean used by the template mod.", true);
             someIntWrapper = Config.Wrap("Settings", "SomeInt", "Some random integer used by the template mod.", 0);
+            // Provides maximums, minimums, and increments for SomeInt.
+            // If these are not provided, the default min is 0, max is 100, increment is 1
             Config.Wrap("SettingsIgnore", "SomeIntMin", defaultValue: 0);
             Config.Wrap("SettingsIgnore", "SomeIntMax", defaultValue: 5);
             Config.Wrap("SettingsIgnore", "SomeIntIncrement", defaultValue: 2);
@@ -34,12 +36,6 @@ namespace Template_Mod
         public void OnLoad()
         {
             mod.Load();
-            if (regenerateConfigWrapper.Value)
-            {
-                // Regenerate the Config file!
-                // Then save it to the disk again! (Not necessary)
-                Config.Save();
-            }
             if (mod.EnabledWrapper.Value)
             {
                 // Add hooks here!
