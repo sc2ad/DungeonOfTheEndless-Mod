@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MonoMod.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,6 +13,13 @@ namespace DustDevilFramework
         {
             return type.GetProperty(name, BindingFlags.NonPublic);
         }
-
+        public static V GetField<T, V>(this object c, string name) where T : class
+        {
+            return new DynData<T>((T)c).Get<V>(name);
+        }
+        public static void SetField<T, V>(this object c, string name, V item) where T : class
+        {
+            new DynData<T>((T)c).Set(name, item);
+        }
     }
 }

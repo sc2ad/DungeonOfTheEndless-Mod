@@ -580,7 +580,7 @@ namespace DustDevilFramework
         }
         public void CreateScrollArea()
         {
-            AgeControlScrollView scroll = new DynData<OptionsPanel>(optionsPanel).Get<AgeControlScrollView>("controlBindingsScrollView");
+            AgeControlScrollView scroll = optionsPanel.GetField<OptionsPanel, AgeControlScrollView>("controlBindingsScrollView");
             // Clones the parent of the scroll (1-ControlsConfig)
             // ScrollBar is child: 2-ControlBindingsScrollView
             GameObject o = (GameObject)GameObject.Instantiate(scroll.gameObject);

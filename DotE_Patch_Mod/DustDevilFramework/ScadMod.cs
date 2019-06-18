@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace DustDevilFramework
@@ -22,10 +23,10 @@ namespace DustDevilFramework
         public string GUID { get; private set; }
         public ConfigWrapper<bool> EnabledWrapper { get; private set; }
 
-        public ScadMod(string name, Type bepinModType, BepInEx.BaseUnityPlugin bepinPlugin)
+        public ScadMod(string name, BepInEx.BaseUnityPlugin bepinPlugin)
         {
             this.name = name;
-            BepinExPluginType = bepinModType;
+            BepinExPluginType = bepinPlugin.GetType(); // Should get highest type
             BepinPluginReference = bepinPlugin;
             SetupPluginData();
         }
@@ -36,9 +37,10 @@ namespace DustDevilFramework
         protected void SetupPluginData()
         {
             object[] customAttrs = BepinExPluginType.GetCustomAttributes(typeof(BepInEx.BepInPlugin), false);
-            if (customAttrs.Length > 0 && customAttrs[0] != null)
+            object ca = customAttrs.ToList().Find(c => c is BepInEx.BepInPlugin);
+            if (ca != null)
             {
-                pluginData = customAttrs[0] as BepInEx.BepInPlugin;
+                pluginData = ca as BepInEx.BepInPlugin;
                 Log("Overwritting name from: " + name + " to: " + pluginData.Name);
                 name = pluginData.Name;
             }
@@ -59,7 +61,7 @@ namespace DustDevilFramework
             {
                 try
                 {
-                    logger = new DynData<BepInEx.BaseUnityPlugin>(BepinPluginReference).Get<ManualLogSource>("Logger");
+                    logger = BepinPluginReference.GetField<BepInEx.BaseUnityPlugin, ManualLogSource>("Logger");
                 } catch (Exception _)
                 {
                     // Could not find the Logger for the plugin! Make our own!

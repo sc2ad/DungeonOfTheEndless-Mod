@@ -19,7 +19,7 @@ namespace DungeonModifications_Mod
 
         public void Awake()
         {
-            mod = new ScadMod("Dungeon Modifications", typeof(DungeonModificationsMod), this);
+            mod = new ScadMod("Dungeon Modifications", this);
 
             // Wrap Settings here!
             capRoomsWrapper = Config.Wrap("Settings", "CapRooms", "Whether to cap the number of rooms provided by the config value: MaxRooms or not.", true);
@@ -42,7 +42,7 @@ namespace DungeonModifications_Mod
 
         private System.Collections.IEnumerator DungeonGenerator2_GenerateDungeonCoroutine(On.DungeonGenerator2.orig_GenerateDungeonCoroutine orig, DungeonGenerator2 self, int level, Amplitude.StaticString shipName)
         {
-            if (new DynData<DungeonGenerator2>(self).Get<bool>("IsGeneratingForRuntime"))
+            if (self.GetField<DungeonGenerator2, bool>("IsGeneratingForRuntime"))
             {
                 GameConfig c = GameConfig.GetGameConfig();
                 if (capRoomsWrapper.Value && (int) c.DungeonRoomCountMax.GetValue() != maxRoomWrapper.Value)

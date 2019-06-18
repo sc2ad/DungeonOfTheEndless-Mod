@@ -18,7 +18,7 @@ namespace DustDevilFramework
 
         public SeedData()
         {
-            DungeonSeed = new DynData<DungeonGenerator2>(SingletonManager.Get<DungeonGenerator2>(true)).Get<int>("randomSeed");
+            DungeonSeed = SingletonManager.Get<DungeonGenerator2>(true).GetField<DungeonGenerator2, int>("randomSeed");
             RandomGeneratorSeed = RandomGenerator.Seed;
             UnityEngineSeed = UnityEngine.Random.seed;
         }
@@ -37,7 +37,7 @@ namespace DustDevilFramework
         }
         public void SetSeedData()
         {
-            new DynData<DungeonGenerator2>(SingletonManager.Get<DungeonGenerator2>(true)).Set<int>("randomSeed", DungeonSeed);
+            SingletonManager.Get<DungeonGenerator2>(true).SetField<DungeonGenerator2, int>("randomSeed", DungeonSeed);
             RandomGenerator.SetSeed(RandomGeneratorSeed);
             UnityEngine.Random.seed = UnityEngineSeed;
             // Saves Seed for TriggerEvents Consistency!

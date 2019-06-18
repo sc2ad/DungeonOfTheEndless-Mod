@@ -15,7 +15,7 @@ namespace DustDevilFramework
         public static int MinorVersion { get; } = 1;
         public static int Revision { get; } = 0;
 
-        private static List<ScadMod> ModList = new List<ScadMod>();
+        private static readonly List<ScadMod> ModList = new List<ScadMod>();
         private static ModSettingsPopupMenuPanel SettingsPanel;
 
         public static readonly string IGNORED_SETTINGS_SECTION_NAME = "SettingsIgnore";
@@ -60,7 +60,7 @@ namespace DustDevilFramework
             }
             System.Collections.IEnumerator temp = orig(self);
             yield return temp;
-            AgePrimitiveLabel label = new DynData<MainMenuPanel>(self).Get<AgePrimitiveLabel>("versionLabel");
+            AgePrimitiveLabel label = self.GetField<MainMenuPanel, AgePrimitiveLabel>("versionLabel");
             Debug.Log("Attempting to overwrite old version with DustDevil version!");
             Debug.Log("Current message is: " + label.Text);
             label.Text = "#4D4D4D#Dungeon of the Endless, VERSION ";
@@ -115,7 +115,7 @@ namespace DustDevilFramework
         {
             Debug.Log("Attempting to create ModSettings Menu!");
 
-            AgeControlButton oldButton = new DynData<MainMenuPanel>(mainMenuPanel).Get<AgeControlButton>("multiplayerButton");
+            AgeControlButton oldButton = mainMenuPanel.GetField<MainMenuPanel, AgeControlButton>("multiplayerButton");
             GameObject newO = (GameObject)GameObject.Instantiate(oldButton.gameObject, oldButton.transform.position, oldButton.transform.localRotation);
             //GameObject newO = GameObject.CreatePrimitive(PrimitiveType.Cube);
             //newO.GetComponent<MeshRenderer>().enabled = false;
