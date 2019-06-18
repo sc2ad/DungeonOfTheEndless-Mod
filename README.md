@@ -24,4 +24,4 @@ There are a few steps that you must take in order to properly use these mods.
 
 * If you have problems loading mods, contact me on Discord at: Sc2ad#8836 or open a GitHub Issue.
 
-* Please note that you can change various configuration of these mods in their respective config files, which are generated (by default) in the `BepInEx/config` director after loading them for the first time.
+* Please note that you can change various configuration of these mods in their respective config files, which are generated (by default) in the `BepInEx/config` directory after loading them for the first time.
