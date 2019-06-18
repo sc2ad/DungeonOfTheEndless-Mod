@@ -12,8 +12,8 @@ namespace DustDevilFramework
         private static DustDevil Instance;
 
         public static int MajorVersion { get; } = 4;
-        public static int MinorVersion { get; } = 0;
-        public static int Revision { get; } = 7;
+        public static int MinorVersion { get; } = 1;
+        public static int Revision { get; } = 0;
 
         private static List<ScadMod> ModList = new List<ScadMod>();
         private static ModSettingsPopupMenuPanel SettingsPanel;
