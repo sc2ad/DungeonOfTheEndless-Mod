@@ -8,7 +8,7 @@ using System.Text;
 
 namespace TrueIGT_Mod
 {
-    [BepInPlugin("com.sc2ad.TrueIGT", "TrueIGT", "2.5.0")]
+    [BepInPlugin("com.sc2ad.TrueIGT", "TrueIGT", "2.5.1")]
     public class TrueIGTMod : BaseUnityPlugin
     {
         internal DateTime StartTime;
@@ -59,6 +59,7 @@ namespace TrueIGT_Mod
             orig(self, parameters);
             Dungeon d = SingletonManager.Get<Dungeon>(true);
             AgePrimitiveLabel label = new DynData<VictoryPanel>(self).Get<AgePrimitiveLabel>("informationLabel");
+            label.Text += " - DustDevil: v" + DustDevil.GetVersion();
             label.Text += " - Time: " + d.Statistics.GetStat(DungeonStatistics.Stat_GameTime).DurationToString();
         }
 

@@ -29,6 +29,11 @@ namespace DustDevilFramework
             ModList.Add(mod);
         }
 
+        public static string GetVersion()
+        {
+            return MajorVersion + "." + MinorVersion + "." + Revision;
+        }
+
         public static ScadMod GetMod(string guid, Version lowestVersion)
         {
             foreach (ScadMod m in ModList)
