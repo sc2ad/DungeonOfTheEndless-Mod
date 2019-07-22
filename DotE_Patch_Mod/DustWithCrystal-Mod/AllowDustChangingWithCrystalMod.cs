@@ -13,7 +13,7 @@ namespace DustWithCrystal_Mod
         ScadMod mod;
         public void Awake()
         {
-            mod = new ScadMod("DustAfterCrystal", typeof(AllowDustChangingWithCrystalMod), this);
+            mod = new ScadMod("DustAfterCrystal", this);
             mod.Initialize();
 
             OnLoad();

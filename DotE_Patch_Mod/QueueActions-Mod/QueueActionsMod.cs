@@ -24,7 +24,7 @@ namespace QueueActions_Mod
 
         public void Awake()
         {
-            mod = new ScadMod("QueueActions", typeof(QueueActionsMod), this);
+            mod = new ScadMod("QueueActions", this);
 
             keyWrapper = Config.Wrap<string>("Settings", "Key", "The UnityEngine.KeyCode used to queue up actions.", KeyCode.LeftShift.ToString());
 

@@ -19,7 +19,7 @@ namespace DuplicateHeroSelection_Mod
         private ConfigWrapper<int> allowedDuplicateCountWrapper;
         public void Awake()
         {
-            mod = new ScadMod("DuplicateHeroSelection", typeof(DuplicateHeroSelectionMod), this);
+            mod = new ScadMod("DuplicateHeroSelection", this);
 
             allowedDuplicateCountWrapper = Config.Wrap<int>("Settings", "AllowedDuplicateCount", "The number of duplicate heroes allowed.", 4);
 

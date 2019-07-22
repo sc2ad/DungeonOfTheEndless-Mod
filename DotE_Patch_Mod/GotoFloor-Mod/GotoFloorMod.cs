@@ -22,7 +22,7 @@ namespace GotoFloor_Mod
 
         public void Awake()
         {
-            mod = new ScadMod("GotoFloor", typeof(GotoFloorMod), this);
+            mod = new ScadMod("GotoFloor", this);
 
             levelTargetWrapper = Config.Wrap<int>("Settings", "LevelTarget", "The target level to go to. Must be between 2 and 12.", 12);
 

@@ -29,7 +29,7 @@ namespace TASTools_Mod
 
         public void Awake()
         {
-            mod = new ScadMod("TASToolsMod", typeof(TASToolsMod), this);
+            mod = new ScadMod("TASToolsMod", this);
 
             tasFileExtensionWrapper = Config.Wrap("Settings", "TasFileExtension", "The file extension for all TAS files.", ".tas");
             playKeyWrapper = Config.Wrap("Settings", "PlayKey", "The UnityEngine.KeyCode to use for playing the TAS.", KeyCode.Quote.ToString());

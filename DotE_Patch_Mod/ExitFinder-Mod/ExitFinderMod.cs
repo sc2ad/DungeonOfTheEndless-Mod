@@ -20,7 +20,7 @@ namespace ExitFinder_Mod
 
         public void Awake()
         {
-            mod = new ScadMod("ExitFinder", typeof(ExitFinderMod), this);
+            mod = new ScadMod("ExitFinder", this);
 
             displayExitWrapper = Config.Wrap<bool>("Settings", "DisplayExit", "Displays the exit to all players.", true);
             keyWrapper = Config.Wrap<string>("Settings", "Key", "The UnityEngine.KeyCode to use for displaying the exit.", KeyCode.Backslash.ToString());

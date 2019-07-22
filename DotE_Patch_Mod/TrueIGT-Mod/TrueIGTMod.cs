@@ -18,7 +18,7 @@ namespace TrueIGT_Mod
         internal ScadMod mod;
         public void Awake()
         {
-            mod = new ScadMod("TrueIGT", typeof(TrueIGTMod), this);
+            mod = new ScadMod("TrueIGT", this);
 
             mod.Initialize();
 

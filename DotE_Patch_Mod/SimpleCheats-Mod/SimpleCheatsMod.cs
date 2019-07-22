@@ -19,7 +19,7 @@ namespace SimpleCheats_Mod
 
         public void Awake()
         {
-            mod = new ScadMod("Simple Cheats", typeof(SimpleCheatsMod), this);
+            mod = new ScadMod("Simple Cheats", this);
 
             incrementWrapper = Config.Wrap("Settings", "IncrementAmount", "How much to increment for each key press", 10.0f);
             indKeyWrapper = Config.Wrap("Settings", "IndustryKey", "The key to press to receive industry", KeyCode.M.ToString());

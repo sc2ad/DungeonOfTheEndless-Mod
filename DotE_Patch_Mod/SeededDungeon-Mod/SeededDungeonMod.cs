@@ -16,7 +16,7 @@ namespace SeededDungeon_Mod
         private ConfigWrapper<string> createNewSeedKeyWrapper;
         public void Awake()
         {
-            mod = new ScadMod("SeededDungeon", typeof(SeededDungeonMod), this);
+            mod = new ScadMod("SeededDungeon", this);
 
             overwriteWrapper = Config.Wrap("Settings", "OverwriteSeeds", "Whether to overwrite seeds or create new ones.", true);
             saveKeyWrapper = Config.Wrap("Settings", "SaveKey", "The UnityEngine.KeyCode to use for saving seeds.", KeyCode.Backspace.ToString());

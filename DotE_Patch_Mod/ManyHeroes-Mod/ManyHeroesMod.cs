@@ -22,7 +22,7 @@ namespace ManyHeroes_Mod
 
         public void Awake()
         {
-            mod = new ScadMod("ManyHeroes", typeof(ManyHeroesMod), this);
+            mod = new ScadMod("ManyHeroes", this);
 
             // Wrap Settings here!
             maxHeroCountWrapper = Config.Wrap("Settings", "MaxHeroCount", "Maximum heroes ever allowed.", 10);
